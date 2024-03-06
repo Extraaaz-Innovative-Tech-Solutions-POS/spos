@@ -17,8 +17,7 @@ class AuthController extends Controller
             'resturants_id' => 'required',
             'email' => 'required|email|unique:user',
             'password' => 'required',
-            'phone' => 'required|numeric',
-            // 'state' => 'required',
+            'phone' => 'required|numeric',            
             'role' => 'required',
             'name' => 'required',
         ]);
@@ -27,6 +26,7 @@ class AuthController extends Controller
         $user = User::create($validated);
         $success['token'] = $user->createToken('auth')->plainTextToken;
         $success['name'] = $user->name;
+        $success['status'] = "Inactive";
         // $success['customer_id'] = $user->id;
         $response = [
             'success' => true,
@@ -39,7 +39,7 @@ class AuthController extends Controller
 
 public function login(Request $request)
 {
-    if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+    if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'status' => 'Active'])) {
         $user = Auth::user();
         $token = $user->createToken('auth')->plainTextToken;
         $userData = [
