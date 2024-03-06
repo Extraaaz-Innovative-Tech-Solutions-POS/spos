@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ItemsController;
+use App\Http\Controllers\Api\TablesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +24,8 @@ Route::middleware('auth:sanctum')->group( function () {
     // return $request->user()
 
 
-    route::get('category',[CategoryController::class, 'index']);
+    route::apiResource('category',CategoryController::class);
+    route::apiResource('table',TablesController::class);
+    route::apiResource('items',ItemsController::class);
 });
 // route::get('category',[CategoryController::class, 'index']);
