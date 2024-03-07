@@ -87,7 +87,27 @@ class ItemsController extends Controller
     public function update(Request $request, $id)
     {
         //
-        
+        $user = Auth::user();
+        $items = Items::find($id);
+        $validatedData = $request->validate([
+            'item_id' => 'required|string|max:255',
+            'item_name' => 'required|string|max:255',
+            'price' => 'required|string|max:255',
+            'discount' => 'required|string|max:255',
+            'category_id' => 'required|string|max:255',
+            'food_type' => 'string|max:255',
+            'inventory_status' => 'string|max:255',
+            'associated_item' => 'string|max:255',
+            'varients' => 'string|max:255',
+            'tax_percentage' => 'string|max:255',
+            'varients' => 'string|max:255',
+
+
+
+        ]);
+        $items->update($validatedData);
+        return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$items]); //, 'data' => $category]);
+
     }
 
     /**
@@ -99,5 +119,9 @@ class ItemsController extends Controller
     public function destroy($id)
     {
         //
+        $item = Items::findorFail($id);
+        $name = $item->item_name;
+        $item->delete();
+        return response()->json(["success" => true, "message" => $name . ' Item is Deleted Successfully']);
     }
 }
