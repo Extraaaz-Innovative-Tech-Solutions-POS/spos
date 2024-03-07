@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
+use App\Http\Controllers\Api\StaffController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,5 +58,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post("complete-order",[OrderController::class, 'completeOrder']);
     
     Route::post("order-status",[OrderController::class, 'orderStatus']);
+
+    Route::apiResource('staff', StaffController::class);
 });
 // route::get('category',[CategoryController::class, 'index']);
