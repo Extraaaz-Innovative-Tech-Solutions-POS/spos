@@ -20,11 +20,10 @@ class ItemsController extends Controller
         //
         $user = Auth::user();
         
-        $resturants_id  = $request->input('restaurant_id ');
+        $restaurant_id   = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $items = Items::where('restaurant_id ', $resturants_id)
-                    
+        $items = Items::where('restaurant_id', $restaurant_id )
                     ->get();
         
         return response()->json(["success" => true, "data" => $items]);
@@ -44,7 +43,7 @@ class ItemsController extends Controller
 
         $user = Auth::user();
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-        $restaurant_id = $user->resturants_id;
+        $restaurant_id = $user->restaurant_id;
         $items = new Items();
         $items->item_id  = $request->item_id  ;
         $items->item_name = $request->item_name;
