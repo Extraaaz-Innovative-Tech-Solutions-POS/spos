@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\TablesController;
+use App\Http\Controllers\Api\TaxController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,5 +32,6 @@ Route::middleware('auth:sanctum')->group( function () {
     route::apiResource('items',ItemsController::class);
     route::apiResource('floor',FloorController::class);
     route::apiResource('order',OrderController::class);
+    route::apiResource('tax',TaxController::class);
 });
 // route::get('category',[CategoryController::class, 'index']);
