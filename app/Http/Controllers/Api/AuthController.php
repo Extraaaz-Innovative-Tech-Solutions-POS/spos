@@ -9,33 +9,34 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    //
-    public function register(Request $request)
-    {
-        // return $request->all();
-        $validated = $request->validate([
-            'resturants_id' => 'required',
-            'email' => 'required|email|unique:user',
-            'password' => 'required',
-            'phone' => 'required|numeric',            
-            'role' => 'required',
-            'name' => 'required',
-        ]);
-        
-        $validated['password'] = bcrypt($validated['password']);
-        $user = User::create($validated);
-        $success['token'] = $user->createToken('auth')->plainTextToken;
-        $success['name'] = $user->name;
-        $success['status'] = "Inactive";
-        // $success['customer_id'] = $user->id;
-        $response = [
-            'success' => true,
-            'data' => $success,
-            'message' => 'user register successfully'
-        ];
-        return response()->json($response, 200);
-    }
-
+   //REGISTER
+   public function register(Request $request)
+   {
+       
+       
+       $count = User::count() + 1;       
+       $validated = $request->validate([          
+           'email' => 'required|email|unique:user',
+           'password' => 'required',
+           'phone' => 'required|numeric',            
+           'role' => 'required',
+           'name' => 'required',
+       ]);
+       
+       $validated['password'] = bcrypt($validated['password']);
+       $validated['restaurant_id'] = $count;
+       $user = User::create($validated);
+       $success['token'] = $user->createToken('auth')->plainTextToken;
+       $success['name'] = $user->name;
+       $success['status'] = "Inactive";
+       $success['restaurant_id'] = $count;
+       $response = [
+           'success' => true,
+           'data' => $success,
+           'message' => 'user register successfully'
+       ];
+       return response()->json($response, 200);
+   }
 
 public function login(Request $request)
 {

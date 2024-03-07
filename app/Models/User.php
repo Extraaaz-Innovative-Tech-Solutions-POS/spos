@@ -21,7 +21,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         
-        'resturants_id',
+        'restaurant_id',
         'name',
         'email',
         'password',
