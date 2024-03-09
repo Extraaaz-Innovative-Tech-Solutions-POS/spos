@@ -30,6 +30,7 @@ class AuthController extends Controller
        $success['name'] = $user->name;
        $success['status'] = "Inactive";
        $success['restaurant_id'] = $count;
+       $success['role'] = $user->role;
        $response = [
            'success' => true,
            'data' => $success,
@@ -49,6 +50,7 @@ public function login(Request $request)
             'phone' => $user->phone,
             'state' => $user->state,
             'email' => $user->email, 
+            'role' => $user->role
         ];
 
         $response = [

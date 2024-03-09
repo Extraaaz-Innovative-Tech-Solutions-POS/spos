@@ -3,7 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
@@ -33,5 +35,9 @@ Route::middleware('auth:sanctum')->group( function () {
     route::apiResource('floor',FloorController::class);
     route::apiResource('order',OrderController::class);
     route::apiResource('tax',TaxController::class);
+    route::apiResource('customer',CustomerController::class);
+    route::apiResource('cart',CartController::class);
+
+
 });
 // route::get('category',[CategoryController::class, 'index']);
