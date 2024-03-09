@@ -10,6 +10,7 @@ class Items extends Model
     use HasFactory;
     protected $table = 'items';
     protected $primaryKey = 'item_id'; 
+
     protected $fillable = [
         'item_id ',
         'item_name',
@@ -23,4 +24,10 @@ class Items extends Model
         'tax_percentage'
 
     ];
+
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class,'category_id','item_id');
+    }
 }

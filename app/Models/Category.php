@@ -25,4 +25,11 @@ class Category extends Model
 {
     return $this->belongsToMany(Location::class)->withTimestamps();
 }
+
+public function items()
+{
+    return $this->hasMany(Items::class,'category_id');
+}
+
+
 }

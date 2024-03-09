@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ItemResource;
+use App\Models\Category;
 use App\Models\Items;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,7 +17,7 @@ class ItemsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+   public function index(Request $request)
     {
         //
         $user = Auth::user();
@@ -23,8 +25,11 @@ class ItemsController extends Controller
         $restaurant_id   = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
+         
         $items = Items::where('restaurant_id', $user->restaurant_id)
                     ->get();
+
+        $items = ItemResource::collection($items);
         
         return response()->json(["success" => true, "data" => $items]);
 
@@ -137,4 +142,6 @@ class ItemsController extends Controller
         $item->delete();
         return response()->json(["success" => true, "message" => $name . ' Item is Deleted Successfully']);
     }
+
+  
 }

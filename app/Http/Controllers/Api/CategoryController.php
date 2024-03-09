@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Items;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+// use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class CategoryController extends Controller
 {
@@ -22,16 +26,16 @@ class CategoryController extends Controller
         $user = Auth::user();
         
         $resturants_id  = $request->input('resturant_id');
-       
-
-
-        // $location = Location::find($locationId);
+  
         
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $categories = Category::where('restaurant_id',$user->restaurant_id)
-                    
-                    ->get();
+        $categories = Category::where('restaurant_id',$user->restaurant_id)->get();
+       
+
+        $categories = CategoryResource::collection($categories);
+        // $categories = Category::with('items')->get();
+
         
         return response()->json(["success" => true, "data" => $categories]);
     }
@@ -118,4 +122,6 @@ class CategoryController extends Controller
         $category->delete();
         return response()->json(["success" => true, "message" => $name . ' category is Deleted Successfully']);
     }
+   
+    
 }
