@@ -23,7 +23,7 @@ class CartController extends Controller
         $resturants_id = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $cart= Cart::where('restaurant_id',$resturants_id)->get();
+        $cart= Cart::where('restaurant_id',$user->restaurant_id)->get();
         
         return response()->json(["success" => true, "data" =>$cart]);
     
@@ -43,14 +43,18 @@ class CartController extends Controller
 
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
-        $customer = new Cart();
-        $customer->id   = $request->id;
-        $customer->name = $request->name;
-        $customer->address  = $request->address ;
-        $customer->phone = $request->phone;
-        $customer->restaurant_id = $restaurant_id;
-        $customer->save();
-        return response()->json(['success' => true, 'message' => 'customer added successfully', 'data' => $customer]);
+        $cart = new Cart();
+        // $cart->id = $request->id;
+        $cart->table_number = $request->table_number;
+        $cart->floor_number  = $request->floor_number;
+        $cart->order_type = $request->order_type;
+        $cart->customer_id = $request->customer_id;
+        $cart->kot_id = $request->kot_id;
+        // $cart->order_type = $request->order_type;
+        // $cart->order_type = $request->order_type;
+
+        $cart->save();
+        return response()->json(['success' => true, 'message' => 'cart added successfully', 'data' => $cart]);
 
 
     }
@@ -76,6 +80,26 @@ class CartController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $validatedData = $request->validate([
+            // 'id' => 'id|string|max:255',
+            'table_number' => 'required|string|max:255',
+            'floor_number' => 'required|string|max:255',
+            'order_type' => 'required|string|max:255',
+            'customer_id' => 'required|string|max:255',
+            'kot_id' => 'required|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        $cart = Cart::find($id);
+        $cart->table_number = $request->table_number;
+        $cart->floor_number  = $request->floor_number;
+        $cart->order_type = $request->order_type;
+        $cart->customer_id = $request->customer_id;
+        $cart->kot_id = $request->kot_id;
+        $cart->save();
+
+        return response()->json(['success' => true, 'message' => 'cart updated successfully','data'=>$cart]);
+
     }
 
     /**

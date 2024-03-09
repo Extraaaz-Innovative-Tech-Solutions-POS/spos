@@ -21,6 +21,7 @@ class AuthController extends Controller
            'phone' => 'required|numeric',            
            'role' => 'required',
            'name' => 'required',
+           
        ]);
        
        $validated['password'] = bcrypt($validated['password']);

@@ -22,7 +22,7 @@ class TablesController extends Controller
         $resturants_id  = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $table = Tables::where('restaurant_id', $resturants_id)->get();
+        $table = Tables::where('restaurant_id',$user->restaurant_id)->get();
 
   return response()->json(["success" => true, "data" => $table]);
 

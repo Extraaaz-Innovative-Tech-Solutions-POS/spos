@@ -24,7 +24,7 @@ class FloorController extends Controller
 
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $floor = Floor::where('restaurant_id', $restaurant_id)->get();
+        $floor = Floor::where('restaurant_id',$user->restaurant_id)->get();
         
         return response()->json(["success" => true, "data" => $floor]);
 

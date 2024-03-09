@@ -23,7 +23,7 @@ class ItemsController extends Controller
         $restaurant_id   = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $items = Items::where('restaurant_id', $restaurant_id )
+        $items = Items::where('restaurant_id', $user->restaurant_id)
                     ->get();
         
         return response()->json(["success" => true, "data" => $items]);
@@ -86,8 +86,7 @@ class ItemsController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $user = Auth::user();
-        $items = Items::find($id);
+       
         $validatedData = $request->validate([
             'item_id' => 'required|string|max:255',
             'item_name' => 'required|string|max:255',
@@ -104,7 +103,22 @@ class ItemsController extends Controller
 
 
         ]);
-        $items->update($validatedData);
+        $user = Auth::user();
+        $items = Items::find($id);
+        $items->item_name = $request->item_name;
+        $items->price  = $request->price ;
+        $items->discount = $request->discount;
+        $items->category_id  = $request->category_id ;
+        $items->food_type = $request->food_type;
+        $items->inventory_status = $request->inventory_status;
+        $items->associated_item = $request->associated_item;
+        $items->varients = $request->varients;
+        $items->tax_percentage = $request->tax_percentage;
+        // $items->discount = $request->discount;
+
+        // $items->restaurant_id = $restaurant_id;
+        $items->save();
+        // $items->update($validatedData);
         return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$items]); //, 'data' => $category]);
 
     }

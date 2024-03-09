@@ -29,7 +29,7 @@ class CategoryController extends Controller
         
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $categories = Category::where('restaurant_id', $resturants_id,)
+        $categories = Category::where('restaurant_id',$user->restaurant_id)
                     
                     ->get();
         
@@ -49,7 +49,7 @@ class CategoryController extends Controller
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
         $category = new Category();
-        $category->category_id  = $request->category_id ;
+        // $category->category_id  = $request->category_id ;
         $category->category_name = $request->category_name;
         $category->restaurant_id  = $request->restaurant_id ;
         $category->descirption = $request->descirption;
@@ -82,25 +82,24 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $user = Auth::user();
-        $category = Category::find($id);
         $validatedData = $request->validate([
             'category_id' => 'required|string|max:255',
             'category_name' => 'required|string|max:255',
             'descirption' => 'required|string|max:255',
-            // 'discount' => 'required|string|max:255',
-            // 'category_id' => 'required|string|max:255',
-            // 'food_type' => 'string|max:255',
-            // 'inventory_status' => 'string|max:255',
-            // 'associated_item' => 'string|max:255',
-            // 'varients' => 'string|max:255',
-            // 'tax_percentage' => 'string|max:255',
-            // 'varients' => 'string|max:255',
+            
 
 
 
         ]);
-        $category->update($validatedData);
+        $user = Auth::user();
+        $category = Category::find($id);
+        $category->category_id  = $request->category_id ;
+        $category->category_name = $request->category_name;
+        $category->restaurant_id  = $request->restaurant_id ;
+        $category->descirption = $request->descirption;
+        // $category->restaurant_id = $restaurant_id;
+        $category->save();
+        // $category->update($validatedData);
         return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$category]);
 
     }

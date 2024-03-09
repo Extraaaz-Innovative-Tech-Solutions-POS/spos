@@ -23,7 +23,7 @@ class TaxController extends Controller
         $restaurant_id   = $request->input('restaurant_id');
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
-        $tax = Tax::where('restaurant_id', $restaurant_id )
+        $tax = Tax::where('restaurant_id', $user->restaurant_id)
                     ->get();
         
         return response()->json(["success" => true, "data" => $tax]);
