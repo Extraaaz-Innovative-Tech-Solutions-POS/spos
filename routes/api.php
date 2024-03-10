@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group( function () {
     route::apiResource('customer',CustomerController::class);
     route::apiResource('cart',CartController::class);
 
+    Route::get('/getFloorsAndTables',[TablesController::class, 'getFloorsAndTables']);
+
 
 });
 // route::get('category',[CategoryController::class, 'index']);
