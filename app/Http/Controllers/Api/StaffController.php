@@ -17,11 +17,11 @@ class StaffController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $restaurant_id = $user->resturants_id;
+        $restaurant_id = $user->restaurant_id;
         $role = $user->role; 
 
         if($role == "manager"){
-            $users = User::where('resturants_id',$restaurant_id)->get();
+            $users = User::where('restaurant_id',$restaurant_id)->get();
         }
         else{
             return response()->json(['success'=>false, 'message'=>'Unauthorized']);
@@ -38,7 +38,18 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+
+        $staff = new User();
+        $staff->restaurant_id = $restaurant_id;
+        $staff->name = $request->name;
+        $staff->email = $request->email;
+        $staff->password = bcrypt($request->password);
+        $staff->role = $request->role;
+        $staff->save();
+
+        return response()->json(["success"=> true, "message"=>"Staff Data Saved Successfully", "data" => $staff]);
     }
 
     /**
@@ -49,7 +60,8 @@ class StaffController extends Controller
      */
     public function show($id)
     {
-        //
+        $data = User::findOrFail($id);
+        return response()->json(["success"=>true, "message"=>"Staff Data", "data"=>$data]);
     }
 
     /**
@@ -61,7 +73,16 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+        $staff = User::findOrFail($id);
+
+        $staff->restaurant_id = $restaurant_id;
+        $staff->name = $request->name;
+        $staff->email = $request->email;
+        $staff->password = bcrypt($request->password);
+        $staff->role = $request->role;
+        $staff->save();
     }
 
     /**
