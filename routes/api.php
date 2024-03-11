@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::get('/getFloorsAndTables',[TablesController::class, 'getFloorsAndTables']);
 
+    Route::get('getOrdersBill',[OrderController::class, 'getOrdersBill']);
 
+    Route::get("/getTableId/{section}", [OrderController::class, 'getTableId']);
 });
 // route::get('category',[CategoryController::class, 'index']);

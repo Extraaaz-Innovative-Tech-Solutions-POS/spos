@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\KOT;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -102,15 +104,50 @@ class OrderController extends Controller
         return response()->json(["success" => true, "message" => $name . ' order is Deleted Successfully']);
     }
 
-    public function getOrdersBill($restaurant_id,Request $request)
+    public function getOrdersBill(Request $request)
      {
+        $user = Auth::user();
 
-          $user = Auth::user();
+        $request->validate([
+            'table_number' => 'required',
+            'floor_number' => 'required',
+        ]);
+
+        $table_number = $request->input('table_number');
+        $floor_number = $request->input('floor_number');
+
+        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number])->first();
         
-        $restaurant_id  = $request->input('restaurant_id');
-        $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-        $order = Order::where('restaurant_id',$user->restaurant_id)->get();
+        $order = $kot->kotItems->where('status','PENDING'); 
 
         return response()->json(["success" => true, "message" => "Orders List", "data" => $order]);
+
+    }
+
+    public function getTableId($section)
+    {
+        try {
+            do {
+                $sect_var = "";
+                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "Takeaway" ? "TAK/" : null);
+                if (!$sect_var) {
+                    return "Invalid Section Name";
+                }
+                $letters = str_split('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+                shuffle($letters);
+                $randomLetters = implode('', array_slice($letters, 0, 4));
+                $randomDigits = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+                $currentDate = Carbon::now();
+                $currentMonth = $currentDate->format('m');
+                $currentYear = $currentDate->format('y');
+                $date = $currentDate->format('d');
+                $table_id = $sect_var . $randomLetters . $date . $currentMonth . $currentYear . $randomDigits;
+                // Check for uniqueness for the current day across all restaurants and locations
+            } while (KOT::where('table_id', $table_id)->whereDate('created_at', $currentDate)->exists());
+            
+            return response()->json($table_id);
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 }

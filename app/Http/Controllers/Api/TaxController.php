@@ -80,8 +80,6 @@ class TaxController extends Controller
             // 'descirption' => 'required|string|max:255',
        
 
-
-
         ]);
         $tax->update($validatedData);
         return response()->json(['success' => true, 'message' => 'tax updated successfully','data'=>$tax]);

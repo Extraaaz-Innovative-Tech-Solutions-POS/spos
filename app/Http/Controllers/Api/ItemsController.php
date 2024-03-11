@@ -50,20 +50,22 @@ class ItemsController extends Controller
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $restaurant_id = $user->restaurant_id;
         $items = new Items();
-        $items->item_id  = $request->item_id  ;
+        // $items->item_id  = $request->item_id;
         $items->item_name = $request->item_name;
         $items->price  = $request->price ;
         $items->discount = $request->discount;
         $items->category_id  = $request->category_id ;
-        $items->food_type = $request->food_type;
-        $items->inventory_status = $request->inventory_status;
-        $items->associated_item = $request->associated_item;
+        $items->food_type = $request->food_type ? $request->food_type : null;
+        $items->inventory_status = $request->inventory_status ? $request->inventory_status : null;
+        // $items->associated_item = $request->associated_item ;
         $items->varients = $request->varients;
-        $items->tax_percentage = $request->tax_percentage;
-        // $items->discount = $request->discount;
+        $items->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
+        $items->discount = $request->discount;
 
         $items->restaurant_id = $restaurant_id;
         $items->save();
+
+
         return response()->json(['success' => true, 'message' => 'items added successfully', 'data' => $items]);
 
         
