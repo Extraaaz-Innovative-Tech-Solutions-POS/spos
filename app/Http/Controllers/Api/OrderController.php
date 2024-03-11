@@ -102,8 +102,15 @@ class OrderController extends Controller
         return response()->json(["success" => true, "message" => $name . ' order is Deleted Successfully']);
     }
 
-    public function getBill(Request $request)
-    {
+    public function getOrdersBill($restaurant_id,Request $request)
+     {
 
+          $user = Auth::user();
+        
+        $restaurant_id  = $request->input('restaurant_id');
+        $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
+        $order = Order::where('restaurant_id',$user->restaurant_id)->get();
+
+        return response()->json(["success" => true, "message" => "Orders List", "data" => $order]);
     }
 }

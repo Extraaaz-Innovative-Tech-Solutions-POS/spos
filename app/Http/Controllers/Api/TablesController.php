@@ -25,7 +25,7 @@ class TablesController extends Controller
         
         $table = Tables::where('restaurant_id',$user->restaurant_id)->get();
 
-  return response()->json(["success" => true, "data" => $table]);
+        return response()->json(["success" => true, "data" => $table]);
 
 
     }
