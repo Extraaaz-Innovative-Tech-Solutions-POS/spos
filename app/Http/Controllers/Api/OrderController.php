@@ -107,20 +107,25 @@ class OrderController extends Controller
     public function getOrdersBill(Request $request)
      {
         $user = Auth::user();
-
         $request->validate([
-            'table_number' => 'required',
-            'floor_number' => 'required',
+            // 'table_number' => 'required',
+            // 'floor_number' => 'required',
+            'table_id' => 'required',
         ]);
 
         $table_number = $request->input('table_number');
         $floor_number = $request->input('floor_number');
+        $table_id = $request->input('table_id');
 
-        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number])->first();
-        
-        $order = $kot->kotItems->where('status','PENDING'); 
+        // $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number,])->first();
+        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id' => $table_id])->first();
 
-        return response()->json(["success" => true, "message" => "Orders List", "data" => $order]);
+        if ($kot) {
+            $order = $kot ? $kot->kotItems->where('status', 'PENDING') : null;
+            return response()->json(["success" => true, "message" => "Orders List", "data" => $order]);
+        } else {
+            return response()->json(["success" => false, "message" => "No Orders Found"]);
+        }
 
     }
 
