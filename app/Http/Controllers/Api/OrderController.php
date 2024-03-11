@@ -101,4 +101,9 @@ class OrderController extends Controller
         $order->delete();
         return response()->json(["success" => true, "message" => $name . ' order is Deleted Successfully']);
     }
+
+    public function getBill(Request $request)
+    {
+
+    }
 }
