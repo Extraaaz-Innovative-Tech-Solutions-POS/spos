@@ -26,6 +26,7 @@ class AuthController extends Controller
        
        $validated['password'] = bcrypt($validated['password']);
        $validated['restaurant_id'] = $count;
+       $validated['plain_password']= $request['password'];
        $user = User::create($validated);
        $success['token'] = $user->createToken('auth')->plainTextToken;
        $success['name'] = $user->name;
