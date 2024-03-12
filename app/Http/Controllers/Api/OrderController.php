@@ -206,7 +206,6 @@ class OrderController extends Controller
 
         $kot->total = $grand_total;
         $kot->save();
-
         return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
     }
 }
