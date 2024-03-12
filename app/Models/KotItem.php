@@ -13,6 +13,7 @@ class KotItem extends Model
 
     protected $fillable = [
         'id',
+        'table_id',
         'kot_id',
         'item_id',
         'quantity',

@@ -13,6 +13,7 @@ class KOT extends Model
 
     protected $fillable = [
         'id',
+        'table_id',
         'isready',
         'table_number',
         'floor_number',
@@ -21,6 +22,7 @@ class KOT extends Model
         'restaurant_id',
         'message',
         'is_cancelled',
+        'total',
         'created_at',
         'updated_at',
     ]; 

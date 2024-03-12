@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\KotResource;
 use App\Models\KOT;
 use App\Models\Order;
 use App\Models\User;
@@ -119,10 +120,11 @@ class OrderController extends Controller
 
         // $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number,])->first();
         $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id' => $table_id])->first();
+        $kot = new KotResource($kot);
 
         if ($kot) {
-            $order = $kot ? $kot->kotItems->where('status', 'PENDING') : null;
-            return response()->json(["success" => true, "message" => "Orders List", "data" => $order]);
+            // $order = $kot ? $kot->kotItems->where(["table_id"=> $table_id,'status'=>'PENDING']) : null;
+            return response()->json(["success" => true, "message" => "Orders List","kot"=>$kot ]);//,"order" => $order]);
         } else {
             return response()->json(["success" => false, "message" => "No Orders Found"]);
         }
