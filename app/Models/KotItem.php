@@ -18,14 +18,15 @@ class KotItem extends Model
         'item_id',
         'quantity',
         'price',
+        'product_total',
         'name',
         'is_cancelled',
         'status',
         'cart_id',
         'restaurant_id',
+        'cancel_reason',
         'created_at',
         'updated_at',
-        'cancel_reason',
     ];
 
     public function kot()

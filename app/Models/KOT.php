@@ -21,6 +21,7 @@ class KOT extends Model
         'customer_id',
         'restaurant_id',
         'message',
+        'isready',
         'is_cancelled',
         'total',
         'created_at',

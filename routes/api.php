@@ -43,5 +43,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('getOrdersBill',[OrderController::class, 'getOrdersBill']);
 
     Route::get("/getTableId/{section}", [OrderController::class, 'getTableId']);
+
+    Route::post('order-confirm', [OrderController::class, 'orderConfirm']);
 });
 // route::get('category',[CategoryController::class, 'index']);

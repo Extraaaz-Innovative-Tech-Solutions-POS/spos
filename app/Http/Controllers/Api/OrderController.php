@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\KotResource;
 use App\Models\KOT;
+use App\Models\KotItem;
 use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
@@ -22,13 +23,13 @@ class OrderController extends Controller
     {
         //
         $user = Auth::user();
-        
+
         $restaurant_id  = $request->input('restaurant_id');
 
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-        
-        $order = Order::where('restaurant_id',$user->restaurant_id)->get();
-        
+
+        $order = Order::where('restaurant_id', $user->restaurant_id)->get();
+
         return response()->json(["success" => true, "data" => $order]);
     }
 
@@ -45,11 +46,11 @@ class OrderController extends Controller
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $restaurant_id = $user->restaurant_id;
         $order = new Order();
-        $order->id   = $request->id   ;
+        $order->id   = $request->id;
         $order->ispaid = $request->ispaid;
-        $order->table_number  = $request->table_number ;
+        $order->table_number  = $request->table_number;
         $order->floor_number = $request->floor_number;
-        $order->order_type  = $request->order_type ;
+        $order->order_type  = $request->order_type;
         $order->customer_id = $request->customer_id;
         $order->invoice_id = $request->invoice_id;
         $order->product = $request->product;
@@ -106,7 +107,7 @@ class OrderController extends Controller
     }
 
     public function getOrdersBill(Request $request)
-     {
+    {
         $user = Auth::user();
         $request->validate([
             // 'table_number' => 'required',
@@ -119,16 +120,15 @@ class OrderController extends Controller
         $table_id = $request->input('table_id');
 
         // $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number,])->first();
-        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id' => $table_id])->first();
+        $kot = KOT::where(['restaurant_id' => $user->restaurant_id, 'table_id' => $table_id])->first();
         $kot = new KotResource($kot);
 
         if ($kot) {
             // $order = $kot ? $kot->kotItems->where(["table_id"=> $table_id,'status'=>'PENDING']) : null;
-            return response()->json(["success" => true, "message" => "Orders List","kot"=>$kot ]);//,"order" => $order]);
+            return response()->json(["success" => true, "message" => "Orders List", "kot" => $kot]); //,"order" => $order]);
         } else {
             return response()->json(["success" => false, "message" => "No Orders Found"]);
         }
-
     }
 
     public function getTableId($section)
@@ -151,10 +151,62 @@ class OrderController extends Controller
                 $table_id = $sect_var . $randomLetters . $date . $currentMonth . $currentYear . $randomDigits;
                 // Check for uniqueness for the current day across all restaurants and locations
             } while (KOT::where('table_id', $table_id)->whereDate('created_at', $currentDate)->exists());
-            
+
             return response()->json($table_id);
         } catch (\Exception $e) {
             return $e->getMessage();
         }
+    }
+    public function orderConfirm(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'items' => 'required'
+        ]);
+        $billingDetails = $request->input('billingDetails');
+        // $floor_number = $request->input('floor_number');
+        // $table_id = $request->input('table_id');    
+ 
+        $kot = new KOT();
+        $kot->table_id = $request->table_id;
+        // $kot->isready = $request->isready;
+        $kot->table_number = $request->table;
+        $kot->floor_number = $request->floor;
+        $kot->order_type = $request->orderType;
+        $kot->customer_id = $request->customerId;
+        $kot->restaurant_id = $user->restaurant_id;
+        // $kot->message = $request->message;
+        // $kot->is_cancelled = $request->is_cancelled;
+        // $kot->total = $request->total;
+        $kot->save();
+
+        $grand_total = 0;
+
+        foreach ($request->items as $orderItem) {
+
+            // return $orderItem;
+
+            $kotItem = new KotItem();
+            $kotItem->kot_id = $kot->id;
+            $kotItem->table_id = $request->table_id;
+            $kotItem->item_id = $orderItem['Id'];
+            $kotItem->quantity = $orderItem['quantity'];
+            $kotItem->price = $orderItem['price'];
+            $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
+            $kotItem->name = $orderItem['name'];
+            // $kotItem->is_cancelled = $orderItem->is_cancelled;
+            // $kotItem->status = $orderItem->status;
+            // $kotItem->cart_id = $orderItem->cart_id;
+            $kotItem->restaurant_id = $user->restaurant_id;
+            // $kotItem->cancel_reason = $orderItem->cancel_reason;
+            $kotItem->save();
+
+            $grand_total += $orderItem['quantity'] * $orderItem['price'];
+        }
+
+        $kot->total = $grand_total;
+        $kot->save();
+
+        return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
     }
 }
