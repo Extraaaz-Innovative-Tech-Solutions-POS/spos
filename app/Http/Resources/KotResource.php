@@ -15,6 +15,7 @@ class KotResource extends JsonResource
     public function toArray($request)
     {
         // return parent::toArray($request);
+        $filteredItems = $this->kotItems()->where('is_cancelled', 0)->get();
         return [
             'id' => $this->id,
             'table_id' => $this->table_id,
@@ -27,7 +28,7 @@ class KotResource extends JsonResource
             'message' => $this->message,
             'is_cancelled' => $this->is_cancelled,
             'total'=> $this->total,
-            'items'=> KotItemResource::collection($this->kotItems),
+            'items'=> KotItemResource::collection($filteredItems),
             // 'created_at' => $this->created_at,
             // 'updated_at' => $this->updated_at,
         ];
