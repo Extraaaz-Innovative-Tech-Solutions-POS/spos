@@ -33,4 +33,9 @@ class KotItem extends Model
     {
         return $this->belongsTo(KOT::class, 'kot_id');
     }
+
+    public function item()
+    {
+        return $this->belongsTo(Items::class, 'item_id');
+    }
 }

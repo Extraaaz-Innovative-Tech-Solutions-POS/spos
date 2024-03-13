@@ -209,4 +209,24 @@ class OrderController extends Controller
 
         return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
     }
+
+    public function cancelOrder(Request $request)
+    {
+        $request->validate([
+            "table_id" => "required",
+            "item_id" => "required",
+        ]);
+
+        $table_id = $request->table_id;
+        $item_id = $request->item_id;
+        $cancel_reason = $request->cancel_reason;
+
+        $kot = KotItem::findOrFail($request->table_id);
+        $kot->is_cancelled = 1;
+        $kot->cancel_reason = $request->cancel_reason;
+        $kot->save();
+
+        return response()->json(['success' => true,'message' => 'Item cancelled successfully'], 200);
+
+    }
 }
