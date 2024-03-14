@@ -45,8 +45,17 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("/getTableId/{section}", [OrderController::class, 'getTableId']);
 
     Route::post('order-confirm', [OrderController::class, 'confirmOrder']);
-    Route::post('updae-order', [OrderController::class, 'updateOrder']);
+
+    Route::post('update-item', [OrderController::class, 'updateOrder']);
+
+    Route::post('add-item', [OrderController::class, 'addItem']);
 
     Route::post("cancel-item",[OrderController::class, 'cancelItem']);
+    
+    Route::post("cancel-order",[OrderController::class, 'cancelOrder']);
+    
+    Route::post("complete-order",[OrderController::class, 'completeOrder']);
+    
+    Route::post("order-status",[OrderController::class, 'orderStatus']);
 });
 // route::get('category',[CategoryController::class, 'index']);
