@@ -235,7 +235,7 @@ class OrderController extends Controller
         return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
     }
 
-    public function updateOrder()
+    public function updateOrder(Request $request)
     {
 
     }
@@ -287,10 +287,11 @@ class OrderController extends Controller
         $cancel_reason = $request->cancel_reason;
 
         $kot = KOT::where('restaurant_id',$user->restaurant_id,'table_id',$table_id)->first();
-
+        
 
         // $kotitems = KotItem::where('table_id',$table_id)->get();
         // // return $kotitems;
+
         // foreach($kotitems as $kotitem)
         // {
         //     if($kotitem->item_id == $item_id)
