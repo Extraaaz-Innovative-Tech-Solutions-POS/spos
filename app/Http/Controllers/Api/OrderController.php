@@ -122,9 +122,9 @@ class OrderController extends Controller
 
         // $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'floor_number' => $floor_number, 'table_number' => $table_number,])->first();
         $kot = KOT::where(['restaurant_id' => $user->restaurant_id, 'table_id' => $table_id])->first();
-        $kot = new KotResource($kot);
-
+        
         if ($kot) {
+            $kot = new KotResource($kot);
             // $order = $kot ? $kot->kotItems->where(["table_id"=> $table_id,'status'=>'PENDING']) : null;
             return response()->json(["success" => true, "message" => "Orders List", "kot" => $kot]); //,"order" => $order]);
         } else {
