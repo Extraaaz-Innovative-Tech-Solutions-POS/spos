@@ -14,6 +14,7 @@ class KOT extends Model
     protected $fillable = [
         'id',
         'table_id',
+        'order_number',
         'isready',
         'table_number',
         'floor_number',

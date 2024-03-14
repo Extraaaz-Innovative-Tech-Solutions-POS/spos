@@ -19,6 +19,7 @@ class KotResource extends JsonResource
         return [
             'id' => $this->id,
             'table_id' => $this->table_id,
+            'order_number' => $this->order_number,
             'isready' => $this->isready,
             'table_number' => $this->table_number,
             'floor_number' => $this->floor_number,

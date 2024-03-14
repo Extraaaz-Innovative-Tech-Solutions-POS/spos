@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->group( function () {
     route::apiResource('items',ItemsController::class);
     route::apiResource('floor',FloorController::class);
     route::apiResource('order',OrderController::class);
-    route::apiResource('tax',TaxController::class);
+    // route::apiResource('tax',TaxController::class);
     route::apiResource('customer',CustomerController::class);
     route::apiResource('cart',CartController::class);
 
@@ -44,6 +44,9 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::get("/getTableId/{section}", [OrderController::class, 'getTableId']);
 
-    Route::post('order-confirm', [OrderController::class, 'orderConfirm']);
+    Route::post('order-confirm', [OrderController::class, 'confirmOrder']);
+    Route::post('updae-order', [OrderController::class, 'updateOrder']);
+
+    Route::post("cancel-item",[OrderController::class, 'cancelItem']);
 });
 // route::get('category',[CategoryController::class, 'index']);

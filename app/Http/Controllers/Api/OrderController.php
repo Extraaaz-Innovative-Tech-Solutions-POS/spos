@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\KotResource;
+use App\Models\Items;
 use App\Models\KOT;
 use App\Models\KotItem;
 use App\Models\Order;
@@ -157,18 +158,42 @@ class OrderController extends Controller
             return $e->getMessage();
         }
     }
-    public function orderConfirm(Request $request)
+    public function confirmOrder(Request $request)
     {
         $user = Auth::user();
         $request->validate([
-            'items' => 'required'
+            'table_id' => 'required',
+            'items' => 'required',
+            "orderType" => "required",
         ]);
-        $billingDetails = $request->input('billingDetails');
+
+        // $billingDetails = $request->input('billingDetails');
         // $floor_number = $request->input('floor_number');
-        // $table_id = $request->input('table_id');    
+        // $table_id = $request->input('table_id');   
+        $todaysDate = now()->toDateString(); // Get today's date in 'Y-m-d' format
+        $order_number = 1;
+
+        $table_order_number = KOT::where('restaurant_id', $user->restaurant_id)
+            ->whereDate('created_at', $todaysDate)->latest()
+            ->pluck('order_number')
+            ->first();
+
+        $table_id = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
+
+        if($table_id)
+        {
+            return response()->json(['success'=> false, 'message' => 'Table already has an order with same table_id'], 400);
+        }
+
+        // return $table_order_number;
+
+        if ($table_order_number) {
+            $order_number = $table_order_number + 1;
+        }
  
         $kot = new KOT();
         $kot->table_id = $request->table_id;
+        $kot->order_number = $order_number;        
         // $kot->isready = $request->isready;
         $kot->table_number = $request->table;
         $kot->floor_number = $request->floor;
@@ -210,7 +235,12 @@ class OrderController extends Controller
         return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
     }
 
-    public function cancelOrder(Request $request)
+    public function updateOrder()
+    {
+
+    }
+
+    public function cancelItem(Request $request)
     {
         $request->validate([
             "table_id" => "required",
@@ -221,12 +251,41 @@ class OrderController extends Controller
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
 
-        $kot = KotItem::findOrFail($request->table_id);
-        $kot->is_cancelled = 1;
-        $kot->cancel_reason = $request->cancel_reason;
-        $kot->save();
+        $kotitems = KotItem::where('table_id',$table_id)->get();
+        // return $kotitems;
 
-        return response()->json(['success' => true,'message' => 'Item cancelled successfully'], 200);
+        foreach($kotitems as $kotitem)
+        {
+            if($kotitem->item_id == $item_id)
+            {
+                $itemName = Items::where('item_id',$item_id)->pluck('item_name')->first();
+                if($kotitem->is_cancelled == 0)
+                {
+                    $kotitem->is_cancelled = 1;
+                    $kotitem->cancel_reason = $cancel_reason;
+                    $kotitem->save();    
+                    // return $itemName;
+                    return response()->json(['success' => true,'message' => $itemName .' item has been cancelled successfully'], 200);
+                }
+                else{
+                    return response()->json(['success' => false,'message' => $itemName .' item has been already cancelled for this order'], 404);
+                }
+            }
+        }
+        return response()->json(['success' => false,'message' => 'Item has not been found for this order'], 404);
+    }
 
+    public function completeOrder(Request $request)
+    {
+        $table_id = $request->table_id;
+        $kotitems = KotItem::where('table_id',$table_id)->get();
+        $total_amount = 0;
+        foreach($kotitems as $kotitem)
+        {
+            $total_amount += $kotitem->amount;
+        }
+        $order = Order::where('table_id',$table_id)->first();
+        $order->total_amount = $total_amount;
+        $order->status = 'completed';
     }
 }
