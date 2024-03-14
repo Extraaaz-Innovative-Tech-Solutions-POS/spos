@@ -250,6 +250,12 @@ class OrderController extends Controller
         $table_id = $request->table_id;
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
+        $item = Items::where('item_id',$item_id)->first();
+
+        
+
+        $itemName = $item->item_name;
+        $itemPrice = $item->price;
 
         $kotitems = KotItem::where('table_id',$table_id)->get();
         // return $kotitems;
@@ -258,7 +264,6 @@ class OrderController extends Controller
         {
             if($kotitem->item_id == $item_id)
             {
-                $itemName = Items::where('item_id',$item_id)->pluck('item_name')->first();
                 if($kotitem->is_cancelled == 0)
                 {
                     $kotitem->is_cancelled = 1;
@@ -273,6 +278,31 @@ class OrderController extends Controller
             }
         }
         return response()->json(['success' => false,'message' => 'Item has not been found for this order'], 404);
+    }
+
+    public function cancelOrder(Request $request)
+    {
+        $user = Auth::user();
+        $table_id = $request->table_id;
+        $cancel_reason = $request->cancel_reason;
+
+        $kot = KOT::where('restaurant_id',$user->restaurant_id,'table_id',$table_id)->first();
+
+
+        // $kotitems = KotItem::where('table_id',$table_id)->get();
+        // // return $kotitems;
+        // foreach($kotitems as $kotitem)
+        // {
+        //     if($kotitem->item_id == $item_id)
+
+        //     {
+        //         $itemName = $kotitem->item_name;
+        //         if($kotitem->is_cancelled )
+        //         {
+        //             return response()->json(['success' => false,'message' => $itemName .' item has been already cancelled for this']);
+        //         }
+        //     }
+        // }
     }
 
     public function completeOrder(Request $request)
