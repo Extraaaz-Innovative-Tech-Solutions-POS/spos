@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
@@ -12,6 +10,10 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -60,5 +62,16 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post("order-status",[OrderController::class, 'orderStatus']);
 
     Route::apiResource('staff', StaffController::class);
+    Route::post("top-selling-items",[DashboardController::class, 'topSellingItems']);
+
+    Route::post("dashboard-cards",[DashboardController::class, 'dashboardCards']);
+
+    Route::post("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
+
+    Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+
+    
+    
+
 });
 // route::get('category',[CategoryController::class, 'index']);
