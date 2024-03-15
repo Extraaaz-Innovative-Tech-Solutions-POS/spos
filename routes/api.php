@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::post('order-confirm', [OrderController::class, 'confirmOrder']);
 
-    Route::post('update-item', [OrderController::class, 'updateOrder']);
+    Route::post('update-item', [OrderController::class, 'updateItem']);
 
     Route::post('add-item', [OrderController::class, 'addItem']);
 

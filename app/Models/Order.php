@@ -12,6 +12,7 @@ class Order extends Model
     // protected $primaryKey = 'order_id';
     protected $fillable = [
         'id',
+        'table_id',
         'ispaid',
         'table_number',
         'floor_number',
@@ -27,7 +28,7 @@ class Order extends Model
         'restro_tax',
         'othertaxtotal',
         'other_tax',
-        'total'
+        'total',
 
 
     ];
