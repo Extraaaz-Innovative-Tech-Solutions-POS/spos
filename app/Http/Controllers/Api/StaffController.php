@@ -45,6 +45,7 @@ class StaffController extends Controller
         $staff->restaurant_id = $restaurant_id;
         $staff->name = $request->name;
         $staff->email = $request->email;
+        $staff->phone = $request->phone;
         $staff->password = bcrypt($request->password);
         $staff->role = $request->role;
         $staff->save();
@@ -76,13 +77,15 @@ class StaffController extends Controller
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
         $staff = User::findOrFail($id);
-
         $staff->restaurant_id = $restaurant_id;
         $staff->name = $request->name;
-        $staff->email = $request->email;
+        $staff->phone = $request->phone;
         $staff->password = bcrypt($request->password);
         $staff->role = $request->role;
         $staff->save();
+        return response()->json(["success" => true, "message" => "Staff Data update Saved Successfully", "data" => $staff]);
+
+        
     }
 
     /**
@@ -94,5 +97,18 @@ class StaffController extends Controller
     public function destroy($id)
     {
         //
+        $user = Auth::user();
+        $role = $user->role;
+
+        if ($role != "manager") {
+            return response()->json(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $staff = User::findOrFail($id);
+        $staff->delete();
+
+        return response()->json(["success" => true, "message" => "Staff Data Deleted Successfully"]);
+
+       
     }
 }
