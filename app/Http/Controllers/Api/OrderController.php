@@ -8,6 +8,7 @@ use App\Models\Items;
 use App\Models\KOT;
 use App\Models\KotItem;
 use App\Models\Order;
+use App\Models\OrderPayment;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -138,7 +139,7 @@ class OrderController extends Controller
         try {
             do {
                 $sect_var = "";
-                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "Takeaway" ? "TAK/" : null);
+                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "TakeAway" ? "TAK/" : ($section == "Delivery" ?  "DEL/" : ($section == "Advance" ? "ADV/" : null)));
                 if (!$sect_var) {
                     return "Invalid Section Name";
                 }
@@ -151,7 +152,6 @@ class OrderController extends Controller
                 $currentYear = $currentDate->format('y');
                 $date = $currentDate->format('d');
                 $table_id = $sect_var . $randomLetters . $date . $currentMonth . $currentYear . $randomDigits;
-                // Check for uniqueness for the current day across all restaurants and locations
             } while (KOT::where('table_id', $table_id)->whereDate('created_at', $currentDate)->exists());
 
             return response()->json($table_id);
@@ -168,9 +168,6 @@ class OrderController extends Controller
             "orderType" => "required",
         ]);
 
-        // $billingDetails = $request->input('billingDetails');
-        // $floor_number = $request->input('floor_number');
-        // $table_id = $request->input('table_id');   
         $todaysDate = now()->toDateString(); // Get today's date in 'Y-m-d' format
         $order_number = 1;
 
@@ -201,7 +198,7 @@ class OrderController extends Controller
         $kot->order_type = $request->orderType;
         $kot->customer_id = $request->customerId;
         $kot->restaurant_id = $user->restaurant_id;
-        $kot->status = "Pending";
+        $kot->status = "PENDING";
         // $kot->message = $request->message;
         // $kot->is_cancelled = $request->is_cancelled;
         // $kot->total = $request->total;
@@ -256,6 +253,16 @@ class OrderController extends Controller
             return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id']);
         }
 
+        if($kot->is_cancelled == 1)
+        {
+            return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id, since it has been cancelled']);
+        }
+
+        if($kot->status == 'COMPLETED')
+        {
+            return response()->json(['success'=> false, 'message' => 'Cannot update item, Order has been already Completed']);
+        }
+
         $total = $kot->total;
 
         $kotItem = KotItem::where("table_id",$request->table_id)->where("item_id", $request->item_id)->first();
@@ -265,9 +272,9 @@ class OrderController extends Controller
             return response()->json(['success'=> false, 'message' => 'Data does exists for this item_id in the table']);
         }
 
-        if($kot->status == 'COMPLETED')
+        if($kotItem->is_cancelled == 1)
         {
-            return response()->json(['success'=> false, 'message' => 'Cannot update item, Order has been    already Completed']);
+            return response()->json(['success'=> false, 'message' => 'Cannnot Update, since it has been cancelled']);
         }
 
         $total = $total - $kotItem->product_total;
@@ -314,6 +321,11 @@ class OrderController extends Controller
             return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id']);
         }
 
+        if($kot->is_cancelled == 1)
+        {
+            return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id, since it has been cancelled']);
+        }
+
         if($kot->status == 'COMPLETED')
         {
             return response()->json(['success'=> false, 'message' => 'Cannot add item, Order has been already Completed']);
@@ -325,22 +337,26 @@ class OrderController extends Controller
 
         $orderItem = $request->items[0];
 
-        foreach ($kotItems as $kotItem) {
+        foreach ($kotItems as $kotItem) 
+        {
             if($kotItem->item_id == $orderItem['Id'])
             {
-                $total = $total - $kotItem->product_total;
-                // return $kotItem;
-                $kotItem->quantity = $orderItem['quantity'];
-                $kotItem->price = $orderItem['price'];
-                $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
-                $kotItem->name = $orderItem['name'];
-                $kotItem->save();
+                if($kotItem->is_cancelled == 0)
+                {
+                    $total = $total - $kotItem->product_total;
+                    // return $kotItem;
+                    $kotItem->quantity = $orderItem['quantity'];
+                    $kotItem->price = $orderItem['price'];
+                    $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
+                    $kotItem->name = $orderItem['name'];
+                    $kotItem->save();
 
-                $total += $orderItem['quantity'] * $orderItem['price'];
+                    $total += $orderItem['quantity'] * $orderItem['price'];
 
-                $kot->total = $total;
-                $kot->save();
-                return response()->json(['success'=> true, 'message' => 'Items upadeted to table_id : '. $request->table_id .' successfully'], 200);
+                    $kot->total = $total;
+                    $kot->save();
+                    return response()->json(['success'=> true, 'message' => 'Items upadeted to table_id : '. $request->table_id .' successfully'], 200);
+                }
                 // break;
             }
         }
@@ -470,10 +486,21 @@ class OrderController extends Controller
         $user = Auth::user();
         $table_id = $request->table_id;
 
-        // DB::transaction(function($user, $table_id, $request)
-        // {
+        return DB::transaction(function() use($user, $table_id, $request)
+        {
 
             $kot = KOT::where("table_id",$table_id)->first();
+
+            if(!$kot)
+            {  
+                return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id']);
+            }
+
+            if($kot->is_cancelled == 1)
+            {
+                return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id, since it has been cancelled']);
+            }
+    
             $kot->status = "COMPLETED";
             $kot->save();
 
@@ -512,8 +539,22 @@ class OrderController extends Controller
             $order->total = $kot->total;    // Total after adding tax and substracting discount
             $order->save();
 
+            $orderPayment = new OrderPayment();
+            $orderPayment->user_id = $user->id;
+            $orderPayment->order_id = $order->id;
+            $orderPayment->customer_id = $order->customer_id;
+            $orderPayment->table_id = $request->table_id;
+            $orderPayment->order_number = $kot->order_number;
+            $orderPayment->restaurant_id = $user->restaurant_id;
+            $orderPayment->payment_type = $request->payment_type; // Cash/Online -- Compulsary
+            $orderPayment->payment_method = $request->payment_method ?? null; // if ONline - UPI/Card/EMI, etc
+            $orderPayment->amount = $order->total;
+            $orderPayment->status = "COMPLETED";
+            $orderPayment->transaction_id = $request->transaction_id ?? null;
+            $orderPayment->payment_details = $request->payment_details ?? null;
+            $orderPayment->save();
             return response()->json(["success"=>true , "message"=>"Order Completed Successfully"]);
-        // });
+        });
 
         // return response()->json(["success"=>false , "message"=>"Order Not Completed"]);
     }

@@ -14,6 +14,7 @@ class OrderPayment extends Model
         'user_id',
         'order_id',
         'table_id',
+        'customer_id',
         'order_number',
         'restaurant_id',
         'payment_type',
