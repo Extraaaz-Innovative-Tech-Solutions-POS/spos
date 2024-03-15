@@ -267,7 +267,7 @@ class OrderController extends Controller
 
         if($kot->status == 'COMPLETED')
         {
-            return response()->json(['success'=> false, 'message' => 'Cannot update item, Order has been already Completed']);
+            return response()->json(['success'=> false, 'message' => 'Cannot update item, Order has been    already Completed']);
         }
 
         $total = $total - $kotItem->product_total;
