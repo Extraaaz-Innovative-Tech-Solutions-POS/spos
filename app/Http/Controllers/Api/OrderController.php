@@ -245,6 +245,8 @@ class OrderController extends Controller
             'item_id' => 'required',
             'items' => 'required',
             "orderType" => "required",
+            "instruction" =>""
+            
         ]);
 
         $kot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
@@ -279,6 +281,7 @@ class OrderController extends Controller
         $kotItem->price = $orderItem['price'];
         $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
         $kotItem->name = $orderItem['name'];
+        $kotItem->instruction = $orderItem['instruction'];
         // $kotItem->is_cancelled = $orderItem->is_cancelled;
         // $kotItem->status = $orderItem->status;
         // $kotItem->cart_id = $orderItem->cart_id;
@@ -301,6 +304,7 @@ class OrderController extends Controller
             'table_id' => 'required',
             'items' => 'required',
             "orderType" => "required",
+            
         ]);
 
         $kot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();

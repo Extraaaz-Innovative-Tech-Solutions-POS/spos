@@ -18,6 +18,7 @@ class KotItem extends Model
         'item_id',
         'quantity',
         'price',
+        "instruction",
         'product_total',
         'name',
         'is_cancelled',
