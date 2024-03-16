@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\KotItem;
 use App\Models\Order;
 use App\Models\OrderPayment;
+use App\Models\Restaurant;
 use App\Models\Restaurants;
 use App\Models\User;
 use Carbon\Carbon;
@@ -43,7 +44,7 @@ class CashierHallWiseController extends Controller
         ->get();
         
         // Fetching restaurant name based on restaurant_id
-        $restaurantName = Restaurants::where('id', $user->restaurant_id)->value('restaurant_name');
+        $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
        
         
         return response()->json([
