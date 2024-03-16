@@ -7,8 +7,10 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
+use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
@@ -74,6 +76,10 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     Route::get("day-summary-report",[DaySummaryReport::class, 'index']);
+    route::apiResource('section', SectionController::class);
+
+    route::apiResource('floorsection',FloorSectionController::class);
+
     Route::get("cancel-items",[DaySummaryReport::class, 'cancelItemsReport']);
     
     route::apiResource("cashier-hallwise",CashierHallWiseController::class);
