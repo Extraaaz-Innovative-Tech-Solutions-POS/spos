@@ -124,4 +124,23 @@ class TablesController extends Controller
 
         return response()->json(["success" => true, "message" => "Section Deleted Successfully"]);
     }
+
+    public function setTables(Request $request)
+    {
+        $user = Auth::user();
+
+        $table = Tables::where("restaurant_id");
+        $table->floor_id  = $request->floor_id;
+        $table->restaurant_id = $user->restaurant_id;
+        $table->floor_number  = $request->floor_number;
+        $table->tables = $request->tables;
+        $table->save();
+        return response()->json();
+    }
+
+    public function updateTables(Request $request)
+    {
+        $user = Auth::user();
+
+    }
 }
