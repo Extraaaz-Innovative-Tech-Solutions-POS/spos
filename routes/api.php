@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post("order-status",[OrderController::class, 'orderStatus']);
 
     Route::apiResource('staff', StaffController::class);
+    
     Route::post("top-selling-items",[DashboardController::class, 'topSellingItems']);
 
     Route::post("dashboard-cards",[DashboardController::class, 'dashboardCards']);
@@ -73,5 +74,7 @@ Route::middleware('auth:sanctum')->group( function () {
     
     
 
+
+    Route::get('getActiveTables',[OrderController::class, 'getActiveTables']);
 });
 // route::get('category',[CategoryController::class, 'index']);

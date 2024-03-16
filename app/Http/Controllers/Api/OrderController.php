@@ -200,7 +200,7 @@ class OrderController extends Controller
             $kot->table_id = $request->table_id;
             $kot->order_number = $order_number;        
             // $kot->isready = $request->isready;
-            $kot->sub_table_number = $request->sub_table_number ?? null;
+            $kot->sub_table_number = $request->sub_table ?? null;
             $kot->section_id = $request->section_id ?? null;
             $kot->table_number = $request->table ?? null;
             $kot->floor_number = $request->floor ?? null;
@@ -242,19 +242,22 @@ class OrderController extends Controller
 
             // $section_name = Section::where('id', $request->section_id)->first()->name;
 
-            $tableActive = new TableActive();
-            $tableActive->user_id = $user->id;
-            $tableActive->table_id = $request->table_id;
-            $tableActive->table_number = $request->table;
-            $tableActive->divided_by = $request->table_divided_by;
-            $tableActive->split_table_number = $request->sub_table;
-            $tableActive->section_id = $request->section_id;
-            $tableActive->section_name = $request->section_name;
-            $tableActive->floor_number = $request->floor;
-            $tableActive->restaurant_id = $user->restaurant_id;
-            $tableActive->cover_count = $request->cover_count;
-            $tableActive->status = "Pending";
-            $tableActive->save();
+            if($request->orderType == "Dine")
+            {
+                $tableActive = new TableActive();
+                $tableActive->user_id = $user->id;
+                $tableActive->table_id = $request->table_id;
+                $tableActive->table_number = $request->table;
+                $tableActive->divided_by = $request->table_divided_by ?? null;
+                $tableActive->split_table_number = $request->sub_table ?? null;
+                $tableActive->section_id = $request->section_id;
+                $tableActive->section_name = $request->section_name ?? null;
+                $tableActive->floor_number = $request->floor;
+                $tableActive->restaurant_id = $user->restaurant_id;
+                $tableActive->cover_count = $request->cover_count ?? null;
+                $tableActive->status = "Occupied";
+                $tableActive->save();
+            }
 
             return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
         });
@@ -507,6 +510,8 @@ class OrderController extends Controller
         $request->validate([
             'table_id' => 'required',
             'ispaid' => 'required',
+            'payment_type' => 'required',
+            'orderType'=> '',
             "sub_table"=> "",
             "table"=> "",
             "section_id"=> "",
@@ -530,6 +535,11 @@ class OrderController extends Controller
             {
                 return response()->json(['success'=> false, 'message' => 'Data does not exists for this table_id, since it has been cancelled']);
             }
+
+            if($kot->status == 'COMPLETED')
+            {
+                return response()->json(['success'=> false, 'message' => 'Cannot add item, Order has been already Completed']);
+            }
     
             $kot->status = "COMPLETED";
             $kot->save();
@@ -549,11 +559,10 @@ class OrderController extends Controller
             }
 
             $order = new Order();
-            $order->id = $request->id;
             $order->table_id = $request->table_id;
             $order->ispaid = $request->ispaid;
-            $order->sub_table_number = $request->sub_table_number ?? null;
-            $order->section_id = $request->section_id ?? null;
+            $order->sub_table_number = $kot->sub_table_number ?? null;
+            $order->section_id = $kot->section_id ?? null;
             $order->table_number = $kot->table_number;
             $order->floor_number = $kot->floor_number;
             $order->order_type = $kot->order_type;
@@ -586,8 +595,34 @@ class OrderController extends Controller
             $orderPayment->payment_details = $request->payment_details ?? null;
             $orderPayment->save();
             
+            if(($kot->order_type == "Dine" ) || ($request->orderType == "Dine"))
+            {
+                $tableActives = TableActive::where("table_id",$kot->table_id)->get();
+                if($tableActives->count() > 0)
+                {
+                    foreach($tableActives as $tableActive)
+                    {
+                        if($tableActive->split_table_number == null)
+                        {
+                            $tableActive->status = "Available";
+                            $tableActive->delete();
+                        }
+                        else
+                        {
+                            if($tableActive->split_table_number == $kot->sub_table_number)
+                            {
+                                $tableActive->status = "Available";
+                                $tableActive->delete();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    return response()->json(["success"=>false , "message"=>"Table Not Found"]);
+                }
+            }
 
-            $tableActive = TableActive::findorFail
             return response()->json(["success"=>true , "message"=>"Order Completed Successfully"]);
         });
 
@@ -617,5 +652,12 @@ class OrderController extends Controller
         }
 
         return $formattedData;
+    }
+
+    public function getActiveTables(Request $request)
+    {
+        $user = Auth::user();
+        $activeTables = TableActive::where('restaurant_id', $user->restaurant_id)->get();
+        return response()->json(["sucess" => true,'data' => $activeTables]);
     }
 }
