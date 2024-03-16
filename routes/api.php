@@ -35,15 +35,22 @@ route::post('userlogin', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group( function () {
     // return $request->user()
 
+    Route::apiResource('category',CategoryController::class);
+    
+    Route::get('table',[TablesController::class,'get']);
+    
+    Route::post('setSection',[TablesController::class,'setSection']);
+    
+    Route::post('setTables',[TablesController::class,'setTables']);
 
-    route::apiResource('category',CategoryController::class);
-    route::apiResource('table',TablesController::class);
-    route::apiResource('items',ItemsController::class);
-    route::apiResource('floor',FloorController::class);
-    route::apiResource('order',OrderController::class);
+    Route::post('deleteSection',[TablesController::class,'deleteSection']);
+    
+    Route::apiResource('items',ItemsController::class);
+    Route::apiResource('floor',FloorController::class);
+    Route::apiResource('order',OrderController::class);
+    Route::apiResource('customer',CustomerController::class);
+    Route::apiResource('cart',CartController::class);
     // route::apiResource('tax',TaxController::class);
-    route::apiResource('customer',CustomerController::class);
-    route::apiResource('cart',CartController::class);
 
     Route::get('/getFloorsAndTables',[TablesController::class, 'getFloorsAndTables']);
 
