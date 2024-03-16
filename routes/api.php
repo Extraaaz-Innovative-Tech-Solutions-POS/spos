@@ -5,8 +5,10 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\FloorController;
+use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
@@ -70,6 +72,10 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
 
     Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+
+    route::apiResource('section', SectionController::class);
+
+    route::apiResource('floorsection',FloorSectionController::class);
 
     
     
