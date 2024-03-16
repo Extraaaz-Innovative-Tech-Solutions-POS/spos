@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
@@ -70,10 +71,12 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
 
     Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    Route::post("day-summary-report",[DaySummaryReport::class, 'index']);
 
+    Route::post("cashier-report",[DaySummaryReport::class, 'cashierReport']);
     
-    
-
+    Route::get("cancel-order",[DaySummaryReport::class, 'cancelOrderReport']);
 
     Route::get('getActiveTables',[OrderController::class, 'getActiveTables']);
 });
