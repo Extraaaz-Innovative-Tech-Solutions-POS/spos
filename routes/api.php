@@ -72,9 +72,9 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
-    Route::post("day-summary-report",[DaySummaryReport::class, 'index']);
+    Route::get("day-summary-report",[DaySummaryReport::class, 'index']);
 
-    Route::post("cashier-report",[DaySummaryReport::class, 'cashierReport']);
+    Route::get("cashier-report",[DaySummaryReport::class, 'cashierReport']);
     
     Route::get("cancel-order",[DaySummaryReport::class, 'cancelOrderReport']);
 
