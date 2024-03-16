@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -71,7 +72,8 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
 
-    
+    Route::post("customer-sale-report",[ReportController::class, 'customerSaleReport']);
+
     
 
 
