@@ -67,9 +67,9 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::post("dashboard-cards",[DashboardController::class, 'dashboardCards']);
 
-    Route::post("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
+    Route::get("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
 
-    Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
 
     
     

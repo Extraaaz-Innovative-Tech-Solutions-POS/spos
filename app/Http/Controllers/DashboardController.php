@@ -94,10 +94,11 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $data = Order::where('restaurant_id', $user->restaurant_id)
+        $data = Order::where('orders.restaurant_id', $user->restaurant_id)
+        ->join('order_payments', 'orders.id', '=', 'order_payments.order_id')
+        // ->whereBetween('orders.created_at', [$currentMonthStart, $currentMonthEnd])
         ->where('payment_type','CASH')
         ->sum('total');
-
 
         return response()->json(["success" => true, "data" => $data]);
 
@@ -107,10 +108,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $data = Order::where('restaurant_id', $user->restaurant_id)
+        $data = Order::where('orders.restaurant_id', $user->restaurant_id)
+        ->join('order_payments', 'orders.id', '=', 'order_payments.order_id')
         ->where('payment_type','ONLINE')
         ->sum('total');
-
 
         return response()->json(["success" => true, "data" => $data]);
 
