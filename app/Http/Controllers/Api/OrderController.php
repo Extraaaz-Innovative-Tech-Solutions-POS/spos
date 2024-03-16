@@ -9,6 +9,7 @@ use App\Models\KOT;
 use App\Models\KotItem;
 use App\Models\Order;
 use App\Models\OrderPayment;
+use App\Models\TableActive;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -166,72 +167,97 @@ class OrderController extends Controller
             'table_id' => 'required',
             'items' => 'required',
             "orderType" => "required",
+            "sub_table"=> "",
+            "table"=> "",
+            "section_id"=> "",
+            "floor"=> "",
+            "table_divided_by"=> "", // If divided
+            "cover_count"=> "", // Number of People
+            "customerId" => "",
         ]);
 
-        $todaysDate = now()->toDateString(); // Get today's date in 'Y-m-d' format
-        $order_number = 1;
-
-        $table_order_number = KOT::where('restaurant_id', $user->restaurant_id)
-            ->whereDate('created_at', $todaysDate)->latest()
-            ->pluck('order_number')
-            ->first();
-
-        $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
-
-        if($oldKot)
+        return DB::transaction(function() use($user, $request)
         {
-            return response()->json(['success'=> false, 'message' => 'Table already has an order with same table_id']);
-        }
+            $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
+            if($oldKot)
+            {
+                return response()->json(['success'=> false, 'message' => 'Table already has an order with same table_id']);
+            }
 
-        // return $table_order_number;
+            $todaysDate = now()->toDateString(); // Get today's date in 'Y-m-d' format
+            $order_number = 1;
 
-        if ($table_order_number) {
-            $order_number = $table_order_number + 1;
-        }
- 
-        $kot = new KOT();
-        $kot->table_id = $request->table_id;
-        $kot->order_number = $order_number;        
-        // $kot->isready = $request->isready;
-        $kot->table_number = $request->table;
-        $kot->floor_number = $request->floor;
-        $kot->order_type = $request->orderType;
-        $kot->customer_id = $request->customerId;
-        $kot->restaurant_id = $user->restaurant_id;
-        $kot->status = "PENDING";
-        // $kot->message = $request->message;
-        // $kot->is_cancelled = $request->is_cancelled;
-        // $kot->total = $request->total;
-        $kot->save();
+            $table_order_number = KOT::where('restaurant_id', $user->restaurant_id)
+                ->whereDate('created_at', $todaysDate)->latest()
+                ->pluck('order_number')
+                ->first();
 
-        $grand_total = 0;
+            if ($table_order_number) {
+                $order_number = $table_order_number + 1;
+            }
+    
+            $kot = new KOT();
+            $kot->table_id = $request->table_id;
+            $kot->order_number = $order_number;        
+            // $kot->isready = $request->isready;
+            $kot->sub_table_number = $request->sub_table_number ?? null;
+            $kot->section_id = $request->section_id ?? null;
+            $kot->table_number = $request->table ?? null;
+            $kot->floor_number = $request->floor ?? null;
+            $kot->order_type = $request->orderType;
+            $kot->customer_id = $request->customerId;
+            $kot->restaurant_id = $user->restaurant_id;
+            $kot->status = "PENDING";
+            // $kot->message = $request->message;
+            // $kot->is_cancelled = $request->is_cancelled;
+            // $kot->total = $request->total;
+            $kot->save();
 
-        foreach ($request->items as $orderItem) {
+            $grand_total = 0;
 
-            // return $orderItem;
+            foreach ($request->items as $orderItem) {
 
-            $kotItem = new KotItem();
-            $kotItem->kot_id = $kot->id;
-            $kotItem->table_id = $request->table_id;
-            $kotItem->item_id = $orderItem['Id'];
-            $kotItem->quantity = $orderItem['quantity'];
-            $kotItem->price = $orderItem['price'];
-            $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
-            $kotItem->name = $orderItem['name'];
-            // $kotItem->is_cancelled = $orderItem->is_cancelled;
-            // $kotItem->status = $orderItem->status;
-            // $kotItem->cart_id = $orderItem->cart_id;
-            $kotItem->restaurant_id = $user->restaurant_id;
-            // $kotItem->cancel_reason = $orderItem->cancel_reason;
-            $kotItem->save();
+                // return $orderItem;
 
-            $grand_total += $orderItem['quantity'] * $orderItem['price'];
-        }
+                $kotItem = new KotItem();
+                $kotItem->kot_id = $kot->id;
+                $kotItem->table_id = $request->table_id;
+                $kotItem->item_id = $orderItem['Id'];
+                $kotItem->quantity = $orderItem['quantity'];
+                $kotItem->price = $orderItem['price'];
+                $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
+                $kotItem->name = $orderItem['name'];
+                // $kotItem->is_cancelled = $orderItem->is_cancelled;
+                // $kotItem->status = $orderItem->status;
+                // $kotItem->cart_id = $orderItem->cart_id;
+                $kotItem->restaurant_id = $user->restaurant_id;
+                // $kotItem->cancel_reason = $orderItem->cancel_reason;
+                $kotItem->save();
 
-        $kot->total = $grand_total;
-        $kot->save();
+                $grand_total += $orderItem['quantity'] * $orderItem['price'];
+            }
 
-        return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
+            $kot->total = $grand_total;
+            $kot->save();
+
+            // $section_name = Section::where('id', $request->section_id)->first()->name;
+
+            $tableActive = new TableActive();
+            $tableActive->user_id = $user->id;
+            $tableActive->table_id = $request->table_id;
+            $tableActive->table_number = $request->table;
+            $tableActive->divided_by = $request->table_divided_by;
+            $tableActive->split_table_number = $request->sub_table;
+            $tableActive->section_id = $request->section_id;
+            $tableActive->section_name = $request->section_name;
+            $tableActive->floor_number = $request->floor;
+            $tableActive->restaurant_id = $user->restaurant_id;
+            $tableActive->cover_count = $request->cover_count;
+            $tableActive->status = "Pending";
+            $tableActive->save();
+
+            return response()->json(['success' => true,'message' => 'Order confirmed successfully'], 200);
+        });
     }
 
     public function updateItem(Request $request)
@@ -481,6 +507,10 @@ class OrderController extends Controller
         $request->validate([
             'table_id' => 'required',
             'ispaid' => 'required',
+            "sub_table"=> "",
+            "table"=> "",
+            "section_id"=> "",
+            "floor"=> "",
         ]);
 
         $user = Auth::user();
@@ -522,6 +552,8 @@ class OrderController extends Controller
             $order->id = $request->id;
             $order->table_id = $request->table_id;
             $order->ispaid = $request->ispaid;
+            $order->sub_table_number = $request->sub_table_number ?? null;
+            $order->section_id = $request->section_id ?? null;
             $order->table_number = $kot->table_number;
             $order->floor_number = $kot->floor_number;
             $order->order_type = $kot->order_type;
@@ -553,6 +585,9 @@ class OrderController extends Controller
             $orderPayment->transaction_id = $request->transaction_id ?? null;
             $orderPayment->payment_details = $request->payment_details ?? null;
             $orderPayment->save();
+            
+
+            $tableActive = TableActive::findorFail
             return response()->json(["success"=>true , "message"=>"Order Completed Successfully"]);
         });
 
