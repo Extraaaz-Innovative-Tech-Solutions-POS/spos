@@ -218,7 +218,6 @@ class OrderController extends Controller
             foreach ($request->items as $orderItem) {
 
                 // return $orderItem;
-
                 $kotItem = new KotItem();
                 $kotItem->kot_id = $kot->id;
                 $kotItem->table_id = $request->table_id;
@@ -373,7 +372,6 @@ class OrderController extends Controller
                 if($kotItem->is_cancelled == 0)
                 {
                     $total = $total - $kotItem->product_total;
-                    // return $kotItem;
                     $kotItem->quantity = $orderItem['quantity'];
                     $kotItem->price = $orderItem['price'];
                     $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
@@ -476,8 +474,6 @@ class OrderController extends Controller
 
         $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id'=>$table_id])->first();
 
-        // return $user->restaurant_id;
-
         if($kot)
         {
             if($kot->is_cancelled == 0)
@@ -486,8 +482,8 @@ class OrderController extends Controller
                 $kot->is_cancelled = 1;
                 $kot->save();
 
-                $kotitems = KotItem::where('table_id',$table_id)->get();
-                foreach($kotitems as $kotitem)
+                $kotItems = KotItem::where('table_id',$table_id)->get();
+                foreach($kotItems as $kotitem)
                 {
                     $kotitem->is_cancelled = 1;
                     $kotitem->cancel_reason = $cancel_reason;
@@ -554,8 +550,11 @@ class OrderController extends Controller
 
             foreach($kotitems as $kotitem)
             {
-                $kotitem->status = "COMPLETED";
-                $kotitem->save();
+                if($kotitem->is_cancelled == 0)
+                {
+                    $kotitem->status = "COMPLETED";
+                    $kotitem->save();
+                }
             }
 
             $order = new Order();
@@ -639,18 +638,17 @@ class OrderController extends Controller
                 'item_name' => $item['name'],
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
-                'discount' => '0.00', // You can change this value as per your requirements
-                'tax_percentage' => 0, // You can change this value as per your requirements
-                'subtotal' => $item['product_total'], // Assuming product_total is the subtotal
-                'totaltax' => 0, // You can change this value as per your requirements
+                'discount' => '0.00',
+                'tax_percentage' => 0, 
+                'subtotal' => $item['product_total'], 
+                'totaltax' => 0, 
                 'iscancelled' => $item['is_cancelled'],
-                'totaldiscount' => 0, // You can change this value as per your requirements
-                'totalwithouttax' => $item['product_total'], // Assuming product_total is the total without tax
+                'totaldiscount' => 0, 
+                'totalwithouttax' => $item['product_total'], 
             ];
 
             $formattedData[] = $formattedItem;
         }
-
         return $formattedData;
     }
 
@@ -658,6 +656,6 @@ class OrderController extends Controller
     {
         $user = Auth::user();
         $activeTables = TableActive::where('restaurant_id', $user->restaurant_id)->get();
-        return response()->json(["sucess" => true,'data' => $activeTables]);
+        return response()->json(["success" => true,'data' => $activeTables]);
     }
 }

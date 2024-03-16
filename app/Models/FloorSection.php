@@ -11,6 +11,11 @@ class FloorSection extends Model
     
     protected $guarded = [];
 
-
+    protected $fillable = [
+        'user_id',
+        'floor',
+        'sections_count',
+        'restaurant_id',
+    ];
 
 }
