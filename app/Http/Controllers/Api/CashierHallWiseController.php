@@ -100,24 +100,5 @@ class CashierHallWiseController extends Controller
     {
         //
     }
-    public function cashierReport(Request $request)
-    {
-        $user = Auth::user();
-        $newdate  = $request->from_date ;
-        $dayAfter = $request->to_date ;
-        $totalInvoice = OrderPayment::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$newdate, $dayAfter])
-        ->where('status','COMPLETED')
-        ->count();
-        $totalSale = OrderPayment::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$newdate, $dayAfter])
-        ->where('status','COMPLETED')
-        ->sum('amount');
-        $productsCount = KotItem::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$newdate, $dayAfter])
-        ->where('status','COMPLETED')
-        ->count();
-        return response()->json(["success" => true, "totalInvoice" => $totalInvoice,'totalSale'=>$totalSale,'productsCount' => $productsCount
-            ]);
-    }
+   
 }

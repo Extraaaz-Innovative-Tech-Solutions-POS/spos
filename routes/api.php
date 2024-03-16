@@ -77,7 +77,7 @@ Route::middleware('auth:sanctum')->group( function () {
     
     route::apiResource("cashier-hallwise",CashierHallWiseController::class);
 
-    Route::post("cashier-report",[CashierHallWiseController::class, 'cashierReport']);
+
 
 
 
