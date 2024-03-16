@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
@@ -73,6 +74,16 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     Route::get("day-summary-report",[DaySummaryReport::class, 'index']);
+    
+    route::apiResource("cashier-hallwise",CashierHallWiseController::class);
+
+    Route::post("cashier-report",[CashierHallWiseController::class, 'cashierReport']);
+
+
+
+
+
+
 
     Route::get("cashier-report",[DaySummaryReport::class, 'cashierReport']);
     
