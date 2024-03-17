@@ -103,9 +103,10 @@ class DaySummaryReport extends Controller
         $selectedFromDate = $request->fromdate;
         $selectedToDate = $request->todate;
 
-        $orders = KOT::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
-        ->where('is_cancelled', 1)
+        $orders = KOT::join('kot_items', 'kot.table_id', '=', 'kot_items.table_id')
+        ->where('kot_items.restaurant_id', $user->restaurant_id)
+        ->whereBetween('kot_items.created_at', [$selectedFromDate, $selectedToDate])
+        ->where('kot_items.is_cancelled', 1)
         ->get();
 
         return response()->json([

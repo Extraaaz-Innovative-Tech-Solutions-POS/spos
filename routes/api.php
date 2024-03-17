@@ -79,13 +79,6 @@ Route::middleware('auth:sanctum')->group( function () {
     route::apiResource("cashier-hallwise",CashierHallWiseController::class);
 
 
-
-
-
-
-
-
-
     Route::get("cashier-report",[DaySummaryReport::class, 'cashierReport']);
     
     Route::get("cancel-order",[DaySummaryReport::class, 'cancelOrderReport']);
