@@ -19,17 +19,11 @@ class FloorSectionController extends Controller
      */
     public function index(Request $request)
     {
-        //
         $user = Auth::user();
 
-        $restaurant_id  = $request->input('restaurant_id');
+        $floorSection = FloorSection::where('restaurant_id', $user->restaurant_id)->get();
 
-        $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-
-        $floorsection = FloorSection::where('restaurant_id', $user->restaurant_id)->get();
-
-        return response()->json(["success" => true, "data" => $floorsection]);
-
+        return response()->json(["success" => true, "data" => $floorSection]);
     }
 
     /**
@@ -64,9 +58,6 @@ class FloorSectionController extends Controller
         $section->restaurant_id = $restaurant_id;
         $section->save();
 
-        // $table = new Tables();
-        // $table = 
-
         return response()->json(['success' => true, 'message' => 'Section floor added successfully', 'data' => $section]); 
     }
 
@@ -91,14 +82,14 @@ class FloorSectionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         $user = Auth::user();
+
         $section = FloorSection::findOrFail($id);
         $section->floor = $request->floor;
         $section->sections_count = $request->sections_count;
         $section->save();
+        
         return response()->json(['success' => true, 'message' => 'Section updated successfully', 'data' => $section]);
-
     }
 
     /**
