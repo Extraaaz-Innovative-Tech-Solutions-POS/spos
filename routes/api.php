@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\ItemsController;
@@ -76,17 +78,23 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::post("dashboard-cards",[DashboardController::class, 'dashboardCards']);
 
-    Route::post("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
+    Route::get("cash-payment",[DashboardController::class, 'cashPaymentAmount']);
 
-    Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
-
+    Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    Route::get("day-summary-report",[DaySummaryReport::class, 'index']);
     route::apiResource('section', SectionController::class);
 
     route::apiResource('floorsection',FloorSectionController::class);
 
+    Route::get("cancel-items",[DaySummaryReport::class, 'cancelItemsReport']);
     
-    
+    route::apiResource("cashier-hallwise",CashierHallWiseController::class);
 
+
+    Route::get("cashier-report",[DaySummaryReport::class, 'cashierReport']);
+    
+    Route::get("cancel-order",[DaySummaryReport::class, 'cancelOrderReport']);
 
     Route::get('getActiveTables',[OrderController::class, 'getActiveTables']);
 });
