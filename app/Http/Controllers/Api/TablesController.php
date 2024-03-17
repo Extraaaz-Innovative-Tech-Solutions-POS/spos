@@ -16,7 +16,12 @@ class TablesController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+
         $table = Tables::where('restaurant_id',$user->restaurant_id)->get();
+        if(!$table)
+        {
+            return response()->json(["success"=> false, "message"=>"Table Data doesn't exists for this restaurant."]);
+        }
         return response()->json(["success" => true, "data" => $table]);
     }
 
@@ -80,6 +85,23 @@ class TablesController extends Controller
         $table->save();
 
         return response()->json(["success" => true, "message" => "Tables Count Added/Updated Successfully"]);
+    }
+
+    public function updateSection(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'floor_id' => '',
+            'floor_number' => 'required',
+            'section_id' => 'required',
+        ]);
+
+        $section = Tables::where(['restaurant_id' => $user->restaurant, 'floor' => $request->floor_number, "section_id", $request->section_id])->first();
+        $section->section_id = $request->section_id;
+        $section->save();
+
+        return response()->json(["success" => true, "message" => "Section Deleted Successfully"]);
     }
 
     public function deleteSection(Request $request)
