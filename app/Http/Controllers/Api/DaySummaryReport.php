@@ -97,6 +97,22 @@ class DaySummaryReport extends Controller
         ]);
       
     }
+    public function cancelItemsReport(Request $request)
+    {
+        $user = Auth::user();
+        $selectedFromDate = $request->fromdate;
+        $selectedToDate = $request->todate;
+
+        $orders = KOT::where('restaurant_id', $user->restaurant_id)
+        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+        ->where('is_cancelled', 1)
+        ->get();
+
+        return response()->json([
+            "success" => true, "orders" => $orders
+        ]);
+      
+    }
 
     /**
      * Display the specified resource.

@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
     Route::get("day-summary-report",[DaySummaryReport::class, 'index']);
+    Route::get("cancel-items",[DaySummaryReport::class, 'cancelItemsReport']);
     
     route::apiResource("cashier-hallwise",CashierHallWiseController::class);
 
