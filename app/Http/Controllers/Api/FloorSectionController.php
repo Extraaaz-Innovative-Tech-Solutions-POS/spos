@@ -69,8 +69,11 @@ class FloorSectionController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = Auth::user();
 
+        $floorSection = FloorSection::where(['floor' => $id, "restaurant_id"=>$user->restaurant_id])->first();
+        
+        return response()->json(["success"=>true, "floor_section"=>$floorSection]);
     }
 
     /**
@@ -84,8 +87,8 @@ class FloorSectionController extends Controller
     {
         $user = Auth::user();
 
-        $section = FloorSection::findOrFail($id);
-        $section->floor = $request->floor;
+        $section = FloorSection::where("restaurant_id",$user->restaurant_id)->where("id",$id)->first();
+        // $section->floor = $request->floor;
         $section->sections_count = $request->sections_count;
         $section->save();
         
@@ -100,9 +103,8 @@ class FloorSectionController extends Controller
      */
     public function destroy($id)
     {
-        //
         $user = Auth::user();
-        $section = FloorSection::findOrFail($id);
+        $section = FloorSection::where(["restaurant_id"=> $user->restaurant_id, "floor" => $id])->first();
         $section->delete();
         return response()->json(['success' => true, 'message' => 'Section deleted successfully']);
     }

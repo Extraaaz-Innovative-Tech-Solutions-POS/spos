@@ -18,7 +18,6 @@ class FloorController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-
         $floor = Floor::where('restaurant_id',$user->restaurant_id)->get();
         return response()->json(["success" => true, "data" => $floor]);
     }
@@ -32,6 +31,13 @@ class FloorController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        $existing_floor = Floor::where("restaurant_id",$user->restaurant_id)->first();
+        
+        if($existing_floor)
+        {
+            return response()->json(["success"=>true,"message" => "Floor Data already exists for this Restaurant Id."]);
+        }
 
         $floor = new Floor();
         $floor->restaurant_id = $user->restaurant_id;
@@ -48,12 +54,9 @@ class FloorController extends Controller
      */
     public function show($id)
     {
-        $floor = Floor::where("restaurant_id",$id)->first;
+        $user = Auth::user();
+        $floor = Floor::findOrFail($id);
 
-        if(!$floor)
-        {
-            return response()->json(['success' => false, 'message' =>"Floors Data not found for this restaurant_id"]);
-        }
         return response ()->json(["success" => true, "message"=>"Floor data", "data" => $floor]);
     }
 
@@ -67,6 +70,13 @@ class FloorController extends Controller
     public function update(Request $request)
     {
         
+        $user = Auth::user();
+
+        $floor = Floor::where("restaurant_id",$user->restaurant_id)->first();
+        $floor->floor = $request->floor;
+        $floor->save();
+
+        return response()->json(["success" => true, "message" => "Floor data Updated Successfully", "data" => $floor]);
     }
 
     /**
@@ -77,11 +87,10 @@ class FloorController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $floor = floor::findOrFail($id);
-        $name = $floor->floor_name;
+        $floor = Floor::findOrFail($id);
+        // $name = $floor->floor;
         $floor->delete();
 
-        return response()->json(["success" => true, "message" => $name . ' floor is Deleted Successfully']);
+        return response()->json(["success" => true, "message" => 'Floor is Deleted Successfully']);
     }
 }

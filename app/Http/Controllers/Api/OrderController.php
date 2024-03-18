@@ -9,6 +9,7 @@ use App\Models\KOT;
 use App\Models\KotItem;
 use App\Models\Order;
 use App\Models\OrderPayment;
+use App\Models\Section;
 use App\Models\TableActive;
 use App\Models\User;
 use Carbon\Carbon;
@@ -248,7 +249,7 @@ class OrderController extends Controller
             $kot->total = $grand_total;
             $kot->save();
 
-            // $section_name = Section::where('id', $request->section_id)->first()->name;
+            $section_name = Section::where('id', $request->section_id)->first()->name;
 
             if($request->orderType == "Dine")
             {
@@ -259,7 +260,7 @@ class OrderController extends Controller
                 $tableActive->divided_by = $request->table_divided_by ?? null;
                 $tableActive->split_table_number = $request->sub_table ?? null;
                 $tableActive->section_id = $request->section_id;
-                $tableActive->section_name = $request->section_name ?? null;
+                $tableActive->section_name = $section_name ?? null;
                 $tableActive->floor_number = $request->floor;
                 $tableActive->restaurant_id = $user->restaurant_id;
                 $tableActive->cover_count = $request->cover_count ?? null;

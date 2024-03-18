@@ -10,12 +10,12 @@ class Tables extends Model
     use HasFactory;
     protected $table = 'tables';
     protected $fillable = [
-    'id',
-    'floor_id',
-    'restaurant_id',
-    'floor_number',
-    'tables',
-
+        'id',
+        'floor_id',
+        'restaurant_id',
+        'floor_number',
+        'section_id',
+        'tables',
     ];
 
 }

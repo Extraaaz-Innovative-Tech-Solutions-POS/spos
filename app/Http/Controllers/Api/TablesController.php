@@ -12,17 +12,62 @@ use Illuminate\Support\Facades\Auth;
 
 class TablesController extends Controller
 {
-
     public function index(Request $request)
     {
         $user = Auth::user();
-
         $table = Tables::where('restaurant_id',$user->restaurant_id)->get();
         if(!$table)
         {
             return response()->json(["success"=> false, "message"=>"Table Data doesn't exists for this restaurant."]);
         }
         return response()->json(["success" => true, "data" => $table]);
+    }
+
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+
+        $Tables = new Tables();
+        $Tables->restaurant_id  = $user->restaurant_id;
+        $Tables->floor_id = $request->floor_id;
+        $Tables->section_id = $request->section_id;
+        $Tables->floor_number = $request->floor_number;
+        $Tables->tables = $request->tables;
+        $Tables->save();
+
+        return response()->json(['success' => true, 'message' => 'Tables added successfully', 'data' => $Tables]);
+    }
+
+    public function show($id)
+    {
+        $user = Auth::user();
+        $Tables = Tables::findOrFail($id);
+        return response()->json(["success" => true, "data" => $Tables]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $Tables = Tables::findOrFail($id);
+        $Tables->restaurant_id  = $user->restaurant_id;
+        $Tables->floor_id = $request->floor_id;
+        $Tables->section_id = $request->section_id;
+        $Tables->floor_number = $request->floor_number;
+        $Tables->tables = $request->tables;
+
+        $Tables->save();
+
+        return response()->json(['success' => true, 'message' => 'Tables updated successfully', 'data' => $Tables]);
+    }
+
+    public function destroy($id)
+    {
+        $user = Auth::user();
+        $Tables = Tables::findOrFail($id);
+        $Tables->delete();
+
+        return response()->json(['success' => true, 'message' => 'Tables deleted successfully']);
     }
 
     public function setSection(Request $request)
@@ -36,17 +81,18 @@ class TablesController extends Controller
         ]);
 
         $main_sections_count = FloorSection::where(['restaurant_id' => $user->restaurant_id, 'floor' => $request->floor_number])->first()->sections_count;
-        $sections_count =  Tables::where(['restaurant_id' => $user->restaurant, 'floor' => $request->floor_number])->get();
+        $sections = Tables::where(['restaurant_id' => $user->restaurant_id, 'floor_number' => $request->floor_number])->get();//->count();
+        $sections_count = count($sections);
 
-        if($sections_count <= $main_sections_count)
+        if($sections_count < $main_sections_count)
         {
             $table = new Tables();
             $table->floor_id  = $request->floor_id ?? null;
             $table->restaurant_id = $user->restaurant_id;
             $table->floor_number  = $request->floor_number;
-            $table->tables = $request->section_id;
+            $table->section_id = $request->section_id;
             $table->save();
-            return response()->json(['success' => true, 'message' => 'table added successfully', 'data' => $table]);
+            return response()->json(['success' => true, 'message' => 'Section_Id added successfully to Table', 'data' => $table]);
         }
         else{
             return response()->json(['success'=> false, 'message'=>'Cannot add sections more than the alloted no of sections. Please delete sections or increase the number of sections.']);
@@ -80,7 +126,13 @@ class TablesController extends Controller
             'tables' =>'required',
         ]);
 
-        $table = Tables::where(['restaurant_id'=>$user->restaurant_id, 'floor_number' => $request->floor, 'section_id' => $request->section_id])->get();
+        $table = Tables::where(['restaurant_id'=>$user->restaurant_id, 'floor_number' => $request->floor_number, 'section_id' => $request->section_id])->first();
+        
+        if(!$table)
+        {
+            return response()->json(["success"=>false, "message"=>"Table Data does not exists for this section_id and floor_number. "]);
+        }
+
         $table->tables = $request->tables;
         $table->save();
 
@@ -94,14 +146,20 @@ class TablesController extends Controller
         $request->validate([
             'floor_id' => '',
             'floor_number' => 'required',
-            'section_id' => 'required',
+            'old_section_id' => 'required',
+            'new_section_id' => 'required',
         ]);
 
-        $section = Tables::where(['restaurant_id' => $user->restaurant, 'floor' => $request->floor_number, "section_id", $request->section_id])->first();
-        $section->section_id = $request->section_id;
-        $section->save();
+        $table = Tables::where(['restaurant_id' => $user->restaurant_id, 'floor_number' => $request->floor_number, "section_id"=> $request->old_section_id])->first();
 
-        return response()->json(["success" => true, "message" => "Section Deleted Successfully"]);
+        if(!$table){
+            return response()->json(["success"=>false,"message"=>"Table data doesn't exists for this floor_number and section_id"]);
+        }
+        
+        $table->section_id = $request->new_section_id;
+        $table->save();
+
+        return response()->json(["success" => true, "message" => "SectionId Updated Successfully for Given Floor"]);
     }
 
     public function deleteSection(Request $request)
@@ -114,13 +172,18 @@ class TablesController extends Controller
             'section_id' => 'required',
         ]);
 
-        $section = Tables::where(['restaurant_id' => $user->restaurant, 'floor' => $request->floor_number, "section_id", $request->section_id])->first();
-        $section->delete();
+        $table = Tables::where(['restaurant_id' => $user->restaurant_id, 'floor_number' => $request->floor_number, "section_id"=> $request->section_id])->first();
+
+        if(!$table) {
+            return response()->json(["success" => false, "message" => "Table data doesn't exists for the given floor_number and section_id"]);
+        }
+        
+        $table->delete();
            
-        $floorSection = FloorSection::where(['restaurant_id' => $user->restaurant_id, 'floor' => $request->floor_number])->first(); 
-        $sections_count = $floorSection->sections_count;
-        $sections_count = $sections_count - 1;
-        $floorSection->save(); 
+        // $floorSection = FloorSection::where(['restaurant_id' => $user->restaurant_id, 'floor' => $request->floor_number])->first(); 
+        // $sections_count = $floorSection->sections_count;
+        // $sections_count = $sections_count - 1;
+        // $floorSection->save(); 
 
         return response()->json(["success" => true, "message" => "Section Deleted Successfully"]);
     }
