@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\DashboardController;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,11 +38,13 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::apiResource('category',CategoryController::class);
     
-    Route::get('table',[TablesController::class,'get']);
+    Route::apiResource('table',TablesController::class);
     
     Route::post('setSection',[TablesController::class,'setSection']);
     
     Route::post('setTables',[TablesController::class,'setTables']);
+
+    Route::post('updateSection',[TablesController::class,'updateSection']);
 
     Route::post('deleteSection',[TablesController::class,'deleteSection']);
     

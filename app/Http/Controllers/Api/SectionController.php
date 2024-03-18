@@ -17,17 +17,9 @@ class SectionController extends Controller
      */
     public function index(Request $request)
     {
-        //
         $user = Auth::user();
-
-        $restaurant_id  = $request->input('restaurant_id');
-
-        $data1 = User::where('id', $user->id)->get()->toArray();
-
         $section = Section::where('restaurant_id', $user->restaurant_id)->get();
-
         return response()->json(["success" => true, "data" => $section]);
-    
     }
 
     /**
@@ -38,18 +30,15 @@ class SectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
          $user = Auth::user();
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-        $restaurant_id = $user->restaurant_id;
-        $section = new section();
-        $section->user_id   = $user->id;
+        $section = new Section();
+        $section->user_id = $user->id;
         $section->name = $request->name;
-        $section->restaurant_id  = $request->retaurant_id;
-        // $section->floor_number = $request->floor_number;
+        $section->restaurant_id  = $user->restaurant_id;
         $section->save();
-        return response()->json(['success' => true, 'message' => 'section added successfully', 'data' => $section]);
 
+        return response()->json(['success' => true, 'message' => 'section added successfully', 'data' => $section]);
     }
 
     /**
@@ -60,7 +49,9 @@ class SectionController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = Auth::user();
+        $section = Section::findOrFail($id);
+        return response()->json(["success" => true, "data" => $section]);
     }
 
     /**
@@ -72,8 +63,8 @@ class SectionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         $user = Auth::user();
+
         $section = Section::findOrFail($id);
         $section->name = $request->name;
         $section->save();
@@ -89,7 +80,6 @@ class SectionController extends Controller
      */
     public function destroy($id)
     {
-        //
         $user = Auth::user();
         $section = Section::findOrFail($id);
         $section->delete();
