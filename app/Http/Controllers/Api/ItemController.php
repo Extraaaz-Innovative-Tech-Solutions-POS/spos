@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemResource;
 use App\Models\Category;
-use App\Models\Items;
+use App\Models\Item;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ItemsController extends Controller
+class ItemController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,12 +26,12 @@ class ItemsController extends Controller
         $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         
          
-        $items = Items::where('restaurant_id', $user->restaurant_id)
+        $Item = Item::where('restaurant_id', $user->restaurant_id)
                     ->get();
 
-        $items = ItemResource::collection($items);
+        $Item = ItemResource::collection($Item);
         
-        return response()->json(["success" => true, "data" => $items]);
+        return response()->json(["success" => true, "data" => $Item]);
 
 
     }
@@ -48,21 +48,21 @@ class ItemsController extends Controller
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $restaurant_id = $user->restaurant_id;
 
-        $items = new Items();
-        // $items->item_id  = $request->item_id;
-        $items->item_name = $request->item_name;
-        $items->restaurant_id = $restaurant_id;
-        $items->price  = $request->price ? $request->price : null;
-        $items->discount = $request->discount ? $request->discount : null;
-        $items->category_id  = $request->category_id ? $request->category_id : null;
-        $items->food_type = $request->food_type ? $request->food_type : null;
-        $items->inventory_status = $request->inventory_status ? $request->inventory_status : null;
-        $items->associated_item = $request->associated_item ? $request->associated_item : null;
-        $items->varients = $request->varients ? $request->varients : null;
-        $items->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
-        $items->save();
+        $Item = new Item();
+        // $Item->item_id  = $request->item_id;
+        $Item->item_name = $request->item_name;
+        $Item->restaurant_id = $restaurant_id;
+        $Item->price  = $request->price ? $request->price : null;
+        $Item->discount = $request->discount ? $request->discount : null;
+        $Item->category_id  = $request->category_id ? $request->category_id : null;
+        $Item->food_type = $request->food_type ? $request->food_type : null;
+        $Item->inventory_status = $request->inventory_status ? $request->inventory_status : null;
+        $Item->associated_item = $request->associated_item ? $request->associated_item : null;
+        $Item->varients = $request->varients ? $request->varients : null;
+        $Item->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
+        $Item->save();
 
-        return response()->json(['success' => true, 'message' => 'Item saved successfully', 'data' => $items]);
+        return response()->json(['success' => true, 'message' => 'Item saved successfully', 'data' => $Item]);
     }
 
     /**
@@ -101,19 +101,19 @@ class ItemsController extends Controller
 
         $user = Auth::user();
 
-        $items = Items::findOrFail($id);
-        $items->item_name = $request->item_name;
-        $items->restaurant_id = $user->restaurant_id;
-        $items->price  = $request->price ? $request->price : null;
-        $items->discount = $request->discount ? $request->discount : null;
-        $items->category_id  = $request->category_id ? $request->category_id : null;
-        $items->food_type = $request->food_type ? $request->food_type : null;
-        $items->inventory_status = $request->inventory_status ? $request->inventory_status : null;
-        $items->associated_item = $request->associated_item ? $request->associated_item : null;
-        $items->varients = $request->varients ? $request->varients : null;
-        $items->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
-        $items->save();
-        return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$items]); //, 'data' => $category]);
+        $Item = Item::findOrFail($id);
+        $Item->item_name = $request->item_name;
+        $Item->restaurant_id = $user->restaurant_id;
+        $Item->price  = $request->price ? $request->price : null;
+        $Item->discount = $request->discount ? $request->discount : null;
+        $Item->category_id  = $request->category_id ? $request->category_id : null;
+        $Item->food_type = $request->food_type ? $request->food_type : null;
+        $Item->inventory_status = $request->inventory_status ? $request->inventory_status : null;
+        $Item->associated_item = $request->associated_item ? $request->associated_item : null;
+        $Item->varients = $request->varients ? $request->varients : null;
+        $Item->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
+        $Item->save();
+        return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$Item]); //, 'data' => $category]);
     }
 
     /**
@@ -124,11 +124,15 @@ class ItemsController extends Controller
      */
     public function destroy($id)
     {
-        $item = Items::findorFail($id);
+        $item = Item::findorFail($id);
         $name = $item->item_name;
         $item->delete();
         return response()->json(["success" => true, "message" => $name . ' Item is Deleted Successfully']);
     }
 
-  
+    public function checkModifiers($item_id)
+    {
+
+
+    }
 }

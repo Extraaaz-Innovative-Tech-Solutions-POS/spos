@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TableActiveResource;
+use App\Http\Resources\TableResource;
 use App\Models\Floor;
 use App\Models\FloorSection;
 use App\Models\Tables;
@@ -110,7 +112,18 @@ class TablesController extends Controller
         
         $sections = FloorSection::where('restaurant_id', $restaurant_id)->get()->map->only(['floor','sections_count'])->values();
         
-        $tables = Tables::where('restaurant_id', $restaurant_id)->get()->map->only(['floor_number','section_id','tables'])->values();
+        $tables = Tables::where('restaurant_id', $restaurant_id)->get();//->map->only(['floor_number','section_id','tables'])->values();
+
+        $tables = TableResource::collection($tables); 
+
+        // $activeTables = TableActive::whereIn('id', function ($query) use ($user) {
+        //     $query->select(DB::raw('MIN(id)'))
+        //     ->from('table_actives')
+        //     ->where('restaurant_id', $user->restaurant_id)
+        //         ->groupBy('table_number');
+        // })->get();
+
+        // $activeTables = TableActiveResource::collection($activeTables);
         
         return response()->json(['success' => true, 'message' => 'Floors and Tables', 'floors' => $floors, 'sections' => $sections, 'tables' => $tables]);
     }

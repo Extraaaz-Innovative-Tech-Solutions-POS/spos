@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\TableActive;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryResource extends JsonResource
+class TableActiveResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -12,16 +13,16 @@ class CategoryResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
+    // public static $wrap = 'table_number';
+
     public function toArray($request)
     {
         // return parent::toArray($request);
-        return 
-        [
-            'category_id '=> $this->category_id,
-            'category_name'=> $this->category_name,
-            'restaurant_id '=> $this->restaurant_id,
-            'description'=> $this->description,
-            'items' => ItemResource::collection($this->items),
+        return [
+            'table_number'=>$this->table_number,
+            'table_data'=>TableActive::where('restaurant_id',$this->restaurant_id)->where("table_number",$this->table_number)
+                                ->get()->groupBy('table_number')->first(),
         ];
     }
 }
