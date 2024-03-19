@@ -21,22 +21,11 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        //  return $request->all();
-        //
         $user = Auth::user();
         
-        $resturants_id  = $request->input('resturant_id');
-  
-        
-        $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
-        
         $categories = Category::where('restaurant_id',$user->restaurant_id)->get();
-       
-
         $categories = CategoryResource::collection($categories);
-        // $categories = Category::with('items')->get();
 
-        
         return response()->json(["success" => true, "data" => $categories]);
     }
     
@@ -56,7 +45,7 @@ class CategoryController extends Controller
         // $category->category_id  = $request->category_id ;
         $category->category_name = $request->category_name;
         $category->restaurant_id  = $request->restaurant_id ;
-        $category->descirption = $request->descirption;
+        $category->description = $request->description;
         $category->restaurant_id = $restaurant_id;
         $category->save();
         return response()->json(['success' => true, 'message' => 'Category added successfully', 'data' => $category]);
@@ -85,27 +74,20 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         $validatedData = $request->validate([
-            'category_id' => 'required|string|max:255',
-            'category_name' => 'required|string|max:255',
-            'descirption' => 'required|string|max:255',
-            
-
-
-
+            'category_id' => 'required',
+            'category_name' => 'required',
+            'description' => 'required',
         ]);
+
         $user = Auth::user();
         $category = Category::find($id);
         $category->category_id  = $request->category_id ;
         $category->category_name = $request->category_name;
-        $category->restaurant_id  = $request->restaurant_id ;
-        $category->descirption = $request->descirption;
-        // $category->restaurant_id = $restaurant_id;
+        $category->description = $request->description;
         $category->save();
-        // $category->update($validatedData);
+        
         return response()->json(['success' => true, 'message' => 'Category updated successfully','data'=>$category]);
-
     }
 
     /**
@@ -116,12 +98,9 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $category = Category::findorFail($id);
+        $category = Category::findOrFail($id);
         $name = $category->category_name;
         $category->delete();
         return response()->json(["success" => true, "message" => $name . ' category is Deleted Successfully']);
     }
-   
-    
 }

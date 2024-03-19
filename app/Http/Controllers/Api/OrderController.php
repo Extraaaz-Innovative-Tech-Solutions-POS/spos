@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\KotResource;
-use App\Models\Items;
+use App\Http\Resources\TableActiveResource;
+use App\Models\Item;
 use App\Models\KOT;
 use App\Models\KotItem;
 use App\Models\Order;
@@ -129,7 +130,7 @@ class OrderController extends Controller
         
         if ($kot) {
             $kot = new KotResource($kot);
-            // $order = $kot ? $kot->kotItems->where(["table_id"=> $table_id,'status'=>'PENDING']) : null;
+            // $order = $kot ? $kot->kotItem->where(["table_id"=> $table_id,'status'=>'PENDING']) : null;
             return response()->json(["success" => true, "message" => "Orders List", "kot" => $kot]); //,"order" => $order]);
         } else {
             return response()->json(["success" => false, "message" => "No Orders Found"]);
@@ -166,7 +167,7 @@ class OrderController extends Controller
         $user = Auth::user();
         $request->validate([
             'table_id' => 'required',
-            'items' => 'required',
+            'Item' => 'required',
             "orderType" => "required",
             "sub_table"=> "",
             "table"=> "",
@@ -224,7 +225,7 @@ class OrderController extends Controller
 
             $grand_total = 0;
 
-            foreach ($request->items as $orderItem) {
+            foreach ($request->Item as $orderItem) {
 
                 // return $orderItem;
                 $kotItem = new KotItem();
@@ -278,7 +279,7 @@ class OrderController extends Controller
         $request->validate([
             'table_id' => 'required',
             'item_id' => 'required',
-            'items' => 'required',
+            'Item' => 'required',
             "orderType" => "required",
             // "instruction" =>""   
         ]);
@@ -316,7 +317,7 @@ class OrderController extends Controller
 
         $total = $total - $kotItem->product_total;
         
-        $orderItem = $request->items[0];
+        $orderItem = $request->Item[0];
 
         $kotItem->kot_id = $kot->id;
         $kotItem->table_id = $request->table_id;
@@ -346,7 +347,7 @@ class OrderController extends Controller
         $user = Auth::user();
         $request->validate([
             'table_id' => 'required',
-            'items' => 'required',
+            'Item' => 'required',
             "orderType" => "required",
             "item_id" => '',
         ]);
@@ -370,7 +371,7 @@ class OrderController extends Controller
 
         $total = $kot->total;
 
-        $orderItem = $request->items[0];
+        $orderItem = $request->Item[0];
 
         $kotItem = KotItem::where(['table_id' => $request->table_id, 'item_id' => $request->item_id, 'restaurant_id' => $user->restaurant_id])->first();
         
@@ -388,7 +389,7 @@ class OrderController extends Controller
             $kot->total = $total;
             $kot->save();
 
-            return response()->json(['success'=> true, 'message' => 'Items upadeted to table_id : '. $request->table_id .' successfully'], 200);
+            return response()->json(['success'=> true, 'message' => 'Item upadeted to table_id : '. $request->table_id .' successfully'], 200);
         }
         else
         {
@@ -408,7 +409,7 @@ class OrderController extends Controller
     
             $kot->total = $total;
             $kot->save();
-            return response()->json(['success'=> true, 'message' => 'Items added to table_id : '. $request->table_id .' successfully'], 200);
+            return response()->json(['success'=> true, 'message' => 'Item added to table_id : '. $request->table_id .' successfully'], 200);
         }
     }
 
@@ -427,7 +428,7 @@ class OrderController extends Controller
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
 
-        $item = Items::where('item_id',$item_id)->first();
+        $item = Item::where('item_id',$item_id)->first();
                
         $itemName = $item->item_name;
         // $itemPrice = $item->price;
@@ -481,8 +482,8 @@ class OrderController extends Controller
                 $kot->is_cancelled = 1;
                 $kot->save();
 
-                $kotItems = KotItem::where('table_id',$table_id)->get();
-                foreach($kotItems as $kotItem)
+                $kotItem = KotItem::where('table_id',$table_id)->get();
+                foreach($kotItem as $kotItem)
                 {
                     $kotItem->is_cancelled = 1;
                     $kotItem->cancel_reason = $cancel_reason;
@@ -541,13 +542,13 @@ class OrderController extends Controller
 
             $customer_id = $kot->customer_id;
 
-            $kotitems = KotItem::where('table_id',$table_id)->get();
+            $kotItem = KotItem::where('table_id',$table_id)->get();
 
-            $products = $this->mergedData($kotitems);
+            $products = $this->mergedData($kotItem);
 
             $products = json_encode($products);
 
-            foreach($kotitems as $kotitem)
+            foreach($kotItem as $kotitem)
             {
                 if($kotitem->is_cancelled == 0)
                 {
@@ -654,7 +655,20 @@ class OrderController extends Controller
     public function getActiveTables(Request $request)
     {
         $user = Auth::user();
-        $activeTables = TableActive::where('restaurant_id', $user->restaurant_id)->get();
+
+        // $activeTables = TableActive::where('restaurant_id', $user->restaurant_id)->groupBy('table_number')->get();
+
+        $activeTables = TableActive::whereIn('id', function ($query) use ($user) {
+            $query->select(DB::raw('MIN(id)'))
+            ->from('table_actives')
+            ->where('restaurant_id', $user->restaurant_id)
+            ->groupBy('table_number');
+        })->get();
+
+        $activeTables = TableActiveResource::collection($activeTables);
+
+        // $activeTables = $activeTables->map->only("table_number");
+
         return response()->json(["success" => true,'data' => $activeTables]);
     }
 }

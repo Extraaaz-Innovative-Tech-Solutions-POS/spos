@@ -16,20 +16,15 @@ class Category extends Model
         'category_id ',
         'category_name',
         'restaurant_id ',
-        'descirption'
-
-
-
+        'description'
     ];
     public function locations()
-{
-    return $this->belongsToMany(Location::class)->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Location::class)->withTimestamps();
+    }
 
-public function items()
-{
-    return $this->hasMany(Items::class,'category_id');
-}
-
-
+    public function items()
+    {
+        return $this->hasMany(Items::class, 'category_id');
+    }
 }

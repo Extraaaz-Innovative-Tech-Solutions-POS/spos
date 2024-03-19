@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
-use App\Http\Controllers\Api\ItemsController;
+use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\TablesController;
@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::post('deleteSection',[TablesController::class,'deleteSection']);
     
-    Route::apiResource('items',ItemsController::class);
+    Route::apiResource('items',ItemController::class);
     Route::apiResource('floor',FloorController::class);
     Route::apiResource('order',OrderController::class);
     Route::apiResource('customer',CustomerController::class);
