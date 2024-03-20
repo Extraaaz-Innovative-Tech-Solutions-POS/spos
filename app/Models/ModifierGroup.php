@@ -9,6 +9,8 @@ class ModifierGroup extends Model
 {
     use HasFactory;
 
+    protected $table = 'modifiergroups';
+
     protected $fillable = [
         'id',
         'user_id',
@@ -20,4 +22,14 @@ class ModifierGroup extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function modifiers()
+    {
+        return $this->belongsToMany(Modifier::class,'modifiergroup_modifier','modifiergroup_id','modifier_id');
+    }
+
+    public function items()
+    {
+        return $this->belongsToMany(Item::class, 'item_modifiergroup','modifiergroup_id','item_id');
+    }
 }

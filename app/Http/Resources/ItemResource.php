@@ -14,10 +14,8 @@ class ItemResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return parent::toArray($request);
-        return 
-        [
-            'id' => $this->item_id,
+        return  [
+            'id' => $this->id,
             'name' => $this->item_name,
             'price' => $this->price,
             'discount' => $this->discount,
@@ -25,8 +23,9 @@ class ItemResource extends JsonResource
             'restaurant_id ' => $this->restaurant_id,
             'food_type' => $this->food_type,
             'associated_item' => $this->associated_item,
-            'varients' => $this->varients,
+            // 'varients' => $this->varients,
             'tax_percentage' => $this->tax_percentage,
+            'modifierGroups'=> ModifierGroupResource::collection($this->modifierGroups)
         ];
     }
 }

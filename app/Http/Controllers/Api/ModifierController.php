@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Modifier;
+use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -93,5 +94,48 @@ class ModifierController extends Controller
         $modifier->delete();
 
         return response()->json(["success" => true, "message" => $modifierName . " deleted successfully",]);
+    }
+
+    public function showModifierGroups(Request $request, $modifier_id)
+    {
+        $user = Auth::user();
+
+        $modifier = Modifier::findOrFail($modifier_id);
+        $modifierGroups = $modifier->modifierGroups;
+
+        if (!$modifierGroups) {
+            return response()->json(["success" => false, "message" => "There are no ModifierGroups for this Modifier"]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Modifier Groups of Modifier ' . $modifier->name, 'modifierGroups' => $modifierGroups]);
+    }
+
+    public function selectModifierGroups(Request $request, $modifier_id)
+    {
+        $user = Auth::user();
+
+        $ids = [];
+
+        $modifierGroupsAll = ModifierGroup::where('restaurant_id', $user->restaurant_id)->get();
+        $modifier = Modifier::findOrFail($modifier_id);
+
+        foreach ($modifier->modifierGroups as $modifierGroup) {
+            array_push($ids, $modifierGroup->id);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Ids of ModifierGroups of associated with this Modifier', 'ids' => $ids, 'modifierGroupsAll' => $modifierGroupsAll]);
+    }
+
+    public function saveModifierGroups(Request $request, $modifier_id)
+    {
+        $user = Auth::user();
+
+        $modifier = Modifier::findOrFail($modifier_id);
+
+        $selectedIds = $request->ids;
+
+        $modifier->modifierGroups()->sync($selectedIds);
+
+        return response()->json(["success" => true, 'message' => 'ModifierGroups and Modifier synced Successfully']);
     }
 }

@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     use HasFactory;
-    protected $table = 'items';
-    protected $primaryKey = 'item_id'; 
+    // protected $table = 'items';
+    // protected $primaryKey = 'item_id'; 
 
     protected $fillable = [
-        'item_id ',
+        'id',
         'item_name',
         'price',
         'discount',
@@ -22,7 +22,6 @@ class Item extends Model
         'associated_item',
         'varients',
         'tax_percentage'
-
     ];
 
 
@@ -34,6 +33,11 @@ class Item extends Model
     public function kotItems()
     {
         return $this->hasMany(KotItem::class,'item_id','item_id');
+    }
+
+    public function modifierGroups()
+    {
+        return $this->belongsToMany(ModifierGroup::class,'item_modifiergroup','item_id','modifiergroup_id');
     }
 
 

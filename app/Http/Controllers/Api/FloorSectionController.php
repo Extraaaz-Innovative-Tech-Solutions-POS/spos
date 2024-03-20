@@ -23,7 +23,7 @@ class FloorSectionController extends Controller
 
         $floorSection = FloorSection::where('restaurant_id', $user->restaurant_id)->get();
 
-        return response()->json(["success" => true, "data" => $floorSection]);
+        return response()->json(['success' => true, 'data' => $floorSection]);
     }
 
     /**
@@ -48,17 +48,21 @@ class FloorSectionController extends Controller
             ->first();
 
         if ($existingSection) {
-            return response()->json(['success' => false, 'message' => 'An entry of sections for this table already exists for this restaurant.']);
+            $existingSection->floor = $request->floor;
+            $existingSection->sections_count = $request->sections_count;
+            $existingSection->save();
+
+            return response()->json(['success' => true, 'message' => 'Section Updated Successfully', 'data' => $existingSection]);
+        } else {
+            $section = new FloorSection();
+            $section->user_id = $user->id;
+            $section->floor = $request->floor;
+            $section->sections_count = $request->sections_count;
+            $section->restaurant_id = $restaurant_id;
+            $section->save();
+
+            return response()->json(['success' => true, 'message' => 'Section floor added successfully', 'data' => $section]);
         }
-
-        $section = new FloorSection();
-        $section->user_id = $user->id;
-        $section->floor = $request->floor;
-        $section->sections_count = $request->sections_count;
-        $section->restaurant_id = $restaurant_id;
-        $section->save();
-
-        return response()->json(['success' => true, 'message' => 'Section floor added successfully', 'data' => $section]); 
     }
 
     /**
@@ -71,9 +75,9 @@ class FloorSectionController extends Controller
     {
         $user = Auth::user();
 
-        $floorSection = FloorSection::where(['floor' => $id, "restaurant_id"=>$user->restaurant_id])->first();
-        
-        return response()->json(["success"=>true, "floor_section"=>$floorSection]);
+        $floorSection = FloorSection::where(['floor' => $id, 'restaurant_id' => $user->restaurant_id])->first();
+
+        return response()->json(['success' => true, 'data' => $floorSection]);
     }
 
     /**
@@ -87,11 +91,13 @@ class FloorSectionController extends Controller
     {
         $user = Auth::user();
 
-        $section = FloorSection::where("restaurant_id",$user->restaurant_id)->where("id",$id)->first();
+        $section = FloorSection::where('restaurant_id', $user->restaurant_id)
+            ->where('id', $id)
+            ->first();
         // $section->floor = $request->floor;
         $section->sections_count = $request->sections_count;
         $section->save();
-        
+
         return response()->json(['success' => true, 'message' => 'Section updated successfully', 'data' => $section]);
     }
 
@@ -104,7 +110,7 @@ class FloorSectionController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        $section = FloorSection::where(["restaurant_id"=> $user->restaurant_id, "floor" => $id])->first();
+        $section = FloorSection::where(['restaurant_id' => $user->restaurant_id, 'floor' => $id])->first();
         $section->delete();
         return response()->json(['success' => true, 'message' => 'Section deleted successfully']);
     }

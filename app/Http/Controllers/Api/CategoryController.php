@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ItemResource;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\User;
@@ -102,5 +103,15 @@ class CategoryController extends Controller
         $name = $category->category_name;
         $category->delete();
         return response()->json(["success" => true, "message" => $name . ' category is Deleted Successfully']);
+    }
+
+    public function getItems($categoryId)
+    {
+        $category = Category::findOrFail($categoryId);
+
+        $items = $category->items;
+        $items = ItemResource::collection($items);
+
+        return response()->json(["success" => true,"message"=>"Items according to Category Id" ,"data" => $items]);
     }
 }

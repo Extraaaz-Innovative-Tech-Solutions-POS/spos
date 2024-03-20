@@ -22,4 +22,9 @@ class Modifier extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function modifierGroups()
+    {
+        return $this->belongsToMany(ModifierGroup::class,'modifiergroup_modifier','modifier_id','modifiergroup_id');
+    }
 }

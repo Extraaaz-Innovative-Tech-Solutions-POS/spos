@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Item;
+use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +20,7 @@ class ModifierGroupController extends Controller
     {
         $user = Auth::user();
 
-        $modifierGroup = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest();
+        $modifierGroup = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest()->get();
         return response()->json(['success' => true, 'data' => $modifierGroup]);
     }
 
@@ -90,5 +92,87 @@ class ModifierGroupController extends Controller
         $modifierGroup->delete();
 
         return response()->json(["success" => true, "message" => $modifierGroupName ." deleted successfully", ]);
+    }
+
+    public function showModifiers(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+        $modifiers = $modifierGroup->modifiers;
+
+        if(!$modifiers){
+            return response()->json(["success" => false, "message" =>"There are no modifiers for this Modifier group"]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Modifiers of this modifierGroup ' . $modifierGroup->name, 'data' => $modifiers]);
+    }
+
+    public function selectModifiers(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $ids = [];
+
+        $modifiersAll = Modifier::where('restaurant_id', $user->restaurant_id)->get();
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+
+        foreach ($modifierGroup->modifiers as $modifier) {
+            array_push($ids, $modifier->id);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Ids of Modifiers of associated with this ModifierGroup', 'ids' => $ids, 'modifiersAll' => $modifiersAll]);
+    }
+
+    public function saveModifiers(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+
+        $selectedIds = $request->ids;
+
+        $modifierGroup->modifiers()->sync($selectedIds);
+
+        return response()->json(["success" => true, 'message' => 'ModifierGroups and Modifiers synced Successfully']);
+    }
+
+    public function showItems(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+        $items = $modifierGroup->items;
+
+        return response()->json(['success' => true, 'message' => 'Items of ModifierGroups ' . $modifierGroup->name, 'data' => $items]);
+    }
+
+    public function selectItems(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $ids = [];
+
+        $itemsAll = Item::where('restaurant_id', $user->restaurant_id)->get();
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+
+        foreach ($modifierGroup->items as $item) {
+            array_push($ids, $item->id);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Ids of Items of associated with this ModifierGroup', 'ids' => $ids, 'itemsAll' => $itemsAll]);
+    }
+
+    public function saveItems(Request $request, $modifierGroup_id)
+    {
+        $user = Auth::user();
+
+        $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
+
+        $selectedIds = $request->ids;
+
+        $modifierGroup->items()->sync($selectedIds);
+
+        return response()->json(["success" => true, 'message' => 'ModifierGroups and Items synced Successfully']);
     }
 }
