@@ -384,7 +384,7 @@ class OrderController extends Controller
             $kotItem->save();
 
             $total += $orderItem['quantity'] * $orderItem['price'];
-
+    
             $kot->total = $total;
             $kot->save();
 
@@ -417,7 +417,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         // return $user->restaurant_id;
-
+        
         $request->validate([
             "table_id" => "required",
             "item_id" => "required",
@@ -541,19 +541,16 @@ class OrderController extends Controller
 
             $customer_id = $kot->customer_id;
 
-            $kotItem = KotItem::where('table_id',$table_id)->get();
+            $kotItems = KotItem::where('table_id',$table_id)->get();
 
-            $products = $this->mergedData($kotItem);
+            $products = $this->mergedData($kotItems);
 
             $products = json_encode($products);
 
-            foreach($kotItem as $kotitem)
+            foreach($kotItems as $kotItem)
             {
-                if($kotitem->is_cancelled == 0)
-                {
-                    $kotitem->status = "COMPLETED";
-                    $kotitem->save();
-                }
+                $kotItem->status = "COMPLETED";
+                $kotItem->save();
             }
 
             $order = new Order();
@@ -659,15 +656,15 @@ class OrderController extends Controller
 
         $activeTables = TableActive::whereIn('id', function ($query) use ($user) {
             $query->select(DB::raw('MIN(id)'))
-            ->from('table_actives')
-            ->where('restaurant_id', $user->restaurant_id)
-            ->groupBy('table_number');
+                ->from('table_actives')
+                ->where('restaurant_id', $user->restaurant_id)
+                ->groupBy('table_number');
         })->get();
 
         $activeTables = TableActiveResource::collection($activeTables);
 
         // $activeTables = $activeTables->map->only("table_number");
 
-        return response()->json(["success" => true,'data' => $activeTables]);
+        return response()->json(["success" => true, 'data' => $activeTables]);
     }
 }

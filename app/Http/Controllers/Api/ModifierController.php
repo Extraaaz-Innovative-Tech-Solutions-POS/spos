@@ -38,9 +38,9 @@ class ModifierController extends Controller
         $modifier->user_id = $user->id;
         $modifier->name = $request->name;
         $modifier->short_name = $request->short_name ?? null;
-        $modifier->description = $request->description;
+        $modifier->description = $request->description ?? null;
         $modifier->price = $request->price;
-        $modifier->restaurant_id = $user->restaurant_id;
+        // $modifier->restaurant_id = $user->restaurant_id;
         $modifier->save();
 
         return response()->json(["success" => true, "message" => "Data saved successfully", "modifier" => $modifier]);
@@ -71,8 +71,9 @@ class ModifierController extends Controller
         $user = Auth::user();
         $modifier = Modifier::findOrFail($id);
         $modifier->name = $request->name;
-        $modifier->description = $request->description;
-        $modifier->type = $request->type;
+        $modifier->short_name = $request->short_name ?? null;
+        $modifier->description = $request->description ?? null;
+        $modifier->price = $request->price;
 
         return response()->json(["success" => true, "message" => "Data saved successfully", "modifier" => $modifier]);
     }
