@@ -19,7 +19,6 @@ class ModifierGroupController extends Controller
         $user = Auth::user();
 
         $modifierGroup = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest();
-
         return response()->json(['success' => true, 'data' => $modifierGroup]);
     }
 
@@ -85,7 +84,7 @@ class ModifierGroupController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        
+
         $modifierGroup = ModifierGroup::findOrFail($id);
         $modifierGroupName = $modifierGroup->name;
         $modifierGroup->delete();

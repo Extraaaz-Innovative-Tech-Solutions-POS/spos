@@ -166,7 +166,7 @@ class OrderController extends Controller
         $user = Auth::user();
         $request->validate([
             'table_id' => 'required',
-            'Item' => 'required',
+            'items' => 'required',
             "orderType" => "required",
             "sub_table"=> "",
             "table"=> "",
@@ -224,7 +224,7 @@ class OrderController extends Controller
 
             $grand_total = 0;
 
-            foreach ($request->Item as $orderItem) {
+            foreach ($request->items as $orderItem) {
 
                 // return $orderItem;
                 $kotItem = new KotItem();

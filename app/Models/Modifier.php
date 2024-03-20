@@ -13,7 +13,7 @@ class Modifier extends Model
         'id',
         'user_id',
         'name',
-        // 'type',
+        'type',
         'short_name',
         'description',
         'price',
