@@ -12,9 +12,9 @@ class ModifierGroup extends Model
     protected $fillable = [
         'id',
         'user_id',
-        'modifier_group_name',
-        'modifier_group_desc',
-        'modifier_group_type',
+        'name',
+        'description',
+        'type',
         'restaurant_id',
         'created_at',
         'updated_at',

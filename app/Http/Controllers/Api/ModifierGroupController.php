@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ModifierGroupController extends Controller
 {
@@ -14,7 +16,11 @@ class ModifierGroupController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        $modifierGroup = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest();
+
+        return response()->json(['success' => true, 'data' => $modifierGroup]);
     }
 
     /**
@@ -25,7 +31,18 @@ class ModifierGroupController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = Auth::user();
+
+        $modifierGroup = new ModifierGroup();
+
+        $modifierGroup->user_id = $user->id;
+        $modifierGroup->name = $request->name;
+        $modifierGroup->description = $request->description;
+        $modifierGroup->type = $request->type;
+        $modifierGroup->restaurant_id = $user->restaurant_id;
+        $modifierGroup->save();
+
+        return response()->json(["success"=>true,"message" => "Data saved successfully", "modifierGroup"=>$modifierGroup]);
     }
 
     /**
@@ -36,7 +53,9 @@ class ModifierGroupController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = Auth::user();
+        $modifierGroup = ModifierGroup::findOrFail($id);
+        return response()->json(["success" => true, "message" => "Data saved successfully", "modifierGroup" => $modifierGroup]);
     }
 
     /**
@@ -48,7 +67,13 @@ class ModifierGroupController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = Auth::user();
+        $modifierGroup = ModifierGroup::findOrFail($id);
+        $modifierGroup->name = $request->name;
+        $modifierGroup->description = $request->description;
+        $modifierGroup->type = $request->type;
+
+        return response()->json(["success" => true, "message" => "Data saved successfully", "modifierGroup" => $modifierGroup]);       
     }
 
     /**
@@ -59,6 +84,12 @@ class ModifierGroupController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user = Auth::user();
+        
+        $modifierGroup = ModifierGroup::findOrFail($id);
+        $modifierGroupName = $modifierGroup->name;
+        $modifierGroup->delete();
+
+        return response()->json(["success" => true, "message" => $modifierGroupName ." deleted successfully", ]);
     }
 }

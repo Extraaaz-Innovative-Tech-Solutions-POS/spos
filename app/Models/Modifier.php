@@ -11,8 +11,9 @@ class Modifier extends Model
 
     protected $fillable = [
         'id',
+        'user_id',
         'name',
-        'type',
+        // 'type',
         'short_name',
         'description',
         'price',
