@@ -19,6 +19,11 @@ class FloorController extends Controller
     {
         $user = Auth::user();
         $floor = Floor::where('restaurant_id', $user->restaurant_id)->get();
+
+        if(!$floor)
+        {
+                return response()->json(["success"=>false, "message"=>"Data does exists for this Restaurant"]);
+        }
         return response()->json(['success' => true, 'data' => $floor]);
     }
 
