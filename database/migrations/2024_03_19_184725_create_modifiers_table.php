@@ -15,8 +15,9 @@ return new class extends Migration
     {
         Schema::create('modifiers', function (Blueprint $table) {
             $table->id();
+            $table->integer('user_id');
             $table->string('name');
-            $table->integer('type');
+            $table->integer('type')->nullable();
             $table->string('short_name')->nullable();
             $table->string('description')->nullable();
             $table->decimal('price',10,2);

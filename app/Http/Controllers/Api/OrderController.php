@@ -52,7 +52,6 @@ class OrderController extends Controller
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $restaurant_id = $user->restaurant_id;
         $order = new Order();
-        $order->id   = $request->id;
         $order->ispaid = $request->ispaid;
         $order->table_number  = $request->table_number;
         $order->floor_number = $request->floor_number;
@@ -69,7 +68,7 @@ class OrderController extends Controller
         $order->other_tax = $request->other_tax;
         $order->total = $request->total;
         $order->invoice_id = $request->invoice_id;
-        $order->restaurant_id = $restaurant_id;
+        $order->restaurant_id = $user->restaurant_id;
         $order->save();
         return response()->json(['success' => true, 'message' => 'order added successfully', 'data' => $order]);
     }

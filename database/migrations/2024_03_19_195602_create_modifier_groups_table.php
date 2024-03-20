@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('modifiergroups', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->string('modifier_group_name')->nullable();
-            $table->string('modifier_group_desc')->nullable();
-            $table->integer('modifier_group_type')->nullable();
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
+            $table->integer('type')->nullable();
             $table->integer('restaurant_id');
             $table->timestamps();
             $table->softDeletes();
