@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
+use App\Http\Controllers\Api\GraphController;
 use App\Http\Controllers\Api\ItemsController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SectionController;
@@ -37,7 +38,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::apiResource('category',CategoryController::class);
     
-    Route::get('table',[TablesController::class,'get']);
+    Route::apiResource('table',TablesController::class);
     
     Route::post('setSection',[TablesController::class,'setSection']);
     
@@ -97,5 +98,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get("cancel-order",[DaySummaryReport::class, 'cancelOrderReport']);
 
     Route::get('getActiveTables',[OrderController::class, 'getActiveTables']);
+
+    Route::apiResource('graph',[GraphController::class]);
 });
 // route::get('category',[CategoryController::class, 'index']);
