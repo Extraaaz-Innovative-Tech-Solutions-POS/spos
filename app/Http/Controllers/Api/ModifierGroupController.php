@@ -32,6 +32,12 @@ class ModifierGroupController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            "name" => "required",
+            // "description" => "Its Drinks Groups",
+            "type" => "required"
+        ]);
+        
         $user = Auth::user();
 
         $modifierGroup = new ModifierGroup();
@@ -43,7 +49,7 @@ class ModifierGroupController extends Controller
         $modifierGroup->restaurant_id = $user->restaurant_id;
         $modifierGroup->save();
 
-        return response()->json(["success"=>true,"message" => "Data saved successfully", "modifierGroup"=>$modifierGroup]);
+        return response()->json(["success"=>true,"message" => "Data saved successfully", "data"=>$modifierGroup]);
     }
 
     /**
@@ -56,7 +62,7 @@ class ModifierGroupController extends Controller
     {
         $user = Auth::user();
         $modifierGroup = ModifierGroup::findOrFail($id);
-        return response()->json(["success" => true, "message" => "Data saved successfully", "modifierGroup" => $modifierGroup]);
+        return response()->json(["success" => true, "data" => $modifierGroup]);
     }
 
     /**
@@ -73,8 +79,9 @@ class ModifierGroupController extends Controller
         $modifierGroup->name = $request->name;
         $modifierGroup->description = $request->description;
         $modifierGroup->type = $request->type;
+        $modifierGroup->save();
 
-        return response()->json(["success" => true, "message" => "Data saved successfully", "modifierGroup" => $modifierGroup]);       
+        return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifierGroup]);       
     }
 
     /**
@@ -143,6 +150,10 @@ class ModifierGroupController extends Controller
 
         $modifierGroup = ModifierGroup::findOrFail($modifierGroup_id);
         $items = $modifierGroup->items;
+
+        if (!$items) {
+            return response()->json(["success" => false, "message" => "There are no items for this Modifier group"]);
+        }
 
         return response()->json(['success' => true, 'message' => 'Items of ModifierGroups ' . $modifierGroup->name, 'data' => $items]);
     }

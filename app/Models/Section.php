@@ -16,4 +16,9 @@ class Section extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function tables()
+    {
+        return $this->hasMany(Tables::class);
+    }
 }

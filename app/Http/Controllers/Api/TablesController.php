@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TableActiveResource;
 use App\Http\Resources\TableResource;
+use App\Http\Resources\TableSectionResource;
 use App\Models\Floor;
 use App\Models\FloorSection;
 use App\Models\Tables;
@@ -70,6 +71,25 @@ class TablesController extends Controller
         $Tables->delete();
 
         return response()->json(['success' => true, 'message' => 'Tables deleted successfully']);
+    }
+
+    public function getSections(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate([
+            'floor_number' => 'required',
+        ]);
+        $floor = FloorSection::where(['restaurant_id' => $user->restaurant_id, 'floor' => $request->floor_number])->first();
+        if($floor){
+            $sections_count = $floor->sections_count;
+            $sections = Tables::where(['restaurant_id' => $user->restaurant_id, 'floor_number' => $request->floor_number])->get(); //->count();
+            $sections = TableSectionResource::collection($sections);// $sections->map->only(['floor_number','section_id','tables']);
+            return response()->json(['success' => true, 'message' => 'Sections data of Floor '.$request->floor_number, 'sections_count' => $sections_count, 'data' => $sections]);
+        }
+        else{
+            return response()->json(["success"=>false,"message"=>"Floor Doesn't exists"]);
+        }
+
     }
 
     public function setSection(Request $request)

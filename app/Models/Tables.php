@@ -18,4 +18,9 @@ class Tables extends Model
         'tables',
     ];
 
+    public function sections()
+    {
+        return $this->belongsTo(Section::class,'section_id');
+    }
+
 }

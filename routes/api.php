@@ -44,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('table', TablesController::class);
 
+    Route::get('getSections', [TablesController::class, 'getSections']);
+
     Route::post('setSection', [TablesController::class, 'setSection']);
 
     Route::post('setTables', [TablesController::class, 'setTables']);
@@ -66,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('graph',GraphController::class);
     Route::apiResource('itemsale',ItemSaleReportController::class);
+    
     
     route::apiResource('tax', TaxController::class);
 
@@ -115,7 +118,28 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('getActiveTables', [OrderController::class, 'getActiveTables']);
 
+    // Modifiers Groups Apis - Modifiers & Items
     Route::apiResource('modifierGroups', ModifierGroupController::class);
 
+    Route::get('showModifiers/{mod_grp_id}',[ModifierGroupController::class, 'showModifiers']);
+
+    Route::get('selectModifiers/{mod_grp_id}', [ModifierGroupController::class, 'selectModifiers']);
+
+    Route::post('saveModifiers/{mod_grp_id}',[ModifierGroupController::class, 'saveModifiers']);
+
+    Route::get('showItems/{mod_grp_id}',[ModifierGroupController::class, 'showItems']);
+
+    Route::get('selectItems/{mod_grp_id}', [ModifierGroupController::class, 'selectItems']);
+
+    Route::post('saveItems/{mod_grp_id}', [ModifierGroupController::class, 'saveItems']);
+
+    // Modifier Apis - Modifiers Groups
     Route::apiResource('modifiers', ModifierController::class);
+
+    Route::get('showModifierGroups/{modifier_id}', [ModifierController::class, 'showModifierGroups']);
+
+    Route::get('selectModifierGroups/{modifier_id}', [ModifierController::class, 'selectModifierGroups']);
+
+    Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
+
 });

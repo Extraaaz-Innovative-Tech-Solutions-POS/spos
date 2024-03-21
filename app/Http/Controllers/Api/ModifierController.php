@@ -19,7 +19,7 @@ class ModifierController extends Controller
     {
         $user = Auth::user();
 
-        $modifier = Modifier::where('restaurant_id', $user->restaurant_id)->latest();
+        $modifier = Modifier::where('restaurant_id', $user->restaurant_id)->latest()->get();
 
         return response()->json(['success' => true, 'data' => $modifier]);
     }
@@ -32,16 +32,20 @@ class ModifierController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            "name" => "required",
+            // "description" => "Its Drinks Groups",
+            "price" => "required"
+        ]);
         $user = Auth::user();
 
         $modifier = new Modifier();
-
         $modifier->user_id = $user->id;
         $modifier->name = $request->name;
         $modifier->short_name = $request->short_name ?? null;
         $modifier->description = $request->description ?? null;
         $modifier->price = $request->price;
-        // $modifier->restaurant_id = $user->restaurant_id;
+        $modifier->restaurant_id = $user->restaurant_id;
         $modifier->save();
 
         return response()->json(["success" => true, "message" => "Data saved successfully", "modifier" => $modifier]);
@@ -57,7 +61,7 @@ class ModifierController extends Controller
     {
         $user = Auth::user();
         $modifier = Modifier::findOrFail($id);
-        return response()->json(["success" => true, "message" => "Data saved successfully", "modifier" => $modifier]);
+        return response()->json(["success" => true, "data" => $modifier]);
     }
 
     /**
@@ -76,7 +80,7 @@ class ModifierController extends Controller
         $modifier->description = $request->description ?? null;
         $modifier->price = $request->price;
 
-        return response()->json(["success" => true, "message" => "Data saved successfully", "modifier" => $modifier]);
+        return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifier]);
     }
 
     /**
