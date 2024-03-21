@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\GraphController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\ItemSaleReportController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\TablesController;
@@ -55,6 +56,8 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::apiResource('customer',CustomerController::class);
     Route::apiResource('cart',CartController::class);
     Route::apiResource('graph',GraphController::class);
+    Route::apiResource('itemsale',ItemSaleReportController::class);
+    
     // route::apiResource('tax',TaxController::class);
 
     Route::get('/getFloorsAndTables',[TablesController::class, 'getFloorsAndTables']);
