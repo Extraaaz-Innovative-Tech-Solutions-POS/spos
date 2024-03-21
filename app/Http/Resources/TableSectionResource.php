@@ -15,6 +15,7 @@ class TableSectionResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'floor_number' => $this->floor_number,
             'section_id' => $this->section_id,
             'section_name' => $this->sections ? $this->sections->name : null,

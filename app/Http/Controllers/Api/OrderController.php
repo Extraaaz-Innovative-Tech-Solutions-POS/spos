@@ -427,7 +427,7 @@ class OrderController extends Controller
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
 
-        $item = Item::where('item_id',$item_id)->first();
+        $item = Item::where('id',$item_id)->first();
                
         $itemName = $item->item_name;
         // $itemPrice = $item->price;
