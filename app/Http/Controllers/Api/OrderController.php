@@ -220,6 +220,7 @@ class OrderController extends Controller
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
             $kot->advance_order_date_time= $request->advance_order_date_time;
+            $kot->delivery_address_id= $request->delivery_address_id;
             $kot->save();
 
             $grand_total = 0;
@@ -527,12 +528,17 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'Cannot add item, Order has been already Completed']);
             }
 
-            $kot->status = "COMPLETED";
-            $kot->save();
+            // $kot->status = "COMPLETED";
+            // $kot->save();
 
             $customer_id = $kot->customer_id;
 
             $kotItems = KotItem::where('table_id', $table_id)->get();
+
+            if(!$kotItems)
+            {
+                return response()->json(['success' => false, 'message' => 'There are no kotItems present for this table id']);
+            }
 
             $products = $this->mergedData($kotItems);
 
@@ -728,5 +734,17 @@ class OrderController extends Controller
         return response()->json(["success"=>true , "message"=>"Item has been delivered"]);
 
 
+    }
+
+    public function getDeliveryPendingOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where([
+            'restaurant_id' => $user->restaurant_id,
+            'is_cancelled' => 0,
+            'order_type' => 'Delivery',
+            'delivery_status' => 'PENDING'
+        ])->get();
+        return response()->json(["success" => true, "data" => $orders]);
     }
 }
