@@ -218,16 +218,15 @@ class ItemController extends Controller
             'price' => 'required',
         ]);
 
-
         $item_id = $request->item_id;
         $section_id = $request->section_id;
 
-        $itemPricing = ItemPricing::where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
+        $itemPrice = ItemPricing::where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
 
-        if($itemPricing)
+        if($itemPrice)
         {
-            $itemPricing->price = $request->price;
-            $itemPricing->save();
+            $itemPrice->price = $request->price;
+            $itemPrice->save();
         }
         else{
             $itemPrice = new ItemPricing();
@@ -238,6 +237,9 @@ class ItemController extends Controller
             $itemPrice->restaurant_id = $user->restaurant_id;
             $itemPrice->save();
         }
+        
+        $itemPrice = new ItemPricingResource($itemPrice);
+
         return response()->json(['success'=>true,  'message'=> 'Item Price Added/Updated Successfully' , 'data' => $itemPrice]);
     }              
 
@@ -261,6 +263,8 @@ class ItemController extends Controller
         }
         $itemPricing->price = $price;
         $itemPricing->save();
+
+        $itemPricing = new ItemPricingResource($itemPricing);
 
         $itemName = $itemPricing->item->item_name;
         return response()->json(['success'=>true, 'message'=> $itemName . 'Item Price Updated  to '.$price .' Successfully']);
