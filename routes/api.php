@@ -142,4 +142,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
 
+    Route::post('update-status-delievery', [OrderController::class, 'delivery_satatus_kot']);
+
+
+    
+
 });
