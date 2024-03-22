@@ -7,6 +7,7 @@ use App\Http\Resources\ItemResource;
 use App\Http\Resources\ModifierGroupResource;
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\ItemPricing;
 use App\Models\ModifierGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ItemController extends Controller
             ->get()
             ->toArray(); // Corrected $user->Id to $user->id
 
-        $Item = Item::where('restaurant_id', $user->restaurant_id)->get();
+        $Item = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
 
         $Item = ItemResource::collection($Item);
 
@@ -73,7 +74,10 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Item::findOrFail($id);
+        $item = new ItemResource($item);
+
+        return response()->json(['success' => true, 'message' =>'Item Data of ' . $item->item_name, 'data' => $item]);
     }
 
     /**
@@ -141,6 +145,8 @@ class ItemController extends Controller
             return response()->json(["success" => false, "message" => "There are no ModifierGroups for this Item"]);
         }
 
+        $modifierGroups = ModifierGroupResource::collection($modifierGroups);
+
         return response()->json(['success' => true, 'message' => 'Modifier Groups of Item ' . $item->item_name, 'modifierGroups' => $modifierGroups]);
     }
 
@@ -180,6 +186,106 @@ class ItemController extends Controller
         $modifierGroups = ModifierGroupResource::collection($modifierGroups);
 
         return response()->json(["success" => true, 'message' =>"Modifiers according to Item Id", 'data' => $modifierGroups]);
+    }
 
+    public function getSectionPrice(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'item_id' => 'required',
+            'section_id' => 'required',
+        ]);
+
+        $item_id = $request->item_id;
+        $section_id = $request->section_id;
+
+        $itemPricing = ItemPricing::with(['item','section'])->where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
+
+        $itemName = $itemPricing->item->item_name;
+
+        return response()->json(['success' => true, 'message' => 'Data of item'. $itemName, 'data' =>  $itemPricing ]);
+    }
+
+    public function setSectionPrice(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'item_id' => 'required',
+            'section_id' => 'required',
+            'price' => 'required',
+        ]);
+
+
+        $item_id = $request->item_id;
+        $section_id = $request->section_id;
+
+        $itemPricing = ItemPricing::where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
+
+        if($itemPricing)
+        {
+            $itemPricing->price = $request->price;
+            $itemPricing->save();
+        }
+        else{
+            $itemPrice = new ItemPricing();
+            $itemPrice->item_id = $request->item_id;
+            $itemPrice->section_id = $request->section_id;
+            $itemPrice->price = $request->price;
+            $itemPrice->user_id = $user->id;
+            $itemPrice->restaurant_id = $user->restaurant_id;
+            $itemPrice->save();
+        }
+        return response()->json(['success'=>true,  'message'=> 'Item Price Added/Updated Successfully' , 'data' => $itemPrice]);
+    }              
+
+    public function updateSectionPrice(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'item_id' => 'required',
+            'section_id' => 'required',
+            'price' => 'required',
+        ]);
+
+        $item_id = $request->item_id;
+        $section_id = $request->section_id;
+        $price = $request->price;
+
+        $itemPricing = ItemPricing::where(['restaurant_id' => $user->restaurant_id,'item_id'=>$item_id, 'section_id' => $section_id])->first();
+        if (!$itemPricing) {
+            return response()->json(['success' => false, 'message' => 'Item Price not found'], 404);
+        }
+        $itemPricing->price = $price;
+        $itemPricing->save();
+
+        $itemName = $itemPricing->item->item_name;
+        return response()->json(['success'=>true, 'message'=> $itemName . 'Item Price Updated  to '.$price .' Successfully']);
+    }
+
+    public function deleteSectionPrice(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'item_id' => 'required',
+            'section_id' => 'required',
+        ]);
+
+        $item_id = $request->item_id;
+        $section_id = $request->section_id;
+        
+        $itemPricing = ItemPricing::where(['restaurant_id' => $user->restaurant_id, 'item_id'=> $item_id, 'section_id' => $section_id])->first();
+        
+        if(!$itemPricing)
+        {
+            return response()->json(['success' => false, 'message' =>'Item Price not found'],404);
+        }
+        $itemName = $itemPricing->item->item_name;
+        $itemPricing->delete();
+
+        return response()->json(['success' => true, 'message' => $itemName . 'Item Price has been Deleted Successfully']);
     }
 }

@@ -32,4 +32,9 @@ class ModifierGroup extends Model
     {
         return $this->belongsToMany(Item::class, 'item_modifiergroup','modifiergroup_id','item_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
 }

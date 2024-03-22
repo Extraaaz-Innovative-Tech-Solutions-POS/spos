@@ -20,7 +20,7 @@ class CategoryResource extends JsonResource
             'category_name'=> $this->category_name,
             'restaurant_id '=> $this->restaurant_id,
             'description'=> $this->description,
-            'items' => ItemResource::collection($this->items),
+            'items' => ItemResource::collection($this->whenLoaded('items')),
         ];
     }
 }

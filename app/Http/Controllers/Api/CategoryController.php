@@ -24,7 +24,7 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         
-        $categories = Category::where('restaurant_id',$user->restaurant_id)->get();
+        $categories = Category::with('items')->where('restaurant_id',$user->restaurant_id)->get();
         $categories = CategoryResource::collection($categories);
 
         return response()->json(["success" => true, "data" => $categories]);
@@ -109,7 +109,7 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($categoryId);
 
-        $items = $category->items;
+        $items = $category->items()->with(['modifierGroups', 'sectionWisePricings'])->get();
         $items = ItemResource::collection($items);
 
         return response()->json(["success" => true,"message"=>"Items according to Category Id" ,"data" => $items]);

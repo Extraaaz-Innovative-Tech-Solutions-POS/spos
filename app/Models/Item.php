@@ -24,10 +24,14 @@ class Item extends Model
         'tax_percentage'
     ];
 
+    public function user()
+    {   
+        return $this->belongsTo(User::class,'user_id');
+    }
 
     public function category()
     {
-        return $this->belongsTo(Category::class,'category_id','item_id');
+        return $this->belongsTo(Category::class, 'id' ,'category_id');
     }
 
     public function kotItems()
@@ -40,5 +44,8 @@ class Item extends Model
         return $this->belongsToMany(ModifierGroup::class,'item_modifiergroup','item_id','modifiergroup_id');
     }
 
-
+    public function sectionWisePricings()
+    {
+        return $this->hasMany(ItemPricing::class,'item_id');
+    }
 }

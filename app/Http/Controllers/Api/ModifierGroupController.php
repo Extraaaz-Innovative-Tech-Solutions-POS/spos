@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ItemResource;
+use App\Http\Resources\ModifierGroupResource;
 use App\Models\Item;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
@@ -20,8 +22,11 @@ class ModifierGroupController extends Controller
     {
         $user = Auth::user();
 
-        $modifierGroup = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest()->get();
-        return response()->json(['success' => true, 'data' => $modifierGroup]);
+        $modifierGroups = ModifierGroup::where('restaurant_id', $user->restaurant_id)->latest()->with('items')->get();
+
+        $modifierGroups = ModifierGroupResource::collection($modifierGroups);
+
+        return response()->json(['success' => true, 'data' => $modifierGroups]);
     }
 
     /**
@@ -62,6 +67,7 @@ class ModifierGroupController extends Controller
     {
         $user = Auth::user();
         $modifierGroup = ModifierGroup::findOrFail($id);
+        $modifierGroup = new ModifierGroupResource($modifierGroup);
         return response()->json(["success" => true, "data" => $modifierGroup]);
     }
 
@@ -154,6 +160,8 @@ class ModifierGroupController extends Controller
         if (!$items) {
             return response()->json(["success" => false, "message" => "There are no items for this Modifier group"]);
         }
+
+        $items = ItemResource::collection($items);
 
         return response()->json(['success' => true, 'message' => 'Items of ModifierGroups ' . $modifierGroup->name, 'data' => $items]);
     }
