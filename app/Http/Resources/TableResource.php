@@ -42,7 +42,7 @@ class TableResource extends JsonResource
         return [
             'floor_number' => $this->floor_number,
             'section_id' => $this->section_id,
-            'section_name' => $this->sections->name,
+            'section_name' => $this->sections? $this->sections->name : null,
             'tables' => $this->tables,
             'tables_data' => $this->tablesData($this->tables, $this->floor_number, $this->section_id),
         ];
