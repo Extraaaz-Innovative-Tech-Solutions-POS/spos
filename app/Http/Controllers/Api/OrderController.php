@@ -176,6 +176,7 @@ class OrderController extends Controller
             "table_divided_by" => "", // If divided
             "cover_count" => "", // Number of People
             "customerId" => "",
+            "advance_order_date_time"=>"",
         ]);
 
         return DB::transaction(function () use ($user, $request) {
@@ -218,6 +219,7 @@ class OrderController extends Controller
             // $kot->message = $request->message;
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
+            $kot->advance_order_date_time= $request->advance_order_date_time;
             $kot->save();
 
             $grand_total = 0;
@@ -247,7 +249,9 @@ class OrderController extends Controller
             $kot->total = $grand_total;
             $kot->save();
 
-            if ($request->orderType == "Dine") {
+            
+            if($request->orderType == "Dine")
+            {
                 $section_name = Section::where('id', $request->section_id)->first()->name;
 
                 $tableActive = new TableActive();
@@ -500,6 +504,8 @@ class OrderController extends Controller
             "table" => "",
             "section_id" => "",
             "floor" => "",
+            'is_partial_paid'=>"",
+            'is_full_paid'=>""
         ]);
 
         $user = Auth::user();
@@ -532,46 +538,71 @@ class OrderController extends Controller
 
             $products = json_encode($products);
 
-            foreach ($kotItems as $kotItem) {
-                $kotItem->status = "COMPLETED";
-                $kotItem->save();
+            $order = new Order();
+
+            $status = 'PENDING';
+            
+            if($request->is_full_paid == 1)   
+            {
+                $kot->status = "COMPLETED";
+                $kot->save();
+
+                foreach($kotItems as $kotItem)
+                {
+                    $kotItem->status = "COMPLETED";
+                    $kotItem->save();
+                }
+
+              
+
+                $order->table_id = $request->table_id;
+                $order->ispaid = $request->ispaid;
+                $order->sub_table_number = $kot->sub_table_number ?? null;
+                $order->section_id = $kot->section_id ?? null;
+                $order->table_number = $kot->table_number;
+                $order->floor_number = $kot->floor_number;
+                $order->order_type = $kot->order_type;
+                $order->customer_id = $customer_id;
+                $order->invoice_id = $kot->order_number;
+                $order->restaurant_id = $user->restaurant_id;
+                $order->product = $products;    // This is important
+                $order->product_total = $kot->total;    // Total before Tax and Discount
+                $order->total_discount = 0;     // $request->total_discount; // Total Discount
+                $order->subtotal = $kot->total; // Total after discount
+                $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
+                $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
+                $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
+                $order->other_tax = 0;          // $request->other_tax; // Other tax data
+                $order->total = $kot->total;    // Total after adding tax and substracting discount
+                $order->advance_order_date_time	 = $kot->advance_order_date_time; 
+
+                // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
+                // {     
+                $order->save();
+                // }
+
+                $status = "COMPLETED";
             }
 
-            $order = new Order();
-            $order->table_id = $request->table_id;
-            $order->ispaid = $request->ispaid;
-            $order->sub_table_number = $kot->sub_table_number ?? null;
-            $order->section_id = $kot->section_id ?? null;
-            $order->table_number = $kot->table_number;
-            $order->floor_number = $kot->floor_number;
-            $order->order_type = $kot->order_type;
-            $order->customer_id = $customer_id;
-            $order->invoice_id = $kot->order_number;
-            $order->restaurant_id = $user->restaurant_id;
-            $order->product = $products;    // This is important
-            $order->product_total = $kot->total;    // Total before Tax and Discount
-            $order->total_discount = 0;     // $request->total_discount; // Total Discount
-            $order->subtotal = $kot->total; // Total after discount
-            $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
-            $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
-            $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
-            $order->other_tax = 0;          // $request->other_tax; // Other tax data
-            $order->total = $kot->total;    // Total after adding tax and substracting discount
-            $order->save();
 
             $orderPayment = new OrderPayment();
             $orderPayment->user_id = $user->id;
-            $orderPayment->order_id = $order->id;
-            $orderPayment->customer_id = $order->customer_id;
+            $orderPayment->order_id = $order? $order->id : null;
+            $orderPayment->customer_id = $kot->customer_id;
             $orderPayment->table_id = $request->table_id;
             $orderPayment->order_number = $kot->order_number;
             $orderPayment->restaurant_id = $user->restaurant_id;
             $orderPayment->payment_type = $request->payment_type; // Cash/Online -- Compulsary
             $orderPayment->payment_method = $request->payment_method ?? null; // if ONline - UPI/Card/EMI, etc
-            $orderPayment->amount = $order->total;
-            $orderPayment->status = "COMPLETED";
+            $orderPayment->amount = $kot->total;
+            $orderPayment->status = $status;
             $orderPayment->transaction_id = $request->transaction_id ?? null;
             $orderPayment->payment_details = $request->payment_details ?? null;
+
+            $orderPayment->money_given = $request->money_given ?? null;
+            $orderPayment->is_partial_paid = $request->is_partial_paid ?? null;
+            $orderPayment->is_full_paid = $request->is_full_paid ?? null;
+
             $orderPayment->save();
 
             if (($kot->order_type == "Dine") || ($request->orderType == "Dine")) {
