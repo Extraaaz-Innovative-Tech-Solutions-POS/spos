@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ItemPricingResource;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\ModifierGroupResource;
 use App\Models\Category;
@@ -200,11 +201,11 @@ class ItemController extends Controller
         $item_id = $request->item_id;
         $section_id = $request->section_id;
 
-        $itemPricing = ItemPricing::with(['item','section'])->where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
-
+        $itemPricing = ItemPricing::where(['restaurant_id' => $user->restaurant_id, 'item_id' => $item_id, 'section_id' => $section_id])->first();
+        $itemPrice = new ItemPricingResource($itemPricing);
         $itemName = $itemPricing->item->item_name;
 
-        return response()->json(['success' => true, 'message' => 'Data of item'. $itemName, 'data' =>  $itemPricing ]);
+        return response()->json(['success' => true, 'message' => 'Data of item '. $itemName, 'data' =>  $itemPrice ]);
     }
 
     public function setSectionPrice(Request $request)

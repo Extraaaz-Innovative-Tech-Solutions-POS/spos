@@ -37,4 +37,9 @@ class ItemPricing extends Model
     {
         return $this->belongsTo(Item::class,'item_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
