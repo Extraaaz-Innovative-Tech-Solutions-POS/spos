@@ -43,15 +43,13 @@ class CategoryController extends Controller
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
         $category = new Category();
-        // $category->category_id  = $request->category_id ;
+       
         $category->category_name = $request->category_name;
-        $category->restaurant_id  = $request->restaurant_id ;
         $category->description = $request->description;
         $category->restaurant_id = $restaurant_id;
         $category->save();
-        return response()->json(['success' => true, 'message' => 'Category added successfully', 'data' => $category]);
 
-        
+        return response()->json(['success' => true, 'message' => 'Category added successfully', 'data' => $category]); 
     }
 
     /**
