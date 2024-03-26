@@ -82,6 +82,7 @@ class SectionController extends Controller
     {
         $user = Auth::user();
         $section = Section::findOrFail($id);
+        $section->floors()->detach(); // Also Removing the sections data in Floor_Section Table
         $section->delete();
 
         return response()->json(['success' => true, 'message' => 'Section deleted successfully']);

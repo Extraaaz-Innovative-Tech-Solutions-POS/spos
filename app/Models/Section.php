@@ -17,8 +17,26 @@ class Section extends Model
         'updated_at'
     ];
 
-    public function tables()
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
+    public function floors()
     {
-        return $this->hasMany(Tables::class);
+        return $this->belongsToMany(Floor::class, 'floor_section', 'section_id', 'floor_id')->withPivot('tables_count')->withTimestamps();
     }
+
+    // public function tables()
+    // {
+    //     return $this->hasMany(Tables::class);
+    // }
+
+    // public function tables()
+    // {
+    //     return $this->hasManyThrough(Tables::class, FloorSection::class,
+    //         'section_id',
+    //         'floor_section_id'
+    //     );
+    // }
 }

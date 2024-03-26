@@ -14,6 +14,22 @@ class Floor extends Model
     protected $fillable = [
         'id ',
         'restaurant_id',
-        'floor'
+        'floor_name'
     ];
+
+    // public function tables()
+    // {
+    //     return $this->hasManyThrough(Tables::class, FloorSection::class, 'floor_id', 'floor_section_id');
+    // }
+
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class, 'floor_section', 'floor_id', 'section_id')->withPivot('tables_count')->withTimestamps();
+    }
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
 }

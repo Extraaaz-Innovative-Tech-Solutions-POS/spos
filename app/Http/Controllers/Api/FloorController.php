@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FloorResource;
 use App\Models\Floor;
+use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,20 +13,21 @@ use Illuminate\Support\Facades\Auth;
 class FloorController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource.   
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         $user = Auth::user();
-        $floor = Floor::where('restaurant_id', $user->restaurant_id)->get();
+        $floors = Floor::where('restaurant_id', $user->restaurant_id)->with(['sections'])->get();
 
-        if(!$floor)
+        if(!$floors)
         {
-                return response()->json(["success"=>false, "message"=>"Data does exists for this Restaurant"]);
+            return response()->json(["success"=>false, "message"=>"Data does exists for this Restaurant"]);
         }
-        return response()->json(['success' => true, 'data' => $floor]);
+        $floors = FloorResource::collection($floors);
+        return response()->json(['success' => true, 'data' => $floors ]);
     }
 
     /**
@@ -61,6 +64,8 @@ class FloorController extends Controller
         $user = Auth::user();
         $floor = Floor::findOrFail($id);
 
+        $floor = new FloorResource($floor);
+
         return response()->json(['success' => true, 'message' => 'Floor data', 'data' => $floor]);
     }
 
@@ -91,9 +96,45 @@ class FloorController extends Controller
     public function destroy($id)
     {
         $floor = Floor::findOrFail($id);
-        // $name = $floor->floor;
+        $floor->sections()->detach(); // Pivot Data in Floor Section of this Floor will also be deleted. 
+        $name = $floor->floor_name;
         $floor->delete();
 
-        return response()->json(['success' => true, 'message' => 'Floor is Deleted Successfully']);
+        return response()->json(['success' => true, 'message' => $name . ' is Deleted Successfully']);
+    }
+
+    public function setSectionAndTables(Request $request)
+    {
+        $request->validate([
+            'floor_id',
+            'section_id',
+            'tables_count'
+        ]);
+        
+        $user = Auth::user();
+        $floor_id = $request->floor_id;
+        $section_ids = $request->section_ids;
+        $tables_counts = $request->tables_counts;
+
+        $floor = Floor::findOrFail($floor_id);
+
+        if (count($section_ids) !== count($tables_counts)) {
+            return response()->json(['error' => 'Mismatch between section_ids and tables_counts.'], 400);
+        }
+
+        // Detach sections not included in the request
+        $existingSections = $floor->sections()->pluck('section_id')->toArray();
+        $sectionsToDetach = array_diff($existingSections, $section_ids);
+        $floor->sections()->detach($sectionsToDetach);
+
+        foreach ($section_ids as $index => $section_id) {
+            $tables_count = $tables_counts[$index];
+            $section = Section::findOrFail($section_id);
+            $floor->sections()->syncWithoutDetaching([$section_id => ['tables_count' => $tables_count]]);
+        }
+
+        // $floor->sections()->syncWithPivotValues($section_ids,["tables_count"=>$tables_counts]);
+
+        return response()->json(['success' => true, 'message' =>'Section and Tables_Count updated Successfully to ' . $floor->floor_name]);
     }
 }

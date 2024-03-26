@@ -11,16 +11,26 @@ class Tables extends Model
     protected $table = 'tables';
     protected $fillable = [
         'id',
-        'floor_id',
         'restaurant_id',
-        'floor_number',
-        'section_id',
-        'tables',
+        'floor_section_id',
+        'tables_count',
+        'created_at',
+        'updated_at',
     ];
 
-    public function sections()
+    // public function sections()
+    // {
+    //     return $this->belongsTo(Section::class,'section_id');
+    // }
+
+    public function floorSection()
     {
-        return $this->belongsTo(Section::class,'section_id');
+        return $this->belongsTo(FloorSection::class,'floor_section_id');
     }
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 
 }
