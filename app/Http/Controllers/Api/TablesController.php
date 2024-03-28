@@ -94,8 +94,7 @@ class TablesController extends Controller
 
     public function setSection(Request $request)
     {
-        $user = Auth::user();
-        
+        $user = Auth::user();        
         $request->validate([
             'floor_id' => '',
             'floor_number' => 'required',

@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $data = KotItem::select('item_id')
-            ->select('item_id', 'name')
+            ->select('item_id', 'name', 'price' )
             ->where('restaurant_id', $user->restaurant_id)
             ->where('status', 'COMPLETED')
             ->groupBy('item_id', 'name')
