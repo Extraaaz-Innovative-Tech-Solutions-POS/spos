@@ -19,7 +19,7 @@ class DashboardController extends Controller
             ->select('item_id', 'name', 'price' )
             ->where('restaurant_id', $user->restaurant_id)
             ->where('status', 'COMPLETED')
-            ->groupBy('item_id', 'name')
+            ->groupBy('item_id', 'name', 'price')
             ->orderByRaw('COUNT(item_id) DESC')
             ->limit(10)
             ->get();
