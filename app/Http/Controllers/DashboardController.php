@@ -81,11 +81,11 @@ class DashboardController extends Controller
 
 
         return response()->json([
-            "success" => true, "todaySales" => $todaySales,
-            'unsettledAmount' => $unsettledAmount, 'todayOrderCount' => $todayOrderCount,
-            'todayinvoices' => $todayinvoices, 'yesterdaySaleTotal' => $yesterdaySaleTotal,
-            'monthlyInvoices'=>$monthlyInvoices,'monthlyOrders'=>$monthlyOrders,
-            'monthlySales'=>$monthlySales,'totalSaleAmount'=>$totalSaleAmount
+            "success" => true, "Today Sales" => $todaySales,
+            'Unsettled Amount' => $unsettledAmount, 'Today Orders Count' => $todayOrderCount,
+            'Today\'s Invoices' => $todayinvoices, 'Yesterday\'s Sales Total' => $yesterdaySaleTotal,
+            'Monthly Invoices'=>$monthlyInvoices,'Monthly Orders'=>$monthlyOrders,
+            'Monthly Sales'=>$monthlySales,'Total Sales Amount'=>$totalSaleAmount
 
         ]);
     }

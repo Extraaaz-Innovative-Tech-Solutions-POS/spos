@@ -18,7 +18,7 @@ class FloorResource extends JsonResource
             'id' => $this->id,
             'restaurant_id' => $this->restaurant_id,
             'floor_name' => $this->floor_name,
-            'sections' => SectionResource::collection($this->sections),
+            'sections' => $this->sections ? SectionResource::collection($this->sections) : null,
         ];
     }
 }

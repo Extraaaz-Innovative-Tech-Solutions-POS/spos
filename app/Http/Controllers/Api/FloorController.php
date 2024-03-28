@@ -40,15 +40,15 @@ class FloorController extends Controller
     {
         $user = Auth::user();
 
-        $existing_floor = Floor::where('restaurant_id', $user->restaurant_id)->first();
+        // $existing_floor = Floor::where('restaurant_id', $user->restaurant_id)->first();
 
-        if ($existing_floor) {
-            return response()->json(['success' => true, 'message' => 'Floor Data already exists for this Restaurant Id.']);
-        }
+        // if ($existing_floor) {
+        //     return response()->json(['success' => true, 'message' => 'Floor Data already exists for this Restaurant Id.']);
+        // }
 
         $floor = new Floor();
         $floor->restaurant_id = $user->restaurant_id;
-        $floor->floor = $request->floor;
+        $floor->floor_name = $request->floor_name;
         $floor->save();
         return response()->json(['success' => true, 'message' => 'Floor Added successfully', 'data' => $floor]);
     }
@@ -63,9 +63,7 @@ class FloorController extends Controller
     {
         $user = Auth::user();
         $floor = Floor::findOrFail($id);
-
         $floor = new FloorResource($floor);
-
         return response()->json(['success' => true, 'message' => 'Floor data', 'data' => $floor]);
     }
 
@@ -76,12 +74,12 @@ class FloorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $user = Auth::user();
 
-        $floor = Floor::where('restaurant_id', $user->restaurant_id)->first();
-        $floor->floor = $request->floor;
+        $floor = Floor::findOrFail($id);
+        $floor->floor_name = $request->floor_name;
         $floor->save();
 
         return response()->json(['success' => true, 'message' => 'Floor data Updated Successfully', 'data' => $floor]);

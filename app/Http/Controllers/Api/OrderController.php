@@ -659,7 +659,7 @@ class OrderController extends Controller
                 ->from('table_actives')
                 ->where('restaurant_id', $user->restaurant_id)
                 ->groupBy('table_number');
-        })->get();
+        })->latest()->get();
 
         $activeTables = TableActiveResource::collection($activeTables);
 

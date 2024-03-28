@@ -75,7 +75,7 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        $item = Item::findOrFail($id);
+        $item = Item::with(['modifierGroups', 'sectionWisePricings'])->findOrFail($id);
         $item = new ItemResource($item);
 
         return response()->json(['success' => true, 'message' =>'Item Data of ' . $item->item_name, 'data' => $item]);

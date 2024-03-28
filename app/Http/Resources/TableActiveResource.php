@@ -20,7 +20,11 @@ class TableActiveResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'table_number'=>$this->table_number,
+            'floor_id' => $this->floor_number ?? null,
+            'section_id' => $this->section_id ?? null,
+            'table_number'=>$this->table_number ?? null,
+            // 'sub_table' => $this->split_table_number ?? null,
+            'divided_by' => $this->divided_by ?? null,
             'table_data'=>TableActive::where('restaurant_id',$this->restaurant_id)->where("table_number",$this->table_number)
                                 ->get()->groupBy('table_number')->first(),
         ];
