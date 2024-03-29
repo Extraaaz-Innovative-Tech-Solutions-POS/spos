@@ -74,14 +74,14 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'category_id' => 'required',
-            'category_name' => 'required',
-            'description' => 'required',
+            // 'category_id' => 'required',
+            // 'category_name' => 'required',
+            // 'description' => 'required',
         ]);
 
         $user = Auth::user();
         $category = Category::find($id);
-        $category->category_id  = $request->category_id ;
+        // $category->category_id  = $request->category_id ;
         $category->category_name = $request->category_name;
         $category->description = $request->description;
         $category->save();
