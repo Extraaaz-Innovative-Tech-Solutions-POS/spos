@@ -249,10 +249,11 @@ class OrderController extends Controller
             $kot->total = $grand_total;
             $kot->save();
 
-            $section_name = Section::where('id', $request->section_id)->first()->name;
-
+            
             if($request->orderType == "Dine")
             {
+                $section_name = Section::where('id', $request->section_id)->first()->name;
+                
                 $tableActive = new TableActive();
                 $tableActive->user_id = $user->id;
                 $tableActive->table_id = $request->table_id;
