@@ -40,11 +40,11 @@ class FloorController extends Controller
     {
         $user = Auth::user();
 
-        // $existing_floor = Floor::where('restaurant_id', $user->restaurant_id)->first();
+        $existing_floor = Floor::where(['restaurant_id'=> $user->restaurant_id, 'floor_name'=>$request->floor_name])->first();
 
-        // if ($existing_floor) {
-        //     return response()->json(['success' => true, 'message' => 'Floor Data already exists for this Restaurant Id.']);
-        // }
+        if ($existing_floor) {
+            return response()->json(['success' => true, 'message' => 'Floor Data already exists for this Restaurant Id.']);
+        }
 
         $floor = new Floor();
         $floor->restaurant_id = $user->restaurant_id;

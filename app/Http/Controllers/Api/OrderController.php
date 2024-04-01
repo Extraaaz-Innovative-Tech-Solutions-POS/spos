@@ -489,6 +489,12 @@ class OrderController extends Controller
                     $kotItem->cancel_reason = $cancel_reason;
                     $kotItem->save();  
                 }
+
+                $tableActive = TableActive::where('table_id',$table_id)->first();
+                if($tableActive)
+                    {$tableActive->delete();
+                    }
+
                 return response()->json(['success' => true,'message' => 'Order has been cancelled successfully'], 200);
             }else
             {

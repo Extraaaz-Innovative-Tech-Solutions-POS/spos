@@ -25,4 +25,9 @@ class TableActive extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class,'section_id');
+    }
 }

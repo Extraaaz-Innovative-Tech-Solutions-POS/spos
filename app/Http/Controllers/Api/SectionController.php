@@ -31,6 +31,12 @@ class SectionController extends Controller
     public function store(Request $request)
     {
          $user = Auth::user();
+
+        $existing_section = Section::where(['restaurant_id' => $user->restaurant_id, 'name' => $request->name])->first();
+
+        if ($existing_section) {
+            return response()->json(['success' => true, 'message' => 'Section Data already exists for this Restaurant Id.']);
+        }
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $section = new Section();
         $section->user_id = $user->id;
