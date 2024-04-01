@@ -16,11 +16,11 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         
-        $data = KotItem::select('item_id', 'name', 'price', DB::raw('SUM(quantity) as total_quantity'))
+            $data = KotItem::select('item_id', 'name', 'price', DB::raw('SUM(quantity) as total_quantity'))
                 ->where('restaurant_id', $user->restaurant_id)
                 ->where('status', 'COMPLETED')
                 ->groupBy('item_id', 'name', 'price')
-                ->orderByRaw('COUNT(item_id) DESC')
+                ->orderByRaw('SUM(quantity) DESC') // Order by the sum of quantity in descending order
                 ->limit(10)
                 ->get();
 
