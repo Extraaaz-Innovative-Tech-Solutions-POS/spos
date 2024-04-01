@@ -8,21 +8,21 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function topSellingItems(Request $request)
     {
         $user = Auth::user();
-
-        $data = KotItem::select('item_id')
-            ->select('item_id', 'name', 'price' )
-            ->where('restaurant_id', $user->restaurant_id)
-            ->where('status', 'COMPLETED')
-            ->groupBy('item_id', 'name', 'price')
-            ->orderByRaw('COUNT(item_id) DESC')
-            ->limit(10)
-            ->get();
+        
+        $data = KotItem::select('item_id', 'name', 'price', DB::raw('SUM(quantity) as total_quantity'))
+                ->where('restaurant_id', $user->restaurant_id)
+                ->where('status', 'COMPLETED')
+                ->groupBy('item_id', 'name', 'price')
+                ->orderByRaw('COUNT(item_id) DESC')
+                ->limit(10)
+                ->get();
 
 
         return response()->json(["success" => true, "data" => $data]);
