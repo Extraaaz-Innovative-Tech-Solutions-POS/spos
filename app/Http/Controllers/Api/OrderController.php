@@ -347,7 +347,7 @@ class OrderController extends Controller
         $user = Auth::user();
         $request->validate([
             'table_id' => 'required',
-            'Item' => 'required',
+            'item' => 'required',
             "orderType" => "required",
             "item_id" => '',
         ]);
@@ -492,8 +492,9 @@ class OrderController extends Controller
 
                 $tableActive = TableActive::where('table_id',$table_id)->first();
                 if($tableActive)
-                    {$tableActive->delete();
-                    }
+                {
+                    $tableActive->delete();
+                }
 
                 return response()->json(['success' => true,'message' => 'Order has been cancelled successfully'], 200);
             }else
