@@ -94,27 +94,31 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        $date = Carbon::now()->format('Y-m-d');
+
         $data = Order::where('orders.restaurant_id', $user->restaurant_id)
         ->join('order_payments', 'orders.id', '=', 'order_payments.order_id')
+        ->whereDate('orders.created_at',$date)
         // ->whereBetween('orders.created_at', [$currentMonthStart, $currentMonthEnd])
         ->where('payment_type','CASH')
         ->sum('total');
 
         return response()->json(["success" => true, "data" => $data]);
-
     }
 
     public function onlinePaymentAmount(Request $request)
     {
         $user = Auth::user();
+        $date = Carbon::now()->format('Y-m-d');
+        // return $date;
 
         $data = Order::where('orders.restaurant_id', $user->restaurant_id)
         ->join('order_payments', 'orders.id', '=', 'order_payments.order_id')
+        ->whereDate('orders.created_at', $date)
         ->where('payment_type','ONLINE')
         ->sum('total');
 
         return response()->json(["success" => true, "data" => $data]);
-
     }
 
 }
