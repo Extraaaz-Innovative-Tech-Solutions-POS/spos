@@ -176,7 +176,8 @@ class OrderController extends Controller
             "table_divided_by" => "", // If divided
             "cover_count" => "", // Number of People
             "customerId" => "",
-            "advance_order_date_time"=>"",
+           // "advance_order_date_time"=>"",
+            
         ]);
 
         return DB::transaction(function () use ($user, $request) {
@@ -220,6 +221,7 @@ class OrderController extends Controller
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
             $kot->advance_order_date_time= $request->advance_order_date_time;
+            $kot->delivery_address_id= $request->delivery_address_id;
             $kot->save();
 
             $grand_total = 0;
