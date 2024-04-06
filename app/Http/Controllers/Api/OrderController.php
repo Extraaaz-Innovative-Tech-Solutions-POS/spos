@@ -176,7 +176,8 @@ class OrderController extends Controller
             "table_divided_by" => "", // If divided
             "cover_count" => "", // Number of People
             "customerId" => "",
-            "advance_order_date_time"=>"",
+           // "advance_order_date_time"=>"",
+            
         ]);
 
         return DB::transaction(function () use ($user, $request) {
