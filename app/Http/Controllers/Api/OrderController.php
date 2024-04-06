@@ -178,6 +178,7 @@ class OrderController extends Controller
         ]);
 
         return DB::transaction(function () use ($user, $request) {
+
             $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
             if ($oldKot) {
                 return response()->json(['success' => false, 'message' => 'Table already has an order with same table_id']);
@@ -244,7 +245,6 @@ class OrderController extends Controller
 
             $kot->total = $grand_total;
             $kot->save();
-
 
             if ($request->orderType == "Dine") {
                 $section_name = Section::where('id', $request->section_id)->first()->name;
@@ -627,8 +627,10 @@ class OrderController extends Controller
             $query->select(DB::raw('MIN(id)'))
                 ->from('table_actives')
                 ->where('restaurant_id', $user->restaurant_id)
-                ->groupBy('table_number');
+                ->groupBy('table_number','section_id','floor_number');
         })->latest()->get();
+
+        // return $activeTables;
 
         $activeTables = TableActiveResource::collection($activeTables);
 

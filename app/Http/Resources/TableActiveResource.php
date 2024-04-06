@@ -24,10 +24,13 @@ class TableActiveResource extends JsonResource
             'section_id' => $this->section_id ?? null,
             'section_name' => $this->section ? $this->section->name: null,
             'table_number'=>$this->table_number ?? null,
-            // 'sub_table' => $this->split_table_number ?? null,
+            'sub_table' => $this->split_table_number ?? null,
             'divided_by' => $this->divided_by ?? null,
-            'table_data'=>TableActive::where('restaurant_id',$this->restaurant_id)->where("table_number",$this->table_number)
-                                ->get()->groupBy('table_number')->first()
+            'table_data'=>TableActive::where('restaurant_id',$this->restaurant_id)
+                                     ->where("table_number",$this->table_number)
+                                     ->where("floor_number",$this->floor_number)
+                                     ->where("section_id",$this->section_id)
+                                     ->get()->groupBy('table_number', 'section_id', 'floor_number')->first()
                                                                 ->map->only([
                                                                     'id',
                                                                     'table_id',

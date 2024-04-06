@@ -44,13 +44,16 @@ class CustomerController extends Controller
         //
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
+
         $customer = new Customer();
-        $customer->id   = $request->id;
+
+        // $customer->id   = $request->id;
         $customer->name = $request->name;
-        $customer->address  = $request->address ;
+        $customer->address  = $request->address;
         $customer->phone = $request->phone;
         $customer->restaurant_id = $restaurant_id;
         $customer->save();
+
         return response()->json(['success' => true, 'message' => 'customer added successfully', 'data' => $customer]);
     }
 
@@ -62,7 +65,12 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+
+        $customer = Customer::findOrFail($id);
+
+        return response()->json(['success' => true, 'message' => 'Customer Data', 'data' => $customer]);
     }
 
     /**
@@ -72,9 +80,22 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    
     public function update(Request $request, $id)
     {
-        //
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+
+        $customer = Customer::findOrFail($id);
+
+        // $customer->id   = $request->id;
+        $customer->name = $request->name;
+        $customer->address  = $request->address;
+        $customer->phone = $request->phone;
+        $customer->restaurant_id = $restaurant_id;
+        $customer->save();
+
+        return response()->json(['success' => true, 'message' => 'customer added successfully', 'data' => $customer]);
     }
 
     /**
@@ -85,6 +106,14 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+
+        $customer = Customer::findOrFail($id);
+        $customerName = $customer->name;
+        
+        $customer->delete();
+
+        return response()->json(['success' => true, 'message' => 'customer deleted successfully', 'data' => $customerName]);
     }
 }
