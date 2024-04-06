@@ -17,7 +17,7 @@ class SectionResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'tables_count' => $this->pivot->tables_count,
+            'tables_count' => $this->floors->first()->pivot->tables_count,
         ];
     }
 }

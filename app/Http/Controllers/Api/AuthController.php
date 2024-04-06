@@ -14,7 +14,7 @@ class AuthController extends Controller
    {
        
        
-    //    $count = User::count() + 1;       
+       $count = User::count() + 1;       
        $validated = $request->validate([          
            'email' => 'required|email|unique:user',
            'password' => 'required',
@@ -25,13 +25,13 @@ class AuthController extends Controller
        ]);
        
        $validated['password'] = bcrypt($validated['password']);
-    //    $validated['restaurant_id'] = $count;
+       $validated['restaurant_id'] = $count;
        $validated['plain_password']= $request['password'];
        $user = User::create($validated);
        $success['token'] = $user->createToken('auth')->plainTextToken;
        $success['name'] = $user->name;
        $success['status'] = "Inactive";
-    //    $success['restaurant_id'] = $count;
+       $success['restaurant_id'] = $count;
        $success['role'] = $user->role;
        $response = [
            'success' => true,
