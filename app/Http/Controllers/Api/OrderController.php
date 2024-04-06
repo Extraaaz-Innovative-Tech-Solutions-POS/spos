@@ -536,26 +536,31 @@ class OrderController extends Controller
 
             $kotItems = KotItem::where('table_id', $table_id)->get();
 
+            if(!$kotItems)
+            {
+                return response()->json(['success' => false, 'message' => 'There are no kotItems present for this table id']);
+            }
+
             $products = $this->mergedData($kotItems);
 
             $products = json_encode($products);
+            
+            $status = 'PENDING';
 
             $order = new Order();
-
-            $status = 'PENDING';
             
             if($request->is_full_paid == 1)   
             {
-                $kot->status = "COMPLETED";
+                $status = "COMPLETED";
+
+                $kot->status = $status;
                 $kot->save();
 
                 foreach($kotItems as $kotItem)
                 {
-                    $kotItem->status = "COMPLETED";
+                    $kotItem->status = $status;
                     $kotItem->save();
                 }
-
-              
 
                 $order->table_id = $request->table_id;
                 $order->ispaid = $request->ispaid;
@@ -582,8 +587,6 @@ class OrderController extends Controller
                 // {     
                 $order->save();
                 // }
-
-                $status = "COMPLETED";
             }
 
 
@@ -698,23 +701,26 @@ class OrderController extends Controller
 
         return response()->json(["success" => true, "data" => $orders, "message" => "Data of " . $orderType]);
     }
-    public function getOngoingOrders()
+    public function getOngoingOrders(Request $request)
     {
         $user = Auth::user();
-        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
-                              'is_cancelled' => 0,
-                              'status' => 'PENDING'])->get();
-        return response()->json(["success" => true, "data" => $orders]);
+
+        $request->validate([
+            "table_id" => "required",
+            
+        ]);
+        $table_id = $request->table_id;        
+
+        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id'=>$table_id])->first();
+       
+        if($kot)
+        {
+            $kot->status = "DELIVERED";
+            $kot->delivery_status = 1;
+            $kot->save();
+        }
+        
+        return response()->json(["success"=>true , "message"=>"Item has been delivered"]);
     }
 
-    public function getDeliveryPendingOrders()
-    {
-        $user = Auth::user();
-        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
-                              'is_cancelled' => 0,
-                              'order_type' => 'Delivery',
-                                'delivery_status' => 'PENDING'])->get();
-
-        return response()->json(["success" => true, "data" => $orders]);
-    }
 }
