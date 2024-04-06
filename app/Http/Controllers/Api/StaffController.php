@@ -48,6 +48,7 @@ class StaffController extends Controller
         $staff->phone = $request->phone;
         $staff->password = bcrypt($request->password);
         $staff->role = $request->role;
+        $staff->status = 'active';
         $staff->save();
 
         return response()->json(["success"=> true, "message"=>"Staff Data Saved Successfully", "data" => $staff]);
@@ -108,7 +109,5 @@ class StaffController extends Controller
         $staff->delete();
 
         return response()->json(["success" => true, "message" => "Staff Data Deleted Successfully"]);
-
-       
     }
 }
