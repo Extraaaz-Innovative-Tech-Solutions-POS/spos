@@ -544,23 +544,23 @@ class OrderController extends Controller
             $products = $this->mergedData($kotItems);
 
             $products = json_encode($products);
+            
+            $status = 'PENDING';
 
             $order = new Order();
-
-            $status = 'PENDING';
             
             if($request->is_full_paid == 1)   
             {
-                $kot->status = "COMPLETED";
+                $status = "COMPLETED";
+
+                $kot->status = $status;
                 $kot->save();
 
                 foreach($kotItems as $kotItem)
                 {
-                    $kotItem->status = "COMPLETED";
+                    $kotItem->status = $status;
                     $kotItem->save();
                 }
-
-              
 
                 $order->table_id = $request->table_id;
                 $order->ispaid = $request->ispaid;
@@ -587,8 +587,6 @@ class OrderController extends Controller
                 // {     
                 $order->save();
                 // }
-
-                $status = "COMPLETED";
             }
 
 
@@ -733,8 +731,20 @@ class OrderController extends Controller
         }
         
         return response()->json(["success"=>true , "message"=>"Item has been delivered"]);
+    }
 
+    public function getTotalOrders(Request $request,$tab)
+    {
+        $user = Auth::user();
+        $orderType = $request->tab;
 
+        $orders = KOT::where(['restaurant_id'=>$user->restaurant_id, 'order_type' => $orderType, 'status' => 'PENDING'])->get();
+
+        // $orders
+
+        $orders = KotResource::collection($orders);
+
+        return response()->json(["success" => true, "data"=> $orders, "message" => "Data of " . $orderType]);
     }
 
     public function getDeliveryPendingOrders()
