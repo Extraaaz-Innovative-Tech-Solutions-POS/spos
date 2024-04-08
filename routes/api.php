@@ -130,6 +130,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('cancel-order', [DaySummaryReport::class, 'cancelOrderReport']);
 
+    Route::get('itemtotalreport',[ItemSaleReportController::class,'itemtotalreport']);
+
     Route::get('getActiveTables', [OrderController::class, 'getActiveTables']);
 
     // Modifiers Groups Apis - Modifiers & Items

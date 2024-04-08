@@ -51,12 +51,6 @@ class ItemSaleReportController extends Controller
     
 ]);
 
-           
-
-
-
-
-
     }
 
     /**
@@ -102,5 +96,46 @@ class ItemSaleReportController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function itemtotalreport(Request $request)
+    {
+
+         //
+        $user = Auth::user();
+        $selectedFromDate = $request->fromdate;
+        $selectedToDate = $request->todate;
+
+     
+
+        $productsGrouped = KotItem::where('restaurant_id', $user->restaurant_id)
+            ->select('item_id', 'name', 'quantity', 'price', 'product_total')
+            ->groupBy('item_id', 'name', 'quantity', 'price', 'product_total')
+            ->get()
+            ->groupBy('item_id')
+            ->map(function ($groupedItems) {
+                return $groupedItems->reduce(function ($carry, $item) {
+                    $carry['item_id'] = $item['item_id'];
+                    $carry['name'] = $item['name'];
+                    $carry['quantity'] = ($carry['quantity'] ?? 0) + $item['quantity'];
+                    $carry['product_total'] = ($carry['product_total'] ?? 0) + $item['product_total'];
+                    $carry['price'] = $item['price']; // Keeping the price intact
+                    return $carry;
+                }, []);
+            });
+
+            $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
+
+
+
+    return response()->json([
+    // "success" => true,
+    "restaurantName" => $restaurantName,
+    "productsCount" => $productsGrouped,
+   
+    // 'totalSale' => $totalSale
+    
+]);
+
     }
 }
