@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CustomerAdvancedtController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
@@ -133,6 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('itemtotalreport',[ItemSaleReportController::class,'itemtotalreport']);
 
     Route::get('getActiveTables', [OrderController::class, 'getActiveTables']);
+
+    Route::apiResource('customerAddress',CustomerAdvancedtController::class);
 
     // Modifiers Groups Apis - Modifiers & Items
     Route::apiResource('modifierGroups', ModifierGroupController::class);

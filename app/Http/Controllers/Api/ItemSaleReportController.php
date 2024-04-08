@@ -106,9 +106,8 @@ class ItemSaleReportController extends Controller
         $selectedFromDate = $request->fromdate;
         $selectedToDate = $request->todate;
 
-     
 
-        $productsGrouped = KotItem::where('restaurant_id', $user->restaurant_id)
+        $productsGrouped = KotItem::where('restaurant_id', 1)//$user->restaurant_id)
             ->select('item_id', 'name', 'quantity', 'price', 'product_total')
             ->groupBy('item_id', 'name', 'quantity', 'price', 'product_total')
             ->get()
@@ -124,6 +123,8 @@ class ItemSaleReportController extends Controller
                 }, []);
             });
 
+            $resultArray = $productsGrouped->values()->toArray();
+
             $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
 
 
@@ -131,7 +132,7 @@ class ItemSaleReportController extends Controller
     return response()->json([
     // "success" => true,
     "restaurantName" => $restaurantName,
-    "productsCount" => $productsGrouped,
+    "productsData" => $resultArray,
    
     // 'totalSale' => $totalSale
     
