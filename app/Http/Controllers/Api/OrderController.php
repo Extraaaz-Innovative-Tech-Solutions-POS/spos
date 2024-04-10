@@ -358,12 +358,14 @@ class OrderController extends Controller
 
         $total = $kot->total;
 
-        $orderItems = $request->items; //[0];
+        $orderItems = $request->items;//[0];
 
-        foreach ($orderItems as $orderItem) {
+        foreach($orderItems as $orderItem)
+        {
             $kotItem = KotItem::where(['table_id' => $request->table_id, 'item_id' => $orderItem['Id'], 'restaurant_id' => $user->restaurant_id])->first();
-
-            if (($kotItem) && ($kotItem->is_cancelled == 0)) {
+        
+            if(($kotItem) && ($kotItem->is_cancelled == 0))
+            {
                 // $total = $total - $kotItem->product_total;
                 $kotItem->quantity += $orderItem['quantity'];
                 $kotItem->price = $orderItem['price'];
@@ -372,12 +374,14 @@ class OrderController extends Controller
                 $kotItem->save();
 
                 $total += $orderItem['quantity'] * $orderItem['price'];
-
+        
                 $kot->total = $total;
                 $kot->save();
 
                 // return response()->json(['success'=> true, 'message' => 'Item upadeted to table_id : '. $request->table_id .' successfully'], 200);
-            } else {
+            }
+            else
+            {
                 $kotItem = new KotItem();
                 $kotItem->kot_id = $kot->id;
                 $kotItem->table_id = $request->table_id;
@@ -389,14 +393,14 @@ class OrderController extends Controller
                 $kotItem->status = "PENDING";
                 $kotItem->restaurant_id = $user->restaurant_id;
                 $kotItem->save();
-
+                
                 $total += $orderItem['quantity'] * $orderItem['price'];
-
+        
                 $kot->total = $total;
                 $kot->save();
             }
         }
-        return response()->json(['success' => true, 'message' => 'Items added to table_id : ' . $request->table_id . ' successfully'], 200);
+        return response()->json(['success'=> true, 'message' => 'Items added to table_id : '. $request->table_id .' successfully'], 200);
     }
 
     public function cancelItem(Request $request)
@@ -414,7 +418,7 @@ class OrderController extends Controller
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
 
-        $kot = KOT::where("table_id", $table_id)->first();
+        $kot = KOT::where("table_id",$table_id)->first();
 
         if (!$kot) {
             return response()->json(['success' => false, 'message' => 'Table Id does not exists in the KOT table']);
@@ -426,13 +430,14 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Item has not been found for this order']);
         }
 
-        $item = Item::findOrFail($item_id); //->first();
+        $item = Item::findOrFail($item_id);//->first();
 
         $itemName = $item->item_name;
         // $itemPrice = $item->price;
+        
 
-
-        if ($kotItem->is_cancelled == 0) {
+        if($kotItem->is_cancelled == 0)
+        {
             $kotItem->is_cancelled = 1;
             $kotItem->cancel_reason = $cancel_reason;
             $kotItem->save();

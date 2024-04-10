@@ -11,13 +11,26 @@ class Restaurant extends Model
     protected $table = 'restaurants';
     protected $fillable = [
         'id',
-        'restaurant_name',
+        'user_id',
+        'name',
+        'email',
+        'phone',
         'address',
-        'owner',
-        'description',
-        'restaurant_id',
+        'city',
+        'district',
+        'state',
+        'country',
+        'pincode',
         'license_id',
-        'restaurant_email',
-        'restaurant_phone'
+        'fssai_id',
+        'gst_no',
+        'latitude',
+        'longitude',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 }
+
+// 'description',
+// 'restaurant_id',
