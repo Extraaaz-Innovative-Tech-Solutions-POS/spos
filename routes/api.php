@@ -161,6 +161,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
 
+    //bulk upload
+    Route::post('bulk-item', [ItemController::class, 'bulkUploadItems']);
+
+
+
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
 

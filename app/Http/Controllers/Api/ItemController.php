@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemPricingResource;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\ModifierGroupResource;
+use App\Imports\ItemImport;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemPricing;
@@ -13,6 +14,7 @@ use App\Models\ModifierGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -293,4 +295,19 @@ class ItemController extends Controller
 
         return response()->json(['success' => true, 'message' => $itemName . 'Item Price has been Deleted Successfully']);
     }
+
+
+    //bulk upload for items
+
+    public function bulkUploadItems(Request $request)
+    {  
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls' 
+        ]);
+        // Process the uploaded Excel file
+        Excel::import(new ItemImport, $request->file('file'));
+
+        return response()->json(['message' => 'Bulk upload successful'], 201);
+    }
+
 }
