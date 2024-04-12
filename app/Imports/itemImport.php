@@ -22,11 +22,15 @@ class ItemImport implements ToModel,  WithHeadingRow
             'item_name' => $row['item_name'],
             'price' => $row['price'],
             'food_type' => $row['food_type'],
+            'discount' =>  null,
             'category_id' => $row['category_id'],
-            'restaurant_id' => $restaurant_id
+            'restaurant_id' => $restaurant_id,
+            'associated_item' => null,
+            'varients' => null,
+            'tax_percentage' => null,
         ]);
 
-        dd($item);
+        // dd($item);
 
         return $item;
 
