@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\CategoryExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemPricingResource;
 use App\Http\Resources\ItemResource;
@@ -309,5 +310,13 @@ class ItemController extends Controller
 
         return response()->json(['message' => 'Bulk upload successful'], 201);
     }
+
+    public function exportCategories()
+    {
+        // dd('test');
+        return Excel::download(new CategoryExport, 'categories.xlsx');
+    }
+
+
 
 }

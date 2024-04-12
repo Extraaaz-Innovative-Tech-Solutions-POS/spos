@@ -166,6 +166,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('getTotalOrders/{tab}',[OrderController::class, 'getTotalOrders']);
 
+    Route::get('/export-categories',[ItemController::class, 'exportCategories']);
+
+
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
 
