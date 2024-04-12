@@ -639,8 +639,6 @@ class OrderController extends Controller
 
         return response()->json(["success" => true, 'data' => $activeTables]);
     }
-<<<<<<< Updated upstream
-=======
 
     public function getTotalOrders(Request $request, $tab)
     {
@@ -658,5 +656,4 @@ class OrderController extends Controller
         return response()->json(["success" => true, "data" => $orders, "message" => "Data of " . $orderType]);
     }
 
->>>>>>> Stashed changes
 }
