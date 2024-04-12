@@ -164,7 +164,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //bulk upload
     Route::post('bulk-item', [ItemController::class, 'bulkUploadItems']);
 
-
+    Route::get('getTotalOrders/{tab}',[OrderController::class, 'getTotalOrders']);
 
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
