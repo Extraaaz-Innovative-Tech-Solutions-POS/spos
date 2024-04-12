@@ -175,7 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('update-status-delievery', [OrderController::class, 'delivery_satatus_kot']);
 
-    Route::post('getTotalOrders/{tab}',[OrderController::class,'getTotalOrders']);
+    Route::get('getTotalOrders/{tab}',[OrderController::class,'getTotalOrders']);
 
 
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
