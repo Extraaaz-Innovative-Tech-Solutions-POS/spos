@@ -638,4 +638,24 @@ class OrderController extends Controller
 
         return response()->json(["success" => true, 'data' => $activeTables]);
     }
+<<<<<<< Updated upstream
+=======
+
+    public function getTotalOrders(Request $request, $tab)
+    {
+        $user = Auth::user();
+
+        $orderType = $request->tab;
+
+        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
+                              'order_type' => $orderType,
+                              'is_cancelled' => 0,
+                              'status' => 'PENDING'])->get();
+
+        $orders = KotResource::collection($orders);
+
+        return response()->json(["success" => true, "data" => $orders, "message" => "Data of " . $orderType]);
+    }
+
+>>>>>>> Stashed changes
 }

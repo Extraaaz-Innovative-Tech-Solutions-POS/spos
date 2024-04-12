@@ -42,6 +42,7 @@ class StaffController extends Controller
         $restaurant_id = $user->restaurant_id;
 
         $staff = new User();
+
         $staff->restaurant_id = $restaurant_id;
         $staff->name = $request->name;
         $staff->email = $request->email;
@@ -74,18 +75,21 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // return $request->all();
         $user = Auth::user();
         $restaurant_id = $user->restaurant_id;
+
         $staff = User::findOrFail($id);
+
         $staff->restaurant_id = $restaurant_id;
         $staff->name = $request->name;
         $staff->phone = $request->phone;
+        $staff->email = $request->email;
         $staff->password = bcrypt($request->password);
         $staff->role = $request->role;
         $staff->save();
-        return response()->json(["success" => true, "message" => "Staff Data update Saved Successfully", "data" => $staff]);
 
-        
+        return response()->json(["success" => true, "message" => "Staff data Updated Successfully", "data" => $staff]);
     }
 
     /**
