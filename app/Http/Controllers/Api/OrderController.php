@@ -161,6 +161,7 @@ class OrderController extends Controller
             return $e->getMessage();
         }
     }
+    
     public function confirmOrder(Request $request)
     {
         $user = Auth::user();
