@@ -529,8 +529,8 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'Cannot add item, Order has been already Completed']);
             }
 
-            $kot->status = "COMPLETED";
-            $kot->save();
+            // $kot->status = "COMPLETED";
+            // $kot->save();
 
             $customer_id = $kot->customer_id;
 
