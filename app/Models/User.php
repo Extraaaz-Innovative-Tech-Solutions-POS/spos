@@ -21,11 +21,12 @@ class User extends Authenticatable
 
     protected $fillable = [
         
-        'restaurant_id',
+        'restaurant_id', 
         'name',
         'email',
         'password',
         'address',
+        'plain_password',
         'role',
         'phone',
         'status',
@@ -53,4 +54,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class,'restaurant_id');
+    }
 }
