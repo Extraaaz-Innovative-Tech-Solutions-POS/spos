@@ -21,14 +21,24 @@ class ItemSaleReportController extends Controller
     {
         //
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
 
+    
+// dd( $selectedToDate, $selectedFromDate);
         $productsCount = KotItem::where('restaurant_id', $user->restaurant_id)
-        ->select('name', 'quantity','price','product_total','is_cancelled',)
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('.created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('.created_at', $selectedFromDate)
+                ->orWhereDate('.created_at', $selectedToDate);
+        })
+        ->where('is_cancelled',0)
+        ->where('status', 'COMPLETED')
+        ->select('name', 'quantity','price','product_total','is_cancelled','created_at')
         ->get();
 
         // $totalProductsCount = $productsCount->sum('quantity');
+        // dd($productsCount);
 
         foreach ($productsCount as $product) {
             $orderDiscount = Order::where('restaurant_id', $user->restaurant_id)
@@ -100,16 +110,23 @@ class ItemSaleReportController extends Controller
 
     public function itemtotalreport(Request $request)
     {
-
+        // return "hii";
          //
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
+
+        // return $user;
 
 
         $productsGrouped = KotItem::where('restaurant_id', 1)//$user->restaurant_id)
-            ->select('item_id', 'name', 'quantity', 'price', 'product_total')
-            ->groupBy('item_id', 'name', 'quantity', 'price', 'product_total')
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('.created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('.created_at', $selectedFromDate)
+                ->orWhereDate('.created_at', $selectedToDate);
+        })
+            ->select('item_id', 'name', 'quantity', 'price', 'product_total','created_at')
+            ->groupBy('item_id', 'name', 'quantity', 'price', 'product_total','created_at')
             ->get()
             ->groupBy('item_id')
             ->map(function ($groupedItems) {
@@ -118,7 +135,8 @@ class ItemSaleReportController extends Controller
                     $carry['name'] = $item['name'];
                     $carry['quantity'] = ($carry['quantity'] ?? 0) + $item['quantity'];
                     $carry['product_total'] = ($carry['product_total'] ?? 0) + $item['product_total'];
-                    $carry['price'] = $item['price']; // Keeping the price intact
+                    $carry['price'] = $item['price']; 
+                    $carry['created_at'] = $item['created_at']; // Keeping the price intact
                     return $carry;
                 }, []);
             });

@@ -129,7 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('cashier-report', [DaySummaryReport::class, 'cashierReport']);
 
-    Route::get('cancel-order', [DaySummaryReport::class, 'cancelOrderReport']);
+    Route::get('cancel-order-report', [DaySummaryReport::class, 'cancelOrderReport']);
 
     Route::get('itemtotalreport',[ItemSaleReportController::class,'itemtotalreport']);
 

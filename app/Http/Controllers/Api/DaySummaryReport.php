@@ -21,16 +21,20 @@ class DaySummaryReport extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
     
         $results = Order::join('order_payments', 'orders.table_id', '=', 'order_payments.table_id')
             ->where('orders.restaurant_id',$user->restaurant_id)
-            ->whereBetween('orders.created_at', [$selectedFromDate, $selectedToDate])
+            ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+                $query->whereBetween('orders.created_at', [$selectedFromDate, $selectedToDate])
+                    ->orWhereDate('orders.created_at', $selectedFromDate)
+                    ->orWhereDate('orders.created_at', $selectedToDate);
+            })
             ->select(
-               'orders.table_id','orders.order_type','orders.total','orders.total_discount','order_payments.payment_type','orders.cgst','orders.sgst','order_payments.created_at', 
+               'orders.table_id','orders.order_type','orders.total','orders.total_discount','order_payments.payment_type','order_payments.created_at', 
             )
-            ->groupBy('orders.order_type','orders.table_id','orders.total','orders.total_discount','orders.cgst','orders.sgst','order_payments.payment_type','order_payments.created_at')
+            ->groupBy('orders.order_type','orders.table_id','orders.total','orders.total_discount','order_payments.payment_type','order_payments.created_at')
             ->get();
             // dd($results);
         // $payments = DB::table('order_payments')
@@ -63,20 +67,29 @@ class DaySummaryReport extends Controller
     public function cashierReport(Request $request)
     {
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
    
         $totalInvoice = OrderPayment::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
-        ->where('status','COMPLETED')
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('created_at', $selectedFromDate)
+                ->orWhereDate('created_at', $selectedToDate);
+        })        ->where('status','COMPLETED')
         ->count();
         $totalSale = OrderPayment::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
-        ->where('status','COMPLETED')
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('created_at', $selectedFromDate)
+                ->orWhereDate('created_at', $selectedToDate);
+        })        ->where('status','COMPLETED')
         ->sum('amount');
         $productsCount = KotItem::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
-        ->where('status','COMPLETED')
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('created_at', $selectedFromDate)
+                ->orWhereDate('created_at', $selectedToDate);
+        })        ->where('status','COMPLETED')
         ->count();
         return response()->json(["success" => true, "totalInvoice" => $totalInvoice,'totalSale'=>$totalSale,'productsCount' => $productsCount
             ]);
@@ -84,11 +97,15 @@ class DaySummaryReport extends Controller
     public function cancelOrderReport(Request $request)
     {
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
 
-        $orders = KOT::where('restaurant_id', $user->restaurant_id)
-        ->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+        $orders = KotItem::where('restaurant_id', $user->restaurant_id)
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('created_at', $selectedFromDate)
+                ->orWhereDate('created_at', $selectedToDate);
+        })
         ->where('is_cancelled', 1)
         ->get();
 
@@ -100,10 +117,15 @@ class DaySummaryReport extends Controller
     public function cancelItemsReport(Request $request)
     {
         $user = Auth::user();
-        $selectedFromDate = $request->fromdate;
-        $selectedToDate = $request->todate;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
 
         $orders = KOT::join('kot_items', 'kot.table_id', '=', 'kot_items.table_id')
+        ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+            $query->whereBetween('created_at', [$selectedFromDate, $selectedToDate])
+                ->orWhereDate('created_at', $selectedFromDate)
+                ->orWhereDate('created_at', $selectedToDate);
+        })
         ->where('kot_items.restaurant_id', $user->restaurant_id)
         ->whereBetween('kot_items.created_at', [$selectedFromDate, $selectedToDate])
         ->where('kot_items.is_cancelled', 1)
