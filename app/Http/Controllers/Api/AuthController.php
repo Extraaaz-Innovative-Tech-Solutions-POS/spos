@@ -52,7 +52,8 @@ public function login(Request $request)
             'phone' => $user->phone,
             'state' => $user->state,
             'email' => $user->email, 
-            'role' => $user->role
+            'role' => $user->role,
+            'type' => $user->business_type,
         ];
 
         $response = [
