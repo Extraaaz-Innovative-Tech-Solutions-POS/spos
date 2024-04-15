@@ -27,4 +27,9 @@ class OrderPayment extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function kot()
+    {
+        return $this->belongsTo(KOT::class,'table_id');
+    }
 }
