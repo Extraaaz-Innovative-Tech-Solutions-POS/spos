@@ -119,7 +119,7 @@ class ItemSaleReportController extends Controller
         // return $user;
 
 
-        $productsGrouped = KotItem::where('restaurant_id', 1)//$user->restaurant_id)
+        $productsGrouped = KotItem::where('restaurant_id', $user->restaurant_id)//$user->restaurant_id)
         ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
             $query->whereBetween('.created_at', [$selectedFromDate, $selectedToDate])
                 ->orWhereDate('.created_at', $selectedFromDate)
