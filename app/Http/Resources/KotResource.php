@@ -32,6 +32,7 @@ class KotResource extends JsonResource
             'cancelled_reason' => $this->cancelled_reason,
             'total'=> $this->total,
             'items'=> KotItemResource::collection($filteredItems),
+            'payments' => $this->order_payments,// ? $this->order_payments : null,
             // 'created_at' => $this->created_at,
             // 'updated_at' => $this->updated_at,
         ];
