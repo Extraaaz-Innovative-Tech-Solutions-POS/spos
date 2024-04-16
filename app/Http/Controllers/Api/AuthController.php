@@ -66,7 +66,7 @@ class AuthController extends Controller
         $response = [
             'success' => true,
             'data' => $success,
-            'message' => 'User Registered & Restaurant Successfully',
+            'message' => 'User & Restaurant Registered Successfully',
         ];
 
         return response()->json($response, 200);
@@ -77,6 +77,7 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'status' => 'Active'])) {
             $user = Auth::user();
             $token = $user->createToken('auth')->plainTextToken;
+            
             $userData = [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -87,9 +88,11 @@ class AuthController extends Controller
                 'type' => $user->business_type,
             ];
 
+            $restaurant = $user->restaurant;//->map->only([ 'name']);
+
             $response = [
                 'success' => true,
-                'data' => ['token' => $token, 'user' => $userData],
+                'data' => ['token' => $token, 'user' => $userData , 'restaurant' => $restaurant],
                 'message' => 'User logged in successfully',
             ];
 
