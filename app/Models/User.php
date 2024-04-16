@@ -60,3 +60,7 @@ class User extends Authenticatable
         return $this->belongsTo(Restaurant::class,'restaurant_id');
     }
 }
+
+
+
+//this is to test version 2
