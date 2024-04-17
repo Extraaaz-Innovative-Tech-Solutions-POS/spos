@@ -38,6 +38,10 @@ Route::post('userregister', [AuthController::class, 'register']);
 Route::post('userlogin', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::put("updateProfile/{id}", [AuthController::class, 'updateProfile']);
+    
+    Route::put("updateRestaurant/{rest_id}", [AuthController::class, 'updateRestaurant']);
     
     Route::apiResource('category', CategoryController::class);
 
