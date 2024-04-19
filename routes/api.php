@@ -160,4 +160,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('selectModifierGroups/{modifier_id}', [ModifierController::class, 'selectModifierGroups']);
 
     Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
+
+    Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
+
+
 });

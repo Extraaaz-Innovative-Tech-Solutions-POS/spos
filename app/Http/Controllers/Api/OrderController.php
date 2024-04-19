@@ -660,5 +660,14 @@ class OrderController extends Controller
 
         return response()->json(["success" => true, "data" => $orders, "message" => "Data of " . $orderType]);
     }
+    public function getOngoingOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
+                              'is_cancelled' => 0,
+                              'status' => 'PENDING'])->get();
+        return response()->json(["success" => true, "data" => $orders]);
 
+
+    }
 }
