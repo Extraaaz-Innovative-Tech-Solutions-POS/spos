@@ -51,7 +51,7 @@ class ItemSaleReportController extends Controller
         ->select('total_discount')
         ->get();
 
-    $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
+    $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('name');
     return response()->json([
     "success" => true,
     "restaurantName" => $restaurantName,
@@ -143,7 +143,7 @@ class ItemSaleReportController extends Controller
 
             $resultArray = $productsGrouped->values()->toArray();
 
-            $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
+            $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('name');
 
 
 
