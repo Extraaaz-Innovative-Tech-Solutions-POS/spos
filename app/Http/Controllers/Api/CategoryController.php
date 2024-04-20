@@ -24,7 +24,7 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         
-        $categories = Category::with('items')->where('restaurant_id',$user->restaurant_id)->get();
+        $categories = Category::with('items.modifierGroups')->where('restaurant_id',$user->restaurant_id)->get();
         $categories = CategoryResource::collection($categories);
 
         return response()->json(["success" => true, "data" => $categories]);
