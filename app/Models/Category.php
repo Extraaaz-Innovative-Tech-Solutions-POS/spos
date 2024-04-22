@@ -15,7 +15,7 @@ class Category extends Model
     protected $fillable = [
         'category_id ',
         'category_name',
-        'restaurant_id ',
+        'restaurant_id',
         'description'
     ];
     public function locations()

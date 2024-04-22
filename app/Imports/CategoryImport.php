@@ -20,9 +20,11 @@ class CategoryImport implements ToModel, WithHeadingRow
         $restaurant_id = $user->restaurant_id;
         
         $category = new Category([
-            'restaurant_id ' => $restaurant_id,
             'category_name' => $row['category_name'],
             'description' => $row['description'],
+            'restaurant_id' => $restaurant_id,
         ]);
+
+        return $category;
     }
 }
