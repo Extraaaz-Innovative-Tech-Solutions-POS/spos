@@ -744,16 +744,4 @@ class OrderController extends Controller
         ])->get();
         return response()->json(["success" => true, "data" => $orders]);
     }
-
-    public function getDeliveryPendingOrders()
-    {
-        $user = Auth::user();
-        $orders = KOT::where([
-            'restaurant_id' => $user->restaurant_id,
-            'is_cancelled' => 0,
-            'order_type' => 'Delivery',
-            'delivery_status' => 'PENDING'
-        ])->get();
-        return response()->json(["success" => true, "data" => $orders]);
-    }
 }
