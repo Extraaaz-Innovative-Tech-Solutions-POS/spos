@@ -43,8 +43,8 @@ class KOT extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function order_payments()
+    public function orderPayments()
     {
-        return $this->hasMany(OrderPayment::class,'table_id');
+        return $this->hasMany(OrderPayment::class,'table_id','table_id'); //~ 1st Table_id  is of OrderPayment table and 2nd is of KOT table.
     }
 }
