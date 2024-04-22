@@ -593,6 +593,11 @@ class OrderController extends Controller
                 }
             }
 
+            if($kot->order_type == "Delivery" || $kot->order_type == "delivery") {
+                $kot->delivery_status = "PENDING";
+                $kot->save();
+            }
+
             return response()->json(["success" => true, "message" => "Order Completed Successfully"]);
         });
 
@@ -667,7 +672,16 @@ class OrderController extends Controller
                               'is_cancelled' => 0,
                               'status' => 'PENDING'])->get();
         return response()->json(["success" => true, "data" => $orders]);
+    }
 
+    public function getDeliveryPendingOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
+                              'is_cancelled' => 0,
+                              'order_type' => 'Delivery',
+                                'delivery_status' => 'PENDING'])->get();
 
+        return response()->json(["success" => true, "data" => $orders]);
     }
 }
