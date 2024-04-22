@@ -526,7 +526,7 @@ class OrderController extends Controller
             }
 
             if ($kot->status == 'COMPLETED') {
-                return response()->json(['success' => false, 'message' => 'Cannot add item, Order has been already Completed']);
+                return response()->json(['success' => false, 'message' => 'Order has been already Completed']);
             }
 
             // $kot->status = "COMPLETED";
@@ -710,7 +710,7 @@ class OrderController extends Controller
         return response()->json(["success" => true, "data" => $orders]);
     }
 
-    public function delivery_satatus_kot(Request $request)
+    public function delivery_status_kot(Request $request)
     {
         //dd('yesy');
         $user = Auth::user();
@@ -725,8 +725,8 @@ class OrderController extends Controller
        
         if($kot)
         {
-            $kot->status = "DELIVERED";
-            $kot->delivery_status = 1;
+            // $kot->status = "DELIVERED";
+            $kot->delivery_status = "DELIVERED";
             $kot->save();
         }
         

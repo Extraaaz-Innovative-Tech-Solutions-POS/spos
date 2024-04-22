@@ -12,6 +12,17 @@ class KotResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
+    public function moneyRemaining($orderPayments)
+    {
+        $totalMoney = $this->total;
+        $paidMoney = 0;
+        foreach ($orderPayments as $orderPayment) {
+            $paidMoney += $orderPayment->money_given;
+        }
+
+        return $totalMoney - $paidMoney;
+    }
     public function toArray($request)
     {
         // return parent::toArray($request);
@@ -31,8 +42,10 @@ class KotResource extends JsonResource
             'is_cancelled' => $this->is_cancelled,
             'cancelled_reason' => $this->cancelled_reason,
             'total'=> $this->total,
+            'remaining_money' => $this->orderPayments ? $this->moneyRemaining($this->orderPayments) : 0,
             'items'=> KotItemResource::collection($filteredItems),
-            'payments' => $this->order_payments,// ? $this->order_payments : null,
+            'payments' => $this->orderPayments, // ? $this->order_payments : null,
+            
             // 'created_at' => $this->created_at,
             // 'updated_at' => $this->updated_at,
         ];
