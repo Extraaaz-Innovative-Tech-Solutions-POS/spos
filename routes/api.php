@@ -173,5 +173,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
-
+    Route::get('getDeliveryPendingOrders',[OrderController::class, 'getDeliveryPendingOrders']);
 });

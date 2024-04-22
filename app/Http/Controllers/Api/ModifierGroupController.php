@@ -194,4 +194,17 @@ class ModifierGroupController extends Controller
 
         return response()->json(["success" => true, 'message' => 'ModifierGroups and Items synced Successfully']);
     }
+
+    public function importModifierGroups(Request $request)
+    {
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+        $file = $request->file('file');
+
+        if ($request->hasFile('file')) {
+            // Excel::import(new importItem, $request->file('file'));
+        }
+
+        return response()->json(['success' => 'File uploaded successfully']);
+    }
 }
