@@ -163,6 +163,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //bulk upload
     Route::post('bulk-item', [ItemController::class, 'bulkUploadItems']);
+    
+    Route::post('bulk-category', [CategoryController::class, 'bulkUploadCategories']);
 
     Route::get('getTotalOrders/{tab}',[OrderController::class, 'getTotalOrders']);
 
