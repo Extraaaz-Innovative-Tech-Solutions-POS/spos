@@ -16,8 +16,10 @@ class Customer extends Model
         'address',
         'phone',
         'restaurant_id'
-
-
     ];
+
+    public function customer_address() {
+        return $this->hasMany(CustomerAddress::class);
+    }
 
 }

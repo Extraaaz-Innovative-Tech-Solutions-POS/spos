@@ -205,6 +205,9 @@ class OrderController extends Controller
                 $order_number = $table_order_number + 1;
             }
 
+            $advanceDate = $request->advance_order_date_time;
+            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d h:i A', $advanceDate) : null;
+
             $kot = new KOT();
             $kot->table_id = $request->table_id;
             $kot->order_number = $order_number;
@@ -220,7 +223,7 @@ class OrderController extends Controller
             // $kot->message = $request->message;
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
-            $kot->advance_order_date_time= $request->advance_order_date_time;
+            $kot->advance_order_date_time = $advanceDate; // $request->advance_order_date_time;
             $kot->delivery_address_id= $request->delivery_address_id;
             $kot->save();
 
