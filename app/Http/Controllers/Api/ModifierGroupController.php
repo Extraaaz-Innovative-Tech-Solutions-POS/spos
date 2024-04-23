@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ModifierExport;
+use App\Exports\ModifierGroupExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\ModifierGroupResource;
+use App\Imports\ModifierGroupImport;
 use App\Models\Item;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ModifierGroupController extends Controller
 {
@@ -198,13 +202,18 @@ class ModifierGroupController extends Controller
     public function importModifierGroups(Request $request)
     {
         $user = Auth::user();
-        $restaurant_id = $user->restaurant_id;
-        $file = $request->file('file');
+
+        $validated = $request->validate(['file' => 'required']);
 
         if ($request->hasFile('file')) {
-            // Excel::import(new importItem, $request->file('file'));
+            Excel::import(new ModifierGroupImport, $request->file('file'));
         }
 
         return response()->json(['success' => 'File uploaded successfully']);
+    }
+
+    public function exportModifierGroups(Request $request)
+    {
+        return Excel::download(new ModifierGroupExport, 'modifierGroupExport.xlsx');
     }
 }
