@@ -105,4 +105,73 @@ class AuthController extends Controller
             return response()->json($response, 401);
         }
     }
+
+    public function me(Request $request)
+    {
+    }
+
+    public function updateProfile(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required',
+            'phone' => 'required',
+            'role' => 'required',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->name = $request->name;
+        $user->phone = $request->phone;
+        // $user->plain_password = $request->password;
+        // $user->password = bcrypt($request->password);
+        // $user->state = $request->state;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        // $user->business_type = $request->business_type;
+        $user->save();
+
+        return response()->json(["success" => true, "user" => $user, "message" => "Updated profile successfully"]);
+    }
+
+    public function logout(Request $request)
+    {
+    }
+
+    public function updateRestaurant(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'restaurant_name' => 'required',
+            'restaurant_email' => '',
+            'restaurant_phone' => '',
+            'address' => '',
+            'city' => '',
+            'state' => '',
+            'country' => '',
+            'pincode' => '',
+            'license_id' => '',
+            'fssai_id' => '',
+            'gst_no' => '',
+            'latitude' => '',
+            'longitude' => '',
+        ]);
+
+        $restaurant = Restaurant::findOrFail($id);
+        $restaurant->name = $request->restaurant_name;
+        $restaurant->email = $request->restaurant_email;
+        $restaurant->phone = $request->restaurant_phone;
+        $restaurant->address = $request->address;
+        $restaurant->city = $request->city;
+        // $restaurant->district = $request->district;
+        $restaurant->state = $request->state;
+        $restaurant->country = $request->country;
+        $restaurant->pincode = $request->pincode;
+        $restaurant->license_id = $request->license_id;
+        $restaurant->fssai_id = $request->fssai_id;
+        $restaurant->gst_no = $request->gst_no;
+        // $restaurant->latitude = $request->latitude;
+        // $restaurant->longitude = $request->longitude;
+        $restaurant->save();
+
+        return response()->json(["success" => true, "data" => $restaurant, "message" => "Restaurant Updated Successfully"]);
+    }
+
 }
