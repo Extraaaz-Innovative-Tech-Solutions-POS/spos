@@ -185,5 +185,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('exportModifiers', [ModifierController::class, 'exportModifiers']);
 
+    Route::put("updateProfile/{id}", [AuthController::class, 'updateProfile']);
+
+    Route::put("updateRestaurant/{rest_id}", [AuthController::class, 'updateRestaurant']);
 
 });
