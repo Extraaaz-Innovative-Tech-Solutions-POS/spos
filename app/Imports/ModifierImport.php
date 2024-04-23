@@ -5,8 +5,9 @@ namespace App\Imports;
 use App\Models\Modifier;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class ModifierImport implements ToModel
+class ModifierImport implements ToModel, WithHeadingRow
 {
     /**
     * @param array $row
@@ -20,7 +21,7 @@ class ModifierImport implements ToModel
         return new Modifier([
             'user_id' => $user->id,
             'name' => $row['name'],
-            'type' => $row['type'],
+            // 'type' => $row['type'],
             'short_name' => $row['short_name'],
             'description' => $row['description'],
             'price' => $row['price'],
