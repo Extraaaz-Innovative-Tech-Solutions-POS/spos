@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\DashboardController;
+use App\Models\ModifierGroup;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -170,8 +171,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/export-categories',[ItemController::class, 'exportCategories']);
 
+    Route::post('update-status-delivery', [OrderController::class, 'delivery_status_kot']);
 
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
-    Route::get('getDeliveryPendingOrders',[OrderController::class, 'getDeliveryPendingOrders']);
+    Route::get('getDeliveryPendingOrders', [OrderController::class, 'getDeliveryPendingOrders']);
+
+    Route::post('importModifierGroups', [ModifierGroupController::class, 'importModifierGroups']);
+    
+    Route::post('importModifiers', [ModifierController ::class, 'importModifiers']);
+
+    Route::post('exportModifierGroups', [ModifierGroupController::class, 'exportModifierGroups']);
+
+    Route::post('exportModifiers', [ModifierController::class, 'exportModifiers']);
+
+
 });
