@@ -181,9 +181,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('importModifiers', [ModifierController ::class, 'importModifiers']);
 
-    Route::post('exportModifierGroups', [ModifierGroupController::class, 'exportModifierGroups']);
+    Route::get('exportModifierGroups', [ModifierGroupController::class, 'exportModifierGroups']);
 
-    Route::post('exportModifiers', [ModifierController::class, 'exportModifiers']);
+    Route::get('exportModifiers', [ModifierController::class, 'exportModifiers']);
 
 
 });
