@@ -36,6 +36,7 @@ class KotResource extends JsonResource
             'floor_number' => $this->floor_number,
             'order_type' => $this->order_type,
             'customer_id' => $this->customer_id,
+            'customer' => new CustomerResource($this->customer),
             'restaurant_id' => $this->restaurant_id,
             'message' => $this->message,
             'status' => $this->status,
