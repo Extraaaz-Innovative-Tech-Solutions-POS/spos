@@ -224,7 +224,7 @@ class OrderController extends Controller
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
             $kot->advance_order_date_time = $advanceDate; // $request->advance_order_date_time;
-            $kot->delivery_address_id= $request->delivery_address_id;
+            // $kot->delivery_address_id= $request->delivery_address_id;
             $kot->save();
 
             $grand_total = 0;
@@ -510,7 +510,8 @@ class OrderController extends Controller
             "section_id" => "",
             "floor" => "",
             'is_partial_paid'=>"",
-            'is_full_paid'=>""
+            'is_full_paid'=>"",
+            'delivery_address_id' => "",
         ]);
 
         $user = Auth::user();
@@ -632,7 +633,8 @@ class OrderController extends Controller
                 }
             }
 
-            if($kot->order_type == "Delivery" || $kot->order_type == "delivery") {
+            if ($kot->order_type == "Delivery" || $kot->order_type == "delivery") {
+                $kot->delivery_address_id = $request->delivery_address_id;
                 $kot->delivery_status = "PENDING";
                 $kot->save();
             }
@@ -745,6 +747,22 @@ class OrderController extends Controller
             'order_type' => 'Delivery',
             'delivery_status' => 'PENDING'
         ])->get();
+
+        $orders = KotResource::collection($orders);
+        return response()->json(["success" => true, "data" => $orders]);
+    }
+
+    public function getDeliveryCompletedOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where([
+            'restaurant_id' => $user->restaurant_id,
+            'is_cancelled' => 0,
+            'order_type' => 'Delivery',
+            'delivery_status' => 'DELIVERED',
+        ])->get();
+
+        $orders = KotResource::collection($orders);
         return response()->json(["success" => true, "data" => $orders]);
     }
 }

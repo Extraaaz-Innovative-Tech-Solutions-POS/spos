@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CustomerAddressController;
 use App\Http\Controllers\Api\CustomerAdvancedtController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
@@ -136,7 +137,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('getActiveTables', [OrderController::class, 'getActiveTables']);
 
-    Route::apiResource('customerAddress',CustomerAdvancedtController::class);
+    Route::apiResource('customerAddress',CustomerAddressController::class);
+
+    Route::get('getCustomerAddresses/{customerId}', [CustomerAddressController::class, 'getCustomerAddresses']);
 
     // Modifiers Groups Apis - Modifiers & Items
     Route::apiResource('modifierGroups', ModifierGroupController::class);
@@ -176,6 +179,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
 
     Route::get('getDeliveryPendingOrders', [OrderController::class, 'getDeliveryPendingOrders']);
+    
+    Route::get('getDeliveryCompletedOrders', [OrderController::class, 'getDeliveryCompletedOrders']);
 
     Route::post('importModifierGroups', [ModifierGroupController::class, 'importModifierGroups']);
     

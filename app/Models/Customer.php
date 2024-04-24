@@ -19,7 +19,7 @@ class Customer extends Model
     ];
 
     public function customer_address() {
-        return $this->hasMany(CustomerAddress::class);
+        return $this->hasMany(CustomerAddress::class, 'customer_id','id');
     }
 
 }
