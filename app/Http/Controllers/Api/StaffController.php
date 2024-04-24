@@ -86,10 +86,10 @@ class StaffController extends Controller
         $staff->name = $request->name;
         $staff->phone = $request->phone;
         $staff->email = $request->email;
-        $staff->password = bcrypt($request->password);
+        // $staff->password = bcrypt($request->password);
         $staff->role = $request->role;
-        $staff->status = $request->status;
-        $staff->save();
+        // $staff->status = $request->status;
+        $staff->update();
 
         return response()->json(["success" => true, "message" => "Staff data Updated Successfully", "data" => $staff]);
     }

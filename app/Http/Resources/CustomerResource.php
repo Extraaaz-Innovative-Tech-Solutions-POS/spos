@@ -20,7 +20,7 @@ class CustomerResource extends JsonResource
             'address' => $this->address,
             'phone' => $this->phone,
             'restaurant_id' => $this->restaurant_id,
-            'customer_address' => $this->customer_address
+            // 'customer_address' => $this->customer_address
         ];
     }
 }
