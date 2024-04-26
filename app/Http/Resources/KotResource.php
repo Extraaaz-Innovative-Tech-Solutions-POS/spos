@@ -15,13 +15,23 @@ class KotResource extends JsonResource
 
     public function moneyRemaining($orderPayments)
     {
-        $totalMoney = $this->total;
+        $totalMoney = $this->grand_total;
         $paidMoney = 0;
         foreach ($orderPayments as $orderPayment) {
             $paidMoney += $orderPayment->money_given;
         }
 
         return $totalMoney - $paidMoney;
+    }
+
+    public function totalAmountGiven($orderPayments)
+    {
+        $paidMoney = 0;
+        foreach ($orderPayments as $orderPayment) {
+            $paidMoney += $orderPayment->money_given;
+        }
+
+        return $paidMoney;
     }
     public function toArray($request)
     {
@@ -46,6 +56,10 @@ class KotResource extends JsonResource
             'delivery_address' => $this->delivery_address,
             'delivery_status' => $this->delivery_status,
             'total'=> $this->total,
+            'total_discount' => $this->total_discount,
+            'total_tax' => $this->total_tax,
+            'grand_total' => $this->grand_total,
+            'total_given_amount' => $this->orderPayments ? $this->totalAmountGiven($this->orderPayments) : 0,
             'remaining_money' => $this->orderPayments ? $this->moneyRemaining($this->orderPayments) : 0,
             'items'=> KotItemResource::collection($filteredItems),
             'payments' => $this->orderPayments, // ? $this->order_payments : null,

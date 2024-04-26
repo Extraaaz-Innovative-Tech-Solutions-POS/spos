@@ -82,6 +82,7 @@ class ModifierController extends Controller
         $modifier->short_name = $request->short_name ?? null;
         $modifier->description = $request->description ?? null;
         $modifier->price = $request->price;
+        $modifier->save();
 
         return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifier]);
     }
