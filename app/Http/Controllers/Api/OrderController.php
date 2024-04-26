@@ -252,6 +252,7 @@ class OrderController extends Controller
             }
 
             $kot->total = $grand_total;
+            $kot->grand_total = $grand_total;
             $kot->save();
 
             
@@ -512,6 +513,7 @@ class OrderController extends Controller
             'is_partial_paid'=>"",
             'is_full_paid'=>"",
             'delivery_address_id' => "",
+            "discounted_amount" => "",
         ]);
 
         $user = Auth::user();
@@ -530,11 +532,16 @@ class OrderController extends Controller
             }
 
             if ($kot->status == 'COMPLETED') {
-                return response()->json(['success' => false, 'message' => 'Order has been already Completed']);
+                return response()->json(['success' => false, 'message' => 'Order has been already Completed'],404);
             }
 
             // $kot->status = "COMPLETED";
-            // $kot->save();
+            if ($request->discounted_amount) {
+                $kot->total_discount += $request->discounted_amount;
+                $kot->save();
+                $kot->grand_total = $kot->total - $kot->total_discount;
+                $kot->save();
+            }
 
             $customer_id = $kot->customer_id;
 
@@ -566,6 +573,12 @@ class OrderController extends Controller
                     $kotItem->save();
                 }
 
+                $total = $kot->total;
+                if($kot->total_discount)
+                {
+                    $total = $total - $kot->total_discount;
+                }
+
                 $order->table_id = $request->table_id;
                 $order->ispaid = $request->ispaid;
                 $order->sub_table_number = $kot->sub_table_number ?? null;
@@ -578,13 +591,13 @@ class OrderController extends Controller
                 $order->restaurant_id = $user->restaurant_id;
                 $order->product = $products;    // This is important
                 $order->product_total = $kot->total;    // Total before Tax and Discount
-                $order->total_discount = 0;     // $request->total_discount; // Total Discount
-                $order->subtotal = $kot->total; // Total after discount
+                $order->total_discount = $kot->total_discount;     // $request->total_discount; // Total Discount
+                $order->subtotal = $total; // Total after discount
                 $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
                 $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
                 $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
                 $order->other_tax = 0;          // $request->other_tax; // Other tax data
-                $order->total = $kot->total;    // Total after adding tax and substracting discount
+                $order->total = $total;    // Total after adding tax and substracting discount
                 $order->advance_order_date_time	 = $kot->advance_order_date_time; 
 
                 // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
@@ -614,6 +627,17 @@ class OrderController extends Controller
 
             $orderPayment->save();
 
+            if ($request->is_full_paid == 1)  
+            {
+                $orderPayments = OrderPayment::where('table_id',$request->table_id)->get();
+                foreach ($orderPayments as $orderPayment)
+                {
+                    $orderPayment->status = "COMPLETED";
+                    $orderPayment->save();
+                }
+            } 
+
+
             if (($kot->order_type == "Dine") || ($request->orderType == "Dine")) {
                 $tableActives = TableActive::where("table_id", $kot->table_id)->get();
                 if ($tableActives->count() > 0) {
@@ -639,7 +663,9 @@ class OrderController extends Controller
                 $kot->save();
             }
 
-            return response()->json(["success" => true, "message" => "Order Completed Successfully"]);
+            $kot = new KotResource($kot);
+
+            return response()->json(["success" => true, "data"=>$kot, "message" => "Order Completed Successfully" ]);
         });
 
         // return response()->json(["success"=>false , "message"=>"Order Not Completed"]);
