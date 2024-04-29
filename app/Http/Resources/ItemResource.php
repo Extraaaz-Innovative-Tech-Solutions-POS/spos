@@ -28,6 +28,7 @@ class ItemResource extends JsonResource
             'tax_percentage' => $this->tax_percentage,
             'sectionWisePricings' => ItemPricingResource::collection($this->whenLoaded('sectionWisePricings')),
             'modifierGroups'=> ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
+            'short_code'=>$this->short_code,
         ];
     }
 }

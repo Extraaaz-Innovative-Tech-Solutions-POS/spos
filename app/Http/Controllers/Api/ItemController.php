@@ -54,6 +54,13 @@ class ItemController extends Controller
         // $data1 = User::where('id', $user->id)->get()->toArray(); // Corrected $user->Id to $user->id
         $restaurant_id = $user->restaurant_id;
 
+        $lastShortCode = Item::where('restaurant_id', $restaurant_id)
+        ->orderBy('short_code', 'desc')
+        ->value('short_code');
+
+        // Increment the last short_code and assign it to the new item
+        $nextShortCode = $lastShortCode ? $lastShortCode + 1 : 1;
+        
         $Item = new Item();
         // $Item->item_id  = $request->item_id;
         $Item->item_name = $request->item_name;
@@ -66,6 +73,8 @@ class ItemController extends Controller
         $Item->associated_item = $request->associated_item ? $request->associated_item : null;
         $Item->varients = $request->varients ? $request->varients : null;
         $Item->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
+        $Item->short_code = $nextShortCode; 
+
         $Item->save();
 
         return response()->json(['success' => true, 'message' => 'Item saved successfully', 'data' => $Item]);

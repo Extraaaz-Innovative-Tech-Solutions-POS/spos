@@ -21,7 +21,8 @@ class Item extends Model
         'food_type',
         'associated_item',
         'varients',
-        'tax_percentage'
+        'tax_percentage',
+        'short_code',
     ];
 
     public function user()
