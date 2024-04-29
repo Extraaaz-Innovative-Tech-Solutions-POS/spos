@@ -28,6 +28,7 @@ class ItemImport implements ToModel,  WithHeadingRow
             'associated_item' => null,
             'varients' => null,
             'tax_percentage' => null,
+            'short_code' => $row['short_code'],
         ]);
 
         // dd($item);
