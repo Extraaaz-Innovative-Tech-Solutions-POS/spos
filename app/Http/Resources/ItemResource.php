@@ -21,14 +21,24 @@ class ItemResource extends JsonResource
             'discount' => $this->discount,
             'category_id' => $this->category_id,
             'category_name' => $this->category? $this->category->category_name : null,
-            'restaurant_id ' => $this->restaurant_id,
+            'restaurant_id' => $this->restaurant_id,
             'food_type' => $this->food_type,
             'associated_item' => $this->associated_item,
             // 'variants' => $this->variants,
             'tax_percentage' => $this->tax_percentage,
             'sectionWisePricings' => ItemPricingResource::collection($this->whenLoaded('sectionWisePricings')),
-            'modifierGroups'=> ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
+            // 'modifierGroups'=> ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
             'short_code'=>$this->short_code,
+            'add-ons'=> ModifierGroupResource::collection(
+                $this->whenLoaded('modifierGroups', function () {
+                    return $this->modifierGroups->where('type', 1);
+                })
+            ),
+            'variants' => ModifierGroupResource::collection(
+                $this->whenLoaded('modifierGroups', function () {
+                    return $this->modifierGroups->where('type', 2);
+                })
+            ),
         ];
     }
 }
