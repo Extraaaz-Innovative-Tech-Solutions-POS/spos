@@ -25,16 +25,17 @@ class DaySummaryReport extends Controller
         $selectedToDate = $request->toDate;
     
         $results = Order::join('order_payments', 'orders.table_id', '=', 'order_payments.table_id')
+        ->join('kot','kot.table_id','=','orders.table_id')
             ->where('orders.restaurant_id',$user->restaurant_id)
             ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
                 $query->whereBetween('orders.created_at', [$selectedFromDate, $selectedToDate])
                     ->orWhereDate('orders.created_at', $selectedFromDate)
                     ->orWhereDate('orders.created_at', $selectedToDate);
             })
-            ->select(
+            ->select('kot.order_number as bill_number',
                'orders.table_id','orders.order_type','orders.total','orders.total_discount','order_payments.payment_type','order_payments.created_at', 
             )
-            ->groupBy('orders.order_type','orders.table_id','orders.total','orders.total_discount','order_payments.payment_type','order_payments.created_at')
+            ->groupBy('kot.order_number','orders.order_type','orders.table_id','orders.total','orders.total_discount','order_payments.payment_type','order_payments.created_at')
             ->get();
             // dd($results);
         // $payments = DB::table('order_payments')
