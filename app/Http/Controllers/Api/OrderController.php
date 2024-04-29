@@ -187,6 +187,16 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'Table already has an order with same table_id']);
             }
 
+            $occupiedTable = KOT::where(["restaurant_id" => $user->restaurant_id,'floor_number'=> $request->floor,
+                                        'table_number'=> $request->table, "section_id" => $request->section_id])
+                                ->when($request->sub_table, function($query) use($request){
+                                     return $query->where('sub_table_number', $request->sub_table);
+                                })->first();
+                                        
+            if ($occupiedTable) {
+                return response()->json(['success' => false, 'message' => 'Table has been already Occupied'],418); //! Actually should be 409
+            }
+
             if (($request->table_divided_by) && ($request->sub_table)) {
                 if ($request->sub_table > $request->table_divided_by) {
                     return response()->json(['success' => false, 'message' => "Sub-Table cannot be more than " . $request->table_divided_by]);
