@@ -58,9 +58,9 @@ class ItemController extends Controller
         ->orderBy('short_code', 'desc')
         ->value('short_code');
 
-        // Increment the last short_code and assign it to the new item
+        //Increment the last short_code and assign it to the new item
         $nextShortCode = $lastShortCode ? $lastShortCode + 1 : 1;
-        
+
         $Item = new Item();
         // $Item->item_id  = $request->item_id;
         $Item->item_name = $request->item_name;
