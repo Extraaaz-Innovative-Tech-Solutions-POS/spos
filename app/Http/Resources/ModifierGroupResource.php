@@ -22,7 +22,7 @@ class ModifierGroupResource extends JsonResource
             'user_name' => $this->user ? $this->user->name : null, 
             'name' => $this->name,
             'description' => $this->description,
-            'type' => $this->type,
+            'type' => $this->type == 1 ? 'add-ons' : 'variants',
             'restaurant_id' => $this->restaurant_id,
             'items_count' => $this->items ? $this->items->count() : null,
             'modifiers_count' => $this->modifiers ? $this->modifiers->count() : null,
