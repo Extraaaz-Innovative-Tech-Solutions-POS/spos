@@ -27,18 +27,18 @@ class ItemResource extends JsonResource
             // 'variants' => $this->variants,
             'tax_percentage' => $this->tax_percentage,
             'sectionWisePricings' => ItemPricingResource::collection($this->whenLoaded('sectionWisePricings')),
-            // 'modifierGroups'=> ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
+            'modifierGroups'=> ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
             'short_code'=>$this->short_code,
-            'add-ons'=> ModifierGroupResource::collection(
-                $this->whenLoaded('modifierGroups', function () {
-                    return $this->modifierGroups->where('type', 1);
-                })
-            ),
-            'variants' => ModifierGroupResource::collection(
-                $this->whenLoaded('modifierGroups', function () {
-                    return $this->modifierGroups->where('type', 2);
-                })
-            ),
+            // 'add-ons'=> ModifierGroupResource::collection(
+            //     $this->whenLoaded('modifierGroups', function () {
+            //         return $this->modifierGroups->where('type', 1);
+            //     })
+            // ),
+            // 'variants' => ModifierGroupResource::collection(
+            //     $this->whenLoaded('modifierGroups', function () {
+            //         return $this->modifierGroups->where('type', 2);
+            //     })
+            // ),
         ];
     }
 }
