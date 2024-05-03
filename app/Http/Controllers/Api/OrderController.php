@@ -190,7 +190,7 @@ class OrderController extends Controller
             if ($request->orderType == "Dine") {
                 # code...
                 $occupiedTable = KOT::where(["restaurant_id" => $user->restaurant_id,'floor_number'=> $request->floor,
-                                            'table_number'=> $request->table, "section_id" => $request->section_id])
+                                            'table_number'=> $request->table, "section_id" => $request->section_id, "status" => "PENDING"])
                                     ->when($request->sub_table, function($query) use($request){
                                          return $query->where('sub_table_number', $request->sub_table);
                                     })->first();
