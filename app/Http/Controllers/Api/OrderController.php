@@ -190,13 +190,14 @@ class OrderController extends Controller
             if ($request->orderType == "Dine") {
                 # code...
                 $occupiedTable = KOT::where(["restaurant_id" => $user->restaurant_id,'floor_number'=> $request->floor,
-                                            'table_number'=> $request->table, "section_id" => $request->section_id, "status" => "PENDING"])
+                                            'table_number'=> $request->table, "section_id" => $request->section_id, "status" => "PENDING",
+                                            "is_cancelled" => 0])
                                     ->when($request->sub_table, function($query) use($request){
                                          return $query->where('sub_table_number', $request->sub_table);
                                     })->first();
                                             
                 if ($occupiedTable) {
-                    return response()->json(['success' => false, 'message' => 'Table has been already Occupied'],418); //! Actually should be 409
+                    return response()->json(['success' => false, 'message' => 'Table has been already Occupied'],409); //! Actually should be 409 //418
                 }
             }
 
