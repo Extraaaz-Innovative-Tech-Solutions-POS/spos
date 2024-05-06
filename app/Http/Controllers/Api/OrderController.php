@@ -463,6 +463,7 @@ class OrderController extends Controller
         {
             $kotItem->is_cancelled = 1;
             $kotItem->cancel_reason = $cancel_reason;
+            $kotItem->status = 'CANCELLED';
             $kotItem->save();
 
             $kot->total = $kot->total - $kotItem->product_total;
@@ -489,12 +490,14 @@ class OrderController extends Controller
             if ($kot->is_cancelled == 0) {
                 $kot->cancelled_reason = $cancel_reason;
                 $kot->is_cancelled = 1;
+                $kot->status = 'CANCELLED';
                 $kot->save();
 
                 $kotItem = KotItem::where('table_id', $table_id)->get();
                 foreach ($kotItem as $kotItem) {
                     $kotItem->is_cancelled = 1;
                     $kotItem->cancel_reason = $cancel_reason;
+                    $kotItem->status = 'CANCELLED';
                     $kotItem->save();
                 }
 
