@@ -20,6 +20,9 @@ class AuthController extends Controller
             'phone' => 'required|numeric',
             'role' => 'required',
             'name' => 'required',
+            'type' => 'required',
+
+
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
@@ -34,6 +37,8 @@ class AuthController extends Controller
         $user->plain_password = $validated['plain_password'];
         $user->role = $validated['role'];
         $user->phone = $validated['phone'];
+        $user->business_type =$validated['type'];
+
         $user->save();
 
         $restaurant = new Restaurant();

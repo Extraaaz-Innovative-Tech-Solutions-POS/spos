@@ -141,7 +141,7 @@ class OrderController extends Controller
         try {
             do {
                 $sect_var = "";
-                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "TakeAway" ? "TAK/" : ($section == "Delivery" ?  "DEL/" : ($section == "Advance" ? "ADV/" : null)));
+                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "TakeAway" ? "TAK/" : ($section == "Delivery" ?  "DEL/" : ($section == "Advance" ? "ADV/" : ($section == "Catering" ?  "CAT/" : null))));
                 if (!$sect_var) {
                     return "Invalid Section Name";
                 }
