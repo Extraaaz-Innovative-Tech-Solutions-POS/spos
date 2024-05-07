@@ -20,6 +20,8 @@ class AuthController extends Controller
             'phone' => 'required|numeric',
             'role' => 'required',
             'name' => 'required',
+            'type' => 'required',
+
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
@@ -34,6 +36,8 @@ class AuthController extends Controller
         $user->plain_password = $validated['plain_password'];
         $user->role = $validated['role'];
         $user->phone = $validated['phone'];
+        $user->business_type = $validated['type'];
+
         $user->save();
 
         $restaurant = new Restaurant();
@@ -50,6 +54,7 @@ class AuthController extends Controller
         $restaurant->license_id = $request->license_id ?? null;
         $restaurant->fssai_id = $request->fssai_id ?? null;
         $restaurant->gst_no = $request->gst_no ?? null;
+        $restaurant->business_type =$request->type;
         // $restaurant->latitude = $request->latitude ?? null;
         // $restaurant->longitude = $request->longitude ?? null;
         $restaurant->save();
