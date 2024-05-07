@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CateringConfirmController;
 use App\Http\Controllers\Api\CustomerAddressController;
 use App\Http\Controllers\Api\CustomerAdvancedtController;
 use App\Http\Controllers\Api\CustomerController;
@@ -193,5 +194,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put("updateProfile/{id}", [AuthController::class, 'updateProfile']);
 
     Route::put("updateRestaurant/{rest_id}", [AuthController::class, 'updateRestaurant']);
+
+    //catering conform //
+
+    Route::post('catering-order-confirm', [CateringConfirmController::class, 'cateringConfirmOrder']);
+
+    Route::get('catering-order-bill', [CateringConfirmController::class, 'cateringOrderBill']);
+
+    Route::post('catering-item-update',[CateringConfirmController::class, 'updateItemCat']);
+
+    Route::post('catering-add-item',[CateringConfirmController::class,'additemCat']);
+
+    Route::post('catering-cancel-item',[CateringConfirmController::class,'cancelItemCatering']);
+
+    Route::post('complete-order-catering',[CateringConfirmController::class,'completeOrderCatering']);
+
+
+    Route::post('cancel-order-catering', [CateringConfirmController::class, 'cancelOrderCatering']);
+
+
+
+
+
+
+
+   
 
 });
