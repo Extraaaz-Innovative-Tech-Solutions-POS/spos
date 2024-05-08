@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\KotResource;
+use App\Http\Resources\OrderResource;
 use App\Models\Item;
 use App\Models\KOT;
 use App\Models\KotItem;
@@ -53,7 +54,7 @@ class CateringConfirmController extends Controller
             }
 
             $advanceDate = $request->advance_order_date_time;
-            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d h:i A', $advanceDate) : null;
+            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d H:i:s', $advanceDate) : null;
 
             $kot = new KOT();
             $kot->table_id = $request->table_id;
@@ -320,13 +321,25 @@ class CateringConfirmController extends Controller
             'is_partial_paid' => "",
             'is_full_paid' => "",
             'delivery_address_id' => "",
-            "discounted_amount" => "",
+            "discount" => "",
+            "thali_price" =>"",
+            "no_of_thali"=> "",
+
         ]);
 
         $user = Auth::user();
         $table_id = $request->table_id;
-
+        
+        
         return DB::transaction(function () use ($user, $table_id, $request) {
+            $thali_price = $request->thali_price;
+            $no_of_thali = $request ->no_of_thali;
+
+            $Cdiscount = $request ->discount;
+
+            $Ctotal = $thali_price * $no_of_thali;
+
+            $subTotal = $Ctotal - $Cdiscount;
 
             $kot = KOT::where("table_id", $table_id)->first();
 
@@ -343,12 +356,12 @@ class CateringConfirmController extends Controller
             }
 
             // $kot->status = "COMPLETED";
-            if ($request->discounted_amount) {
-                $kot->total_discount += $request->discounted_amount;
-                $kot->save();
-                $kot->grand_total = $kot->total - $kot->total_discount;
-                $kot->save();
-            }
+            // if ($request->discounted_amount) {
+            //     $kot->total_discount += $request->discounted_amount;
+            //     $kot->save();
+            //     $kot->grand_total = $kot->total - $kot->total_discount;
+            //     $kot->save();
+            // }
 
             $customer_id = $kot->customer_id;
 
@@ -377,31 +390,79 @@ class CateringConfirmController extends Controller
                     $kotItem->save();
                 }
 
-                $total = $kot->total;
-                if ($kot->total_discount) {
-                    $total = $total - $kot->total_discount;
-                }
+                
+                
 
                 $order->table_id = $request->table_id;
                 $order->ispaid = $request->ispaid;
                 $order->sub_table_number = $kot->sub_table_number ?? null;
                 $order->section_id = $kot->section_id ?? null;
                 $order->table_number = $kot->table_number;
-                $order->floor_number = $kot->floor_number;
+                $order->floor_number = $kot->floor_number ?? null;
                 $order->order_type = $kot->order_type;
                 $order->customer_id = $customer_id;
                 $order->invoice_id = $kot->order_number;
                 $order->restaurant_id = $user->restaurant_id;
-                $order->product = $products;    // This is important
-                $order->product_total = $kot->total;    // Total before Tax and Discount
-                $order->total_discount = $kot->total_discount;     // $request->total_discount; // Total Discount
-                $order->subtotal = $total; // Total after discount
+                $order->product = $products;    
+                $order->product_total = $Ctotal;    // Total before Tax and Discount
+                $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
+                $order->subtotal = $subTotal; // Total after discount
                 $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
                 $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
                 $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
                 $order->other_tax = 0;          // $request->other_tax; // Other tax data
-                $order->total = $total;    // Total after adding tax and substracting discount
-                $order->advance_order_date_time     = $kot->advance_order_date_time;
+                $order->total = $subTotal;    // Total after adding tax and substracting discount
+                $order->status =  $status;
+                $order->advance_order_date_time= $kot->advance_order_date_time;
+
+                $order->thali_price = $thali_price;                
+                $order->no_of_thali = $no_of_thali;
+
+                // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
+                // {     
+                $order->save();
+                // }
+            }
+
+
+            if ($request->is_partial_paid == 1) {
+                $status = "PENDING";
+
+                $kot->status = $status;
+                $kot->save();
+
+                foreach ($kotItems as $kotItem) {
+                    $kotItem->status = $status;
+                    $kotItem->save();
+                }
+
+                
+                
+
+                $order->table_id = $request->table_id;
+                $order->ispaid = $request->ispaid;
+                $order->sub_table_number = $kot->sub_table_number ?? null;
+                $order->section_id = $kot->section_id ?? null;
+                $order->table_number = $kot->table_number;
+                $order->floor_number = $kot->floor_number ?? null;
+                $order->order_type = $kot->order_type;
+                $order->customer_id = $customer_id;
+                $order->invoice_id = $kot->order_number;
+                $order->restaurant_id = $user->restaurant_id;
+                $order->product = $products;    
+                $order->product_total = $Ctotal;    // Total before Tax and Discount
+                $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
+                $order->subtotal = $subTotal; // Total after discount
+                $order->status =  $status;
+                $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
+                $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
+                $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
+                $order->other_tax = 0;          // $request->other_tax; // Other tax data
+                $order->total = $subTotal;    // Total after adding tax and substracting discount
+                $order->advance_order_date_time= $kot->advance_order_date_time;
+
+                $order->thali_price = $thali_price;                
+                $order->no_of_thali = $no_of_thali;
 
                 // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
                 // {     
@@ -439,34 +500,10 @@ class CateringConfirmController extends Controller
             }
 
 
-            if (($kot->order_type == "Dine") || ($request->orderType == "Dine")) {
-                $tableActives = TableActive::where("table_id", $kot->table_id)->get();
-                if ($tableActives->count() > 0) {
-                    foreach ($tableActives as $tableActive) {
-                        if ($tableActive->split_table_number == null) {
-                            $tableActive->status = "Available";
-                            $tableActive->delete();
-                        } else {
-                            if ($tableActive->split_table_number == $kot->sub_table_number) {
-                                $tableActive->status = "Available";
-                                $tableActive->delete();
-                            }
-                        }
-                    }
-                } else {
-                    return response()->json(["success" => false, "message" => "Table Not Found"]);
-                }
-            }
 
-            if ($kot->order_type == "Delivery" || $kot->order_type == "delivery") {
-                $kot->delivery_address_id = $request->delivery_address_id;
-                $kot->delivery_status = "PENDING";
-                $kot->save();
-            }
+            $order = new OrderResource($order);
 
-            $kot = new KotResource($kot);
-
-            return response()->json(["success" => true, "data" => $kot, "message" => "Order Completed Successfully"]);
+            return response()->json(["success" => true, "data" => $order, "message" => "Order Completed Successfully"]);
         });
 
         // return response()->json(["success"=>false , "message"=>"Order Not Completed"]);
@@ -528,57 +565,18 @@ class CateringConfirmController extends Controller
         }
     }
 
-    // public function CateringOrderConfirm(Request $request)
-    // {
-    //     $request->validate([
-    //         'table_id' => 'required',
-    //         'ispaid' => 'required',
-    //         'payment_type' => 'required',
-    //         'orderType' => '',
-    //         "table" => "",
-    //         'is_partial_paid' => "",
-    //         'is_full_paid' => "",
-    //         'delivery_address_id' => "",
-    //         "discounted_amount" => "",
-    //         "thali_price" => "required|numeric", // Ensure thali price is numeric
-    //         "total_price" => "", // No need to validate, as it will be calculated
-    //         "no_of_thali" => "required|integer|min:1", // Ensure number of thalis is an integer and at least 1
-    //     ]);
-    
-    //     $user = Auth::user();
-    //     $table_id = $request->table_id;
-    
-    //     return DB::transaction(function () use ($user, $table_id, $request) {
-    //         // Retrieve the values of the additional fields from the request object
-    //         $thali_price = $request->thali_price;
-    //         $no_of_thali = $request->no_of_thali;
-            
-    
-    //         // Calculate total price
-    //         $total_price = $thali_price * $no_of_thali;
-    
-    //         // Assuming you have a model named OrderCatering
-    //         $orderCatering = new Order();
-    
-    //         // Set the attributes of the model instance with values from the request
-    //         $orderCatering->table_id = $request->table_id;
-    //         $orderCatering->ispaid = $request->ispaid;
-    //         $orderCatering->payment_type = $request->payment_type;
-    //         $orderCatering->orderType = $request->orderType;
-    //         $orderCatering->table = $request->table;
-    //         $orderCatering->is_partial_paid = $request->is_partial_paid;
-    //         $orderCatering->is_full_paid = $request->is_full_paid;
-    //         $orderCatering->delivery_address_id = $request->delivery_address_id;
-    //         $orderCatering->discounted_amount = $request->discounted_amount;
-    //         $orderCatering->thali_price = $thali_price;
-    //         $orderCatering->total_price = $total_price; // Assign the calculated total price
-    //         $orderCatering->no_of_thali = $no_of_thali;
-    
-    //         // Save the model instance to persist the data in the database
-    //         $orderCatering->save();
-    
-    //         return response()->json(["success" => true, "data" => $orderCatering, "message" => "Order Catering Data Stored Successfully"]);
-    //     });
-    // }
+    function cateringPendingOrders()
+    {
+        $user = Auth::user();
+        $restaurant_id = $user->restaurant_id;
+
+        $data = Order::where('status','PENDING')->where('order_type','Catering')->where('restaurant_id', $restaurant_id)->get();
+
+        $order = OrderResource::collection($data);
+
+        return response()->json(["success" => true, "data" => $order, ]);
+
+
+    }
     
 }
