@@ -330,18 +330,14 @@ class CateringConfirmController extends Controller
         $user = Auth::user();
         $table_id = $request->table_id;
         
-        
         return DB::transaction(function () use ($user, $table_id, $request) {
             $thali_price = $request->thali_price;
             $no_of_thali = $request ->no_of_thali;
-
             $Cdiscount = $request ->discount;
-
             $Ctotal = $thali_price * $no_of_thali;
-
             $subTotal = $Ctotal - $Cdiscount;
 
-            $kot = KOT::where("table_id", $table_id)->first();
+            $kot = KOT::where("table_id", $table_id)->first(); // Do Eager Loading of Kotitems
 
             if (!$kot) {
                 return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
@@ -364,111 +360,104 @@ class CateringConfirmController extends Controller
             // }
 
             $customer_id = $kot->customer_id;
-
-            $kotItems = KotItem::where('table_id', $table_id)->get();
+            $kotItems = KotItem::where('table_id', $table_id)->get(); // Call kotitems from kot through relation
 
             if (!$kotItems) {
                 return response()->json(['success' => false, 'message' => 'There are no kotItems present for this table id']);
             }
 
             $products = $this->mergedData($kotItems);
-
             $products = json_encode($products);
 
-            $status = 'PENDING';
-
-            $order = new Order();
-
-            if ($request->is_full_paid == 1) {
-                $status = "COMPLETED";
-
-                $kot->status = $status;
-                $kot->save();
-
-                foreach ($kotItems as $kotItem) {
-                    $kotItem->status = $status;
-                    $kotItem->save();
-                }
-
-                
-                
-
-                $order->table_id = $request->table_id;
-                $order->ispaid = $request->ispaid;
-                $order->sub_table_number = $kot->sub_table_number ?? null;
-                $order->section_id = $kot->section_id ?? null;
-                $order->table_number = $kot->table_number;
-                $order->floor_number = $kot->floor_number ?? null;
-                $order->order_type = $kot->order_type;
-                $order->customer_id = $customer_id;
-                $order->invoice_id = $kot->order_number;
-                $order->restaurant_id = $user->restaurant_id;
-                $order->product = $products;    
-                $order->product_total = $Ctotal;    // Total before Tax and Discount
-                $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
-                $order->subtotal = $subTotal; // Total after discount
-                $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
-                $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
-                $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
-                $order->other_tax = 0;          // $request->other_tax; // Other tax data
-                $order->total = $subTotal;    // Total after adding tax and substracting discount
-                $order->status =  $status;
-                $order->advance_order_date_time= $kot->advance_order_date_time;
-
-                $order->thali_price = $thali_price;                
-                $order->no_of_thali = $no_of_thali;
-
-                // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
-                // {     
-                $order->save();
-                // }
-            }
-
-
-            if ($request->is_partial_paid == 1) {
+            $status = "COMPLETED";
+            
+            if($request->is_full_paid != 1)
+            {
                 $status = "PENDING";
-
-                $kot->status = $status;
-                $kot->save();
-
-                foreach ($kotItems as $kotItem) {
-                    $kotItem->status = $status;
-                    $kotItem->save();
-                }
-
-                
-                
-
-                $order->table_id = $request->table_id;
-                $order->ispaid = $request->ispaid;
-                $order->sub_table_number = $kot->sub_table_number ?? null;
-                $order->section_id = $kot->section_id ?? null;
-                $order->table_number = $kot->table_number;
-                $order->floor_number = $kot->floor_number ?? null;
-                $order->order_type = $kot->order_type;
-                $order->customer_id = $customer_id;
-                $order->invoice_id = $kot->order_number;
-                $order->restaurant_id = $user->restaurant_id;
-                $order->product = $products;    
-                $order->product_total = $Ctotal;    // Total before Tax and Discount
-                $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
-                $order->subtotal = $subTotal; // Total after discount
-                $order->status =  $status;
-                $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
-                $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
-                $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
-                $order->other_tax = 0;          // $request->other_tax; // Other tax data
-                $order->total = $subTotal;    // Total after adding tax and substracting discount
-                $order->advance_order_date_time= $kot->advance_order_date_time;
-
-                $order->thali_price = $thali_price;                
-                $order->no_of_thali = $no_of_thali;
-
-                // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
-                // {     
-                $order->save();
-                // }
             }
+
+            $kot->status = $status;
+            $kot->save();
+
+            foreach ($kotItems as $kotItem) {
+                $kotItem->status = $status;
+                $kotItem->save();
+            }
+            
+            $order = new Order();
+            $order->table_id = $request->table_id;
+            $order->ispaid = $request->ispaid;
+            $order->sub_table_number = $kot->sub_table_number ?? null;
+            $order->section_id = $kot->section_id ?? null;
+            $order->table_number = $kot->table_number;
+            $order->floor_number = $kot->floor_number ?? null;
+            $order->order_type = $kot->order_type;
+            $order->customer_id = $customer_id;
+            $order->invoice_id = $kot->order_number;
+            $order->restaurant_id = $user->restaurant_id;
+            $order->product = $products;    
+            $order->product_total = $Ctotal;    // Total before Tax and Discount
+            $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
+            $order->subtotal = $subTotal; // Total after discount
+            $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
+            $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
+            $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
+            $order->other_tax = 0;          // $request->other_tax; // Other tax data
+            $order->total = $subTotal;    // Total after adding tax and substracting discount
+            $order->status =  $status;
+            $order->advance_order_date_time= $kot->advance_order_date_time;
+            $order->thali_price = $thali_price;                
+            $order->no_of_thali = $no_of_thali;
+            $order->save();
+
+            // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
+            // {     
+                // }
+            // }
+
+
+            // if ($request->is_partial_paid == 1) {
+            //     $status = "PENDING";
+
+            //     $kot->status = $status;
+            //     $kot->save();
+
+            //     foreach ($kotItems as $kotItem) {
+            //         $kotItem->status = $status;
+            //         $kotItem->save();
+            //     }   
+                
+
+            //     $order->table_id = $request->table_id;
+            //     $order->ispaid = $request->ispaid;
+            //     $order->sub_table_number = $kot->sub_table_number ?? null;
+            //     $order->section_id = $kot->section_id ?? null;
+            //     $order->table_number = $kot->table_number;
+            //     $order->floor_number = $kot->floor_number ?? null;
+            //     $order->order_type = $kot->order_type;
+            //     $order->customer_id = $customer_id;
+            //     $order->invoice_id = $kot->order_number;
+            //     $order->restaurant_id = $user->restaurant_id;
+            //     $order->product = $products;    
+            //     $order->product_total = $Ctotal;    // Total before Tax and Discount
+            //     $order->total_discount = $Cdiscount ??null;     // $request->total_discount; // Total Discount
+            //     $order->subtotal = $subTotal; // Total after discount
+            //     $order->status =  $status;
+            //     $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
+            //     $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
+            //     $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
+            //     $order->other_tax = 0;          // $request->other_tax; // Other tax data
+            //     $order->total = $subTotal;    // Total after adding tax and substracting discount
+            //     $order->advance_order_date_time= $kot->advance_order_date_time;
+
+            //     $order->thali_price = $thali_price;                
+            //     $order->no_of_thali = $no_of_thali;
+
+            //     // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
+            //     // {     
+            //     $order->save();
+            //     // }
+            // }
 
 
             $orderPayment = new OrderPayment();
@@ -484,22 +473,18 @@ class CateringConfirmController extends Controller
             $orderPayment->status = $status;
             $orderPayment->transaction_id = $request->transaction_id ?? null;
             $orderPayment->payment_details = $request->payment_details ?? null;
-
             $orderPayment->money_given = $request->money_given ?? null;
             $orderPayment->is_partial_paid = $request->is_partial_paid ?? null;
             $orderPayment->is_full_paid = $request->is_full_paid ?? null;
-
             $orderPayment->save();
 
-            if ($request->is_full_paid == 1) {
-                $orderPayments = OrderPayment::where('table_id', $request->table_id)->get();
-                foreach ($orderPayments as $orderPayment) {
-                    $orderPayment->status = "COMPLETED";
-                    $orderPayment->save();
-                }
-            }
-
-
+            // if ($request->is_full_paid == 1) {
+            //     $orderPayments = OrderPayment::where('table_id', $request->table_id)->get();
+            //     foreach ($orderPayments as $orderPayment) {
+            //         $orderPayment->status = "COMPLETED";
+            //         $orderPayment->save();
+            //     }
+            // }
 
             $order = new OrderResource($order);
 
@@ -507,6 +492,75 @@ class CateringConfirmController extends Controller
         });
 
         // return response()->json(["success"=>false , "message"=>"Order Not Completed"]);
+    }
+
+    public function partialOrderPayment(Request $request)
+    {
+        $request->validate([
+            'table_id' => 'required',
+            // 'ispaid' => 'required',
+            'payment_type' => 'required',
+            // 'orderType' => '',
+            // "table" => "",
+            'is_partial_paid' => "",
+            'is_full_paid' => "",
+            "money_given" => "required",
+            // 'delivery_address_id' => "",
+            // "discount" => "",
+            // "thali_price" =>"",
+            // "no_of_thali"=> "",
+        ]);
+
+        $user = Auth::user();
+        $table_id = $request->table_id;
+
+        $kot = KOT::where("table_id",$table_id)->first();
+        $order = Order::where("table_id",$table_id)->first();
+        $status = "PENDING";
+        
+        $orderPayment = new OrderPayment();
+        $orderPayment->user_id = $user->id;
+        $orderPayment->order_id = $order ? $order->id : null;
+        $orderPayment->customer_id = $kot->customer_id;
+        $orderPayment->table_id = $request->table_id;
+        $orderPayment->order_number = $kot->order_number;
+        $orderPayment->restaurant_id = $user->restaurant_id;
+        $orderPayment->payment_type = $request->payment_type; // Cash/Online -- Compulsary
+        $orderPayment->payment_method = $request->payment_method ?? null; // if ONline - UPI/Card/EMI, etc
+        $orderPayment->amount = $kot->total;
+        $orderPayment->status = $status;
+        $orderPayment->transaction_id = $request->transaction_id ?? null;
+        $orderPayment->payment_details = $request->payment_details ?? null;
+        $orderPayment->money_given = $request->money_given ?? null;
+        $orderPayment->is_partial_paid = $request->is_partial_paid ?? null;
+        $orderPayment->is_full_paid = $request->is_full_paid ?? null;
+        $orderPayment->save();
+
+        if ($request->is_full_paid == 1) {
+
+            $orderPayments = OrderPayment::where('table_id', $request->table_id)->get();
+            foreach ($orderPayments as $orderPayment) {
+                $orderPayment->status = "COMPLETED";
+                $orderPayment->save();
+            }
+
+            $kot->status = "COMPLETED";
+            $kot->save();
+
+            $kotItems = $kot->kotItems;
+            foreach($kotItems as $kotItem)
+            {
+                $kotItem->status = "COMPLETED";
+                $kotItem->save();
+            }
+
+            $order->status = "COMPLETED";
+            $order->save();
+
+        }
+
+        return response()->json(["success"=>true,"message"=>"Order Payment done Successfully","data" => $orderPayment]);
+
     }
     private function mergedData($kotItems)
     {

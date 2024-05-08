@@ -214,6 +214,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('pending-order-catering', [CateringConfirmController::class, 'cateringPendingOrders']);
 
+    Route::post('partial-catering-payment',[CateringConfirmController::class,'partialOrderPayment']);
+
 
 
 
