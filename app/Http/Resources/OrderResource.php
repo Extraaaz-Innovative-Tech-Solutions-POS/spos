@@ -63,6 +63,7 @@ class OrderResource extends JsonResource
             'status' =>$this->status,
             'no_of_thali' =>$this->no_of_thali,
             'thali_price' =>$this->thali_price,
+            'order_date' => $this->advance_order_date_time,
             'total_given_amount' => $this->orderPayments ? $this->totalAmountGiven($this->orderPayments) : 0,
             'remaining_money' => $this->orderPayments ? $this->moneyRemaining($this->orderPayments) : 0,
             
