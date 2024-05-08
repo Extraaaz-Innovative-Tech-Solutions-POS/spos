@@ -195,7 +195,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put("updateRestaurant/{rest_id}", [AuthController::class, 'updateRestaurant']);
 
-    //catering conform //
+    //catering conform /
 
     Route::post('catering-order-confirm', [CateringConfirmController::class, 'cateringConfirmOrder']);
 
@@ -211,6 +211,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('cancel-order-catering', [CateringConfirmController::class, 'cancelOrderCatering']);
+
+    Route::get('pending-order-catering', [CateringConfirmController::class, 'cateringPendingOrders']);
+
 
 
 
