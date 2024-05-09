@@ -54,7 +54,10 @@ class CateringConfirmController extends Controller
             }
 
             $advanceDate = $request->advance_order_date_time;
-            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d H:i:s', $advanceDate) : null;
+            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d h:i A', $advanceDate) : null;
+
+            // $advanceDate = $request->advance_order_date_time;
+            // $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d H:i:s', $advanceDate) : null;
 
             $kot = new KOT();
             $kot->table_id = $request->table_id;
