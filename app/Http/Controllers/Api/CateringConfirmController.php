@@ -554,8 +554,12 @@ class CateringConfirmController extends Controller
                 $kotItem->save();
             }
 
-            $order->status = "COMPLETED";
-            $order->save();
+            $orders = Order::where('table_id', $request->table_id)->get();
+            foreach($orders as $order)
+            {
+                $order->status = "COMPLETED";
+                $order->save();
+            }
 
         }
 
