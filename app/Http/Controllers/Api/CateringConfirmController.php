@@ -555,15 +555,17 @@ class CateringConfirmController extends Controller
             }
 
             $orders = Order::where('table_id', $request->table_id)->get();
-            foreach($orders as $order)
+            foreach($orders as $order1)
             {
-                $order->status = "COMPLETED";
-                $order->save();
+                $order1->status = "COMPLETED";
+                $order1->save();
             }
 
         }
 
-        return response()->json(["success"=>true,"message"=>"Order Payment done Successfully","data" => $orderPayment]);
+        $order = new OrderResource($order); 
+
+        return response()->json(["success"=>true,"message"=>"Order Payment done Successfully","data" => $order]);
 
     }
     private function mergedData($kotItems)
