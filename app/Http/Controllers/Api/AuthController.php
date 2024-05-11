@@ -20,7 +20,7 @@ class AuthController extends Controller
             'phone' => 'required|numeric',
             'role' => 'required',
             'name' => 'required',
-            'type' => 'required',
+            'type' => '',
 
 
         ]);
