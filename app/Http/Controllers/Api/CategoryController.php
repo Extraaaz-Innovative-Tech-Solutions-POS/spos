@@ -23,11 +23,27 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index2(Request $request)
     {
         $user = Auth::user();
         
-        $categories = Category::with('items.modifierGroups')->where('restaurant_id',$user->restaurant_id)->get();
+        $categories = Category::with(['items.modifierGroups','items.sectionWisePricings'])->where('restaurant_id',$user->restaurant_id)->get();
+        $categories = CategoryResource::collection($categories);
+
+        return response()->json(["success" => true, "data" => $categories]);
+    }
+
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+
+        $section_id = $request->section_id;
+
+        $categories = Category::with(['items.modifierGroups', 'items.sectionWisePricings'])->where('restaurant_id', $user->restaurant_id)->get();
+
+        $categories->each(function ($categories) use ($section_id) {
+            $categories->section_id = $section_id;
+        });
         $categories = CategoryResource::collection($categories);
 
         return response()->json(["success" => true, "data" => $categories]);

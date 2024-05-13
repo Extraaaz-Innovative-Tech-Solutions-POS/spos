@@ -41,4 +41,9 @@ class Section extends Model
     //         'floor_section_id'
     //     );
     // }
+
+    public function items()
+    {
+        return $this->belongsToMany(Item::class,'item_pricing','item_id','section_id')->withPivot('price')->withTimestamps();
+    }
 }
