@@ -32,7 +32,7 @@ class Item extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class, 'id' ,'category_id');
+        return $this->belongsTo(Category::class, 'category_id' ,'category_id');
     }
 
     public function kotItems()
@@ -48,5 +48,10 @@ class Item extends Model
     public function sectionWisePricings()
     {
         return $this->hasMany(ItemPricing::class,'item_id');
+    }
+
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class,'item_pricing','section_id','item_id')->withPivot('price')->withTimestamps();
     }
 }

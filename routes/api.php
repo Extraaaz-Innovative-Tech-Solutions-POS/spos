@@ -44,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('category', CategoryController::class);
 
+    Route::get('category2', [CategoryController::class, 'index2']);
+
     Route::get('getItems/{category_id}', [CategoryController::class, 'getItems']);
 
     Route::apiResource('table', TablesController::class);
@@ -119,7 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cash-payment', [DashboardController::class, 'cashPaymentAmount']);
 
     Route::get('online-payment', [DashboardController::class, 'onlinePaymentAmount']);
-    // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    
     Route::get('day-summary-report', [DaySummaryReport::class, 'index']);
 
     route::apiResource('section', SectionController::class);
@@ -209,20 +211,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('complete-order-catering',[CateringConfirmController::class,'completeOrderCatering']);
 
-
     Route::post('cancel-order-catering', [CateringConfirmController::class, 'cancelOrderCatering']);
 
     Route::get('pending-order-catering', [CateringConfirmController::class, 'cateringPendingOrders']);
 
     Route::post('partial-catering-payment',[CateringConfirmController::class,'partialOrderPayment']);
 
-
-
-
-
-
-
-
-   
+    Route::post('setSectionWisePrice',[ItemController::class, 'setSectionWisePrice']);
+    
+    Route::get('getItemsBySectionId/{section_id}',[ItemController::class, 'getItemsBySectionId']);
+    
+    Route::get('getCategoryItemsBySectionId/{category_id}/{section_id}',[ItemController::class, 'getCategoryItemsBySectionId']);
 
 });

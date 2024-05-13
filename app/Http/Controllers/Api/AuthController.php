@@ -21,8 +21,6 @@ class AuthController extends Controller
             'role' => 'required',
             'name' => 'required',
             'type' => '',
-
-
         ]);
 
         $validated['password'] = bcrypt($validated['password']);

@@ -6,6 +6,8 @@ use App\Exports\CategoryExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemPricingResource;
 use App\Http\Resources\ItemResource;
+use App\Http\Resources\ItemSectionPriceCollection;
+use App\Http\Resources\ItemSectionPriceResource;
 use App\Http\Resources\ModifierGroupResource;
 use App\Imports\CategoryImport;
 use App\Imports\ItemImport;
@@ -13,6 +15,7 @@ use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemPricing;
 use App\Models\ModifierGroup;
+use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,13 +30,7 @@ class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        //
         $user = Auth::user();
-
-        $restaurant_id = $request->input('restaurant_id');
-        $data1 = User::where('id', $user->id)
-            ->get()
-            ->toArray(); // Corrected $user->Id to $user->id
 
         $Item = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
 
@@ -221,6 +218,39 @@ class ItemController extends Controller
         return response()->json(['success' => true, 'message' => 'Data of item '. $itemName, 'data' =>  $itemPrice ]);
     }
 
+    public function setSectionWisePrice(Request $request)
+    {
+        $request->validate([
+            'item_id' => "required",
+            'section_ids' => "required",
+            'prices' => "required",
+        ]);
+
+        $user = Auth::user();
+        $item_id = $request->item_id;
+        $section_ids = $request->section_ids;
+        $prices = $request->prices;
+
+        $item = Item::findOrFail($item_id);
+
+        if (count($section_ids) !== count($prices)) {
+            return response()->json(['error' => 'Mismatch between section_ids and prices.'], 400);
+        }
+
+        // Detach sections not included in the request
+        $existingSections = $item->sections()->pluck('section_id')->toArray();
+        $sectionsToDetach = array_diff($existingSections, $section_ids);
+        $item->sections()->detach($sectionsToDetach);
+
+        foreach ($section_ids as $index => $section_id) {
+            $price = $prices[$index];
+            // $section = Section::findOrFail($section_id);
+            $item->sections()->syncWithoutDetaching([$section_id => ['price' => $price]]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Section and Price updated Successfully to ' . $item->item_name]);
+    }
+
     public function setSectionPrice(Request $request)
     {
         $user = Auth::user();
@@ -327,6 +357,41 @@ class ItemController extends Controller
         return Excel::download(new CategoryExport, 'categories.xlsx');
     }
 
+    public function getItemsBySectionId(Request $request, $section_id)
+    {
+        $user = Auth::user();
 
-    
+        $items = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
+
+        $items->each(function ($item) use ($section_id) {
+            $item->section_id = $section_id;
+        });
+
+        $items = ItemSectionPriceResource::collection($items);
+        
+        return response()->json(['success' => true, 'data' => $items]); 
+    }
+
+    public function getCategoryItemsBySectionId(Request $request, $category_id, $section_id)
+    {
+        $user = Auth::user();
+
+        $category = Category::with(['items.modifierGroups', 'items.sectionWisePricings'])->where("category_id", $category_id)->first();
+        $items = $category->items;
+
+        // $items = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
+
+        $items->each(function ($item) use ($section_id) {
+            $item->section_id = $section_id;
+        });
+
+        $items = ItemSectionPriceResource::collection($items); //->additional(["section_id"=>$section_id]);// This is for collection 
+
+        // $items->extra = (object) ['section_id' => $section_id]; //& This is the second way , But for single object
+
+        // $items = new ItemSectionPriceResource($items,$section_id); //! This is the third way, but for single object
+
+        return response()->json(['success' => true, 'data' => $items]);
+    }
+
 }
