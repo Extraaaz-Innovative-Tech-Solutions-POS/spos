@@ -39,7 +39,8 @@ class ItemSectionPriceResource extends JsonResource
             'short_code' => $this->short_code,
             'section_id' => $section_id ?? null,
             // 'sectionWisePricings' => ItemPricingResource::collection($this->whenLoaded('sectionWisePricings')),
-            'modifierGroups' => ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
+            'modifierGroups' => $section_id ? ModifierGroupResource::collection($this->whenLoaded('modifierGroups'))->where('section_id', '=', $this->section_id)
+            : ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
         ];
     }
 }

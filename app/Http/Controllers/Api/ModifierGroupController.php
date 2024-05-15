@@ -55,6 +55,7 @@ class ModifierGroupController extends Controller
         $modifierGroup->name = $request->name;
         $modifierGroup->description = $request->description;
         $modifierGroup->type = $request->type;
+        $modifierGroup->section_id = $request->section_id;
         $modifierGroup->restaurant_id = $user->restaurant_id;
         $modifierGroup->save();
 
@@ -89,6 +90,7 @@ class ModifierGroupController extends Controller
         $modifierGroup->name = $request->name;
         $modifierGroup->description = $request->description;
         $modifierGroup->type = $request->type;
+        $modifierGroup->section_id = $request->section_id;
         $modifierGroup->save();
 
         return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifierGroup]);       

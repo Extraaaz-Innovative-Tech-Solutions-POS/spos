@@ -17,6 +17,7 @@ class ModifierGroup extends Model
         'name',
         'description',
         'type',
+        'section_id',
         'restaurant_id',
         'created_at',
         'updated_at',
@@ -36,5 +37,9 @@ class ModifierGroup extends Model
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
+    }
+    public function section()
+    {
+        return $this->belongsTo(Section::class,'section_id');
     }
 }
