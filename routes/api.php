@@ -223,4 +223,6 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('getCategoryItemsBySectionId/{category_id}/{section_id}',[ItemController::class, 'getCategoryItemsBySectionId']);
 
+    Route::post('tax-setting',[OrderController::class,'tax_setting']);
+
 });

@@ -8,6 +8,7 @@ use App\Http\Resources\TableActiveResource;
 use App\Models\Item;
 use App\Models\KOT;
 use App\Models\KotItem;
+use App\Models\master_tax;
 use App\Models\Order;
 use App\Models\OrderPayment;
 use App\Models\Section;
@@ -623,7 +624,14 @@ class OrderController extends Controller
                 // }
             }
 
+            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
 
+            $tax_status = $tax->status;
+            $tax_cgst = $tax->cgst;
+            $tax_sgst = $tax->sgst;
+            $tax_vat = $tax->vat;
+
+            
             $orderPayment = new OrderPayment();
             $orderPayment->user_id = $user->id;
             $orderPayment->order_id = $order? $order->id : null;
@@ -642,14 +650,33 @@ class OrderController extends Controller
             $orderPayment->is_partial_paid = $request->is_partial_paid ?? null;
             $orderPayment->is_full_paid = $request->is_full_paid ?? null;
 
+           
+
+
             $orderPayment->save();
 
             if ($request->is_full_paid == 1)  
             {
                 $orderPayments = OrderPayment::where('table_id',$request->table_id)->get();
+                
+                $cgstTax = ($tax_cgst/100) * $orderPayment->money_given;
+                
+                $sgstTax = ($tax_sgst/100) * $orderPayment->money_given;
+
+                $vatTax = ($tax_vat/100) * $orderPayment->money_given;
+
                 foreach ($orderPayments as $orderPayment)
                 {
                     $orderPayment->status = "COMPLETED";
+
+                    if($tax_status == 1)
+                    
+                        {   $orderPayment->cgst_tax = $cgstTax;
+                            $orderPayment->sgst_tax = $sgstTax;
+                            $orderPayment->vat_tax = $vatTax;
+
+                        }
+
                     $orderPayment->save();
                 }
             } 
@@ -808,4 +835,37 @@ class OrderController extends Controller
         $orders = KotResource::collection($orders);
         return response()->json(["success" => true, "data" => $orders]);
     }
+
+    public function tax_setting(Request $request)
+    {
+        $user = Auth::user();
+        
+       
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+    
+        if($tax) {
+            
+            if ($request->has('cgst')) {
+                $tax->cgst = $request->cgst;
+            }
+            if ($request->has('sgst')) {
+                $tax->sgst = $request->sgst;
+            }
+            if ($request->has('status')) {
+                $tax->status = $request->status;
+            }
+            $tax->save();
+            return response()->json(['success' => "Tax settings updated"]);
+        } else {
+           
+            $tax = new Master_tax();
+            $tax->cgst = $request->cgst;
+            $tax->sgst = $request->sgst;
+            $tax->status = $request->status;
+            $tax->restaurant_id = $user->restaurant_id;
+            $tax->save();
+            return response()->json(['success' => "Tax settings confirmed"]);
+        }
+    }
+    
 }
