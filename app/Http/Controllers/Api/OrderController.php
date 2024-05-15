@@ -541,6 +541,13 @@ class OrderController extends Controller
 
             $kot = KOT::where("table_id", $table_id)->first();
 
+            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+            $tax_status = $tax->status;
+            $tax_cgst = $tax->cgst;
+            $tax_sgst = $tax->sgst;
+            $tax_vat = $tax->vat;
+
             if (!$kot) {
                 return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
             }
@@ -561,6 +568,8 @@ class OrderController extends Controller
                 $kot->save();
             }
 
+            
+
             $customer_id = $kot->customer_id;
 
             $kotItems = KotItem::where('table_id', $table_id)->get();
@@ -577,6 +586,9 @@ class OrderController extends Controller
             $status = 'PENDING';
 
             $order = new Order();
+
+           
+
             
             if($request->is_full_paid == 1)   
             {
@@ -596,6 +608,26 @@ class OrderController extends Controller
                 {
                     $total = $total - $kot->total_discount;
                 }
+
+                 $cgstTax = ($tax_cgst/100) * $total;
+                
+                 $sgstTax = ($tax_sgst/100) * $total;
+
+                 $vatTax = ($tax_vat/100) * $total;
+
+                 if($tax_status == 1)
+
+                 {   $kot->cgst_tax = $cgstTax;
+                     $kot->sgst_tax = $sgstTax;
+                     $kot->vat_tax = $vatTax;
+                     $kot->grand_total = $total + $cgstTax + $sgstTax + $vatTax;
+                     $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                     $kot->save();
+                    
+
+                 }
+
 
                 $order->table_id = $request->table_id;
                 $order->ispaid = $request->ispaid;
@@ -618,19 +650,26 @@ class OrderController extends Controller
                 $order->total = $total;    // Total after adding tax and substracting discount
                 $order->advance_order_date_time	 = $kot->advance_order_date_time; 
 
+                if($tax_status == 1)
+
+                    {   $order->cgst_tax = $cgstTax;
+                        $order->sgst_tax = $sgstTax;
+                        $order->vat_tax = $vatTax;
+
+                        $order->total = $total + $cgstTax + $sgstTax + $vatTax;
+                        $order->restrotaxtotal = $cgstTax + $sgstTax + $vatTax;
+
+                    }
+
+
+
                 // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
                 // {     
                 $order->save();
                 // }
             }
 
-            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
-
-            $tax_status = $tax->status;
-            $tax_cgst = $tax->cgst;
-            $tax_sgst = $tax->sgst;
-            $tax_vat = $tax->vat;
-
+           
             
             $orderPayment = new OrderPayment();
             $orderPayment->user_id = $user->id;
@@ -659,23 +698,23 @@ class OrderController extends Controller
             {
                 $orderPayments = OrderPayment::where('table_id',$request->table_id)->get();
                 
-                $cgstTax = ($tax_cgst/100) * $orderPayment->money_given;
+                // $cgstTax = ($tax_cgst/100) * $orderPayment->money_given;
                 
-                $sgstTax = ($tax_sgst/100) * $orderPayment->money_given;
+                // $sgstTax = ($tax_sgst/100) * $orderPayment->money_given;
 
-                $vatTax = ($tax_vat/100) * $orderPayment->money_given;
+                // $vatTax = ($tax_vat/100) * $orderPayment->money_given;
 
                 foreach ($orderPayments as $orderPayment)
                 {
                     $orderPayment->status = "COMPLETED";
 
-                    if($tax_status == 1)
-                    
-                        {   $orderPayment->cgst_tax = $cgstTax;
-                            $orderPayment->sgst_tax = $sgstTax;
-                            $orderPayment->vat_tax = $vatTax;
+                    // if($tax_status == 1)
 
-                        }
+                    //     {   $orderPayment->cgst_tax = $cgstTax;
+                    //         $orderPayment->sgst_tax = $sgstTax;
+                    //         $orderPayment->vat_tax = $vatTax;
+
+                    //     }
 
                     $orderPayment->save();
                 }

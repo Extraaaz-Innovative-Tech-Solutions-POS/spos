@@ -37,6 +37,9 @@ class KOT extends Model
         'delivery_status',
         'created_at',
         'updated_at',
+        'cgst_tax',
+        'sgst_tax',
+        'vat_tax'
     ]; 
 
     public function kotItems()
