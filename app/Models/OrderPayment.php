@@ -29,6 +29,9 @@ class OrderPayment extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'cgst_tax',
+        'sgst_tax',
+        'vat_tax'
     ];
 
     public function kot()
