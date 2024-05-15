@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FloorResource;
 use App\Models\Floor;
+use App\Models\KOT;
 use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -134,5 +135,42 @@ class FloorController extends Controller
         // $floor->sections()->syncWithPivotValues($section_ids,["tables_count"=>$tables_counts]);
 
         return response()->json(['success' => true, 'message' =>'Section and Tables_Count updated Successfully to ' . $floor->floor_name]);
+    }
+
+    function table_transfer(Request $request)
+    {
+        $user = Auth::user();
+       
+        $table_id = $request->table_id;
+        
+        $floor_id = $request->floor_id;
+        $section_id = $request->section_id;
+        $table_number = $request->table_number;
+
+
+        $kot = KOT::where(['restaurant_id' => $user->restaurant_id,'status' => 'PENDING','table_id'=>$table_id])
+                           ->first();
+
+
+        if($kot)
+        {
+            $kot->table_number = $table_number; 
+            $kot->section_id = $section_id; 
+            $kot->floor_number = $floor_id;            
+            
+            $kot->save();
+
+
+        }
+
+        return response()->json(['success' => true, 'message' =>'Table Transfer successfully!!!']);
+
+       
+
+        
+
+
+
+
     }
 }
