@@ -24,6 +24,7 @@ class ModifierGroupResource extends JsonResource
             'description' => $this->description,
             'type' => $this->type == 1 ? 'add-ons' : 'variants',
             'section_id' => $this->section_id,
+            'section_name' => $this->section ? $this->section->name : null,
             'restaurant_id' => $this->restaurant_id,
             'items_count' => $this->items ? $this->items->count() : null,
             'modifiers_count' => $this->modifiers ? $this->modifiers->count() : null,
