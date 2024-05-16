@@ -19,7 +19,8 @@ class ItemSectionPriceResource extends JsonResource
         $section_id = $this->section_id;
         $sectionWisePrice = $collection->where('section_id', $section_id)->first();
         $price = $sectionWisePrice ? $sectionWisePrice->price : null;
-        return strval($price);
+        $price = $price ? strval($price) : null;
+        return $price;
     }
     public function toArray($request)
     {
@@ -28,7 +29,7 @@ class ItemSectionPriceResource extends JsonResource
             'id' => $this->id,
             'name' => $this->item_name,
             'actual_price' => $this->price,
-            'price' => $this->sectionWisePrice($this->sectionWisePricings) ? $this->sectionWisePrice($this->sectionWisePricings) : $this->price,
+            'price' => $this->section_id ? ($this->sectionWisePrice($this->sectionWisePricings) ?? $this->price) : $this->price, //$this->section_id ? ($this->sectionWisePricings ? $this->sectionWisePrice($this->sectionWisePricings) : $this->price ) : $this->price,
             'discount' => $this->discount,
             'category_id' => $this->category_id,
             'category_name' => $this->category ? $this->category->category_name : null,
