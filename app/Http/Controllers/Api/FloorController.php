@@ -7,6 +7,7 @@ use App\Http\Resources\FloorResource;
 use App\Models\Floor;
 use App\Models\KOT;
 use App\Models\Section;
+use App\Models\TableActive;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -147,10 +148,16 @@ class FloorController extends Controller
         $section_id = $request->section_id;
         $table_number = $request->table_number;
 
+        //! Remember to add Split Table Number when the split table is implemented.
 
-        $kot = KOT::where(['restaurant_id' => $user->restaurant_id,'status' => 'PENDING','table_id'=>$table_id])
-                           ->first();
+        $tableActive = TableActive::where(["table_number"=>$table_number,"section_id" => $section_id,"floor_number"=>$floor_id])->first();
 
+        if($tableActive)
+        {
+            return response()->json(["success" => false, "message" => "Data is already present in the given table-number" ],419);
+        }
+
+        $kot = KOT::where(['restaurant_id' => $user->restaurant_id,'status' => 'PENDING','table_id'=>$table_id])->first();
 
         if($kot)
         {
