@@ -171,4 +171,43 @@ class DaySummaryReport extends Controller
     {
         //
     }
-}
+
+    public function cashierwisereportrole(Request $request)
+    {
+        // $user = Auth::user();
+        // return $user;
+        $selectedFromDate = $request->fromDate;
+        $selectedToDate = $request->toDate;
+        
+        $role = $request->role; // Assuming you get the selected role from the request
+        
+        $ordersQuery = OrderPayment::join('user', 'order_payments.user_id', '=', 'user.id')
+            ->where("order_payments.restaurant_id",auth()->user()->restaurant_id)
+            ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
+                $query->whereBetween('order_payments.created_at', [$selectedFromDate, $selectedToDate])
+                    ->orWhereDate('order_payments.created_at', $selectedFromDate)
+                    ->orWhereDate('order_payments.created_at', $selectedToDate);
+            })
+            // ->where('user.role', $role)
+            ->select(DB::raw('SUM(order_payments.amount) as total_amount'),'user.role as role','order_payments.user_id as user_id','user.name as name')
+            ->groupBy('order_payments.user_id','user.role','user.name')
+            ->where('order_payments.status', 'COMPLETED');
+            // ->get();
+        
+        // If a specific role is selected, filter orders by that role
+       
+        
+        $totalInvoice = $ordersQuery->where('order_payments.restaurant_id', auth()->user()->restaurant_id)->count();
+        $totalSale = $ordersQuery->where('order_payments.restaurant_id', auth()->user()->restaurant_id)->sum('order_payments.amount');
+        $productsCount = $ordersQuery->where('order_payments.restaurant_id', auth()->user()->restaurant_id)->count();
+        
+        return response()->json([
+            "success" => true,
+            "totalInvoice" => $totalInvoice,
+            "totalSale" => $totalSale,
+            "productsCount" => $productsCount,
+            "ordersQuery" => $ordersQuery->get(),
+        ]);
+    
+
+    }}

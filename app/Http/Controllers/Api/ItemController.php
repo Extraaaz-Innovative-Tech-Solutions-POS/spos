@@ -128,7 +128,7 @@ class ItemController extends Controller
         $Item->varients = $request->varients ? $request->varients : null;
         $Item->tax_percentage = $request->tax_percentage ? $request->tax_percentage : null;
         $Item->save();
-        return response()->json(['success' => true, 'message' => 'Category updated successfully', 'data' => $Item]); //, 'data' => $category]);
+        return response()->json(['success' => true, 'message' => 'Item updated successfully', 'data' => $Item]); //, 'data' => $category]);
     }
 
     /**
