@@ -183,6 +183,13 @@ class OrderController extends Controller
 
         return DB::transaction(function () use ($user, $request) {
 
+            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+            $tax_status = $tax->status;
+            $tax_cgst = $tax->cgst;
+            $tax_sgst = $tax->sgst;
+            $tax_vat = $tax->vat;
+
             $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
             if ($oldKot) {
                 return response()->json(['success' => false, 'message' => 'Table already has an order with same table_id']);
@@ -267,7 +274,25 @@ class OrderController extends Controller
             }
 
             $kot->total = $grand_total;
-            $kot->grand_total = $grand_total;
+            // $kot->grand_total = $grand_total;
+
+            $cgstTax = ($tax_cgst/100) * $grand_total;
+                
+            $sgstTax = ($tax_sgst/100) * $grand_total;
+
+            $vatTax = ($tax_vat/100) * $grand_total;
+
+            
+            if($tax_status == 1)
+            {   $kot->cgst_tax = $cgstTax;
+                $kot->sgst_tax = $sgstTax;
+                $kot->vat_tax = $vatTax;
+                $kot->grand_total = $grand_total + $cgstTax + $sgstTax + $vatTax;
+                $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                // $kot->save();
+            }
+            
             $kot->save();
 
             
@@ -568,8 +593,6 @@ class OrderController extends Controller
                 $kot->save();
             }
 
-            
-
             $customer_id = $kot->customer_id;
 
             $kotItems = KotItem::where('table_id', $table_id)->get();
@@ -587,9 +610,6 @@ class OrderController extends Controller
 
             $order = new Order();
 
-           
-
-            
             if($request->is_full_paid == 1)   
             {
                 $status = "COMPLETED";
