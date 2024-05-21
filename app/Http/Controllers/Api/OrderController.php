@@ -280,7 +280,7 @@ class OrderController extends Controller
                 
             $sgstTax = ($tax_sgst/100) * $grand_total;
 
-            $vatTax = ($tax_vat/100) * $grand_total;
+            $vatTax = 0;//($tax_vat/100) * $grand_total;
 
             
             if($tax_status == 1)
