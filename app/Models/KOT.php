@@ -61,4 +61,9 @@ class KOT extends Model
     {
         return $this->belongsTo(CustomerAddress::class,'delivery_address_id');
     }
+
+    public function tax()
+    {
+        return $this->hasOne(Master_tax::class,'restaurant_id','restaurant_id');
+    }
 }
