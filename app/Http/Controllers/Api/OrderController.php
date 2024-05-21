@@ -926,5 +926,20 @@ class OrderController extends Controller
             return response()->json(['success' => "Tax settings confirmed"]);
         }
     }
+
+
+    public function get_tax()
+    {
+        $user = Auth::user();
+
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+        return response()->json(["success" => true, "data" => $tax]);
+
+
+
+
+    }
+
     
 }

@@ -61,9 +61,10 @@ class KotResource extends JsonResource
             'grand_total' => $this->grand_total,
             'cgst_tax'=>$this->cgst_tax,
             'sgst_tax'=>$this->sgst_tax,
-            'vat_tax'=>$this->vat_tax,
+            'vat_tax'=>$this->vat_tax,            
             'total_given_amount' => $this->orderPayments ? $this->totalAmountGiven($this->orderPayments) : 0,
             'remaining_money' => $this->orderPayments ? $this->moneyRemaining($this->orderPayments) : 0,
+            'tax_data'=>$this->tax ?? null,
             'items'=> KotItemResource::collection($filteredItems),
             'payments' => $this->orderPayments, // ? $this->order_payments : null,
             

@@ -225,4 +225,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('tax-setting',[OrderController::class,'tax_setting']);
 
+    Route::get('get-tax',[OrderController::class,'get_tax']);
+
+
+
 });
