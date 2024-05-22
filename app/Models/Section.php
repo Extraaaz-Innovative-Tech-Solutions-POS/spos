@@ -46,4 +46,9 @@ class Section extends Model
     {
         return $this->belongsToMany(Item::class,'item_pricing','item_id','section_id')->withPivot('price')->withTimestamps();
     }
+
+    public function modifierGroups()
+    {
+        return $this->hasMany(ModifierGroup::class,'section_id');
+    }
 }

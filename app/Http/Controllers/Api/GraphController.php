@@ -26,11 +26,24 @@ class GraphController extends Controller
         $toDate = Carbon::parse($request->toDate)->addDay()->format('Y-m-d');
         // Fetching user data
         $userData = User::find($user->id);
-        $data = OrderPayment::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(amount) as total_payment'))
-            ->where('restaurant_id', $user->restaurant_id)
-            ->whereBetween('created_at', [$fromDate, $toDate])
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get();
+        if ($request->input('order_type') === 'catering') {
+            $data = DB::table('orders')
+                ->join('order_payments', 'orders.table_id', '=', 'order_payments.table_id')
+                ->where('orders.order_type', 'catering')
+                ->select(DB::raw('DATE(orders.created_at) as date'), DB::raw('SUM(order_payments.money_given) as total_payment'))
+                ->where('order_payments.status','COMPLETED')
+                ->whereDate('orders.created_at', Carbon::today())
+                ->groupBy(DB::raw('DATE(orders.created_at)'))
+                ->get();
+        } else {
+            $data = OrderPayment::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(amount) as total_payment'))
+                ->where('restaurant_id', $user->restaurant_id)
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get();
+        }   
+        
+            
         return response()->json([
             "success" => true, "result" => $data
         ]);
@@ -80,4 +93,6 @@ class GraphController extends Controller
     {
         //
     }
+
+
 }

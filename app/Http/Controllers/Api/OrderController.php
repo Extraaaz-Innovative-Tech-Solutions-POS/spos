@@ -841,6 +841,9 @@ class OrderController extends Controller
         $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
                               'is_cancelled' => 0,
                               'status' => 'PENDING'])->get();
+
+        $orders = KotResource::collection($orders);
+        
         return response()->json(["success" => true, "data" => $orders]);
     }
 
