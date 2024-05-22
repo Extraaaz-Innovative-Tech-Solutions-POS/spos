@@ -8,7 +8,7 @@ use App\Http\Resources\TableActiveResource;
 use App\Models\Item;
 use App\Models\KOT;
 use App\Models\KotItem;
-use App\Models\master_tax;
+use App\Models\Master_tax;
 use App\Models\Order;
 use App\Models\OrderPayment;
 use App\Models\Section;
