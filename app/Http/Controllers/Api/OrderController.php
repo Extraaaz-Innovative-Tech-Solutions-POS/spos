@@ -275,7 +275,7 @@ class OrderController extends Controller
             }
 
             $kot->total = $grand_total;
-            // $kot->grand_total = $grand_total;
+            $kot->grand_total = $grand_total;
 
             $cgstTax = ($tax_cgst/100) * $grand_total;
                 
@@ -293,7 +293,11 @@ class OrderController extends Controller
 
                 // $kot->save();
             }
+            // else{
+            //     $kot->grand_total = $grand_total;
+            // }
             
+
             $kot->save();
 
             
