@@ -163,9 +163,18 @@ class FloorController extends Controller
         {
             $kot->table_number = $table_number; 
             $kot->section_id = $section_id; 
-            $kot->floor_number = $floor_id;            
+            $kot->floor_number = $floor_id;  
+
+            $tableActive1 = TableActive::where(['table_id'=>$table_id])->first();
+  
+            
+            $tableActive1->table_number =$table_number;
+            $tableActive1->section_id = $section_id;
+            $tableActive1->floor_number =$floor_id;
+
             
             $kot->save();
+            $tableActive1 ->save();
 
 
         }
