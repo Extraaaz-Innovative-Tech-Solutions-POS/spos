@@ -185,10 +185,11 @@ class OrderController extends Controller
 
             $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
 
-            $tax_status = $tax->status;
-            $tax_cgst = $tax->cgst;
-            $tax_sgst = $tax->sgst;
-            $tax_vat = $tax->vat;
+            $tax_status = $tax ? $tax->status  : 0;
+
+            $tax_cgst = $tax ? $tax->cgst : 0;
+            $tax_sgst = $tax ? $tax->sgst : 0;
+            $tax_vat = $tax ? $tax->vat : 0;
 
             $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
             if ($oldKot) {
@@ -274,7 +275,7 @@ class OrderController extends Controller
             }
 
             $kot->total = $grand_total;
-            // $kot->grand_total = $grand_total;
+            $kot->grand_total = $grand_total;
 
             $cgstTax = ($tax_cgst/100) * $grand_total;
                 
@@ -292,7 +293,11 @@ class OrderController extends Controller
 
                 // $kot->save();
             }
+            // else{
+            //     $kot->grand_total = $grand_total;
+            // }
             
+
             $kot->save();
 
             
@@ -568,10 +573,10 @@ class OrderController extends Controller
 
             $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
 
-            $tax_status = $tax->status;
-            $tax_cgst = $tax->cgst;
-            $tax_sgst = $tax->sgst;
-            $tax_vat = $tax->vat;
+            $tax_status = $tax ? $tax->status : 0;
+            $tax_cgst = $tax ? $tax->cgst :  0;
+            $tax_sgst = $tax ? $tax->sgst : 0;
+            $tax_vat = $tax ? $tax->vat : 0;
 
             if (!$kot) {
                 return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
