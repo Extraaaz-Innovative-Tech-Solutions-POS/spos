@@ -52,6 +52,6 @@ class Item extends Model
 
     public function sections()
     {
-        return $this->belongsToMany(Section::class,'item_pricing','section_id','item_id')->withPivot('price')->withTimestamps();
+        return $this->belongsToMany(Section::class,'item_pricings','item_id', 'section_id')->withPivot('price')->withTimestamps();
     }
 }
