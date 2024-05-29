@@ -361,10 +361,7 @@ class ItemController extends Controller
     {
         $user = Auth::user();
 
-        $section = Section::findOrFail($section_id);
-
-        $items = $section->items()->with(['modifierGroups', 'sectionWisePricings'])->get();
-        // $items = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
+        $items = Item::where('restaurant_id', $user->restaurant_id)->with(['modifierGroups', 'sectionWisePricings'])->get();
 
         $items->each(function ($item) use ($section_id) {
             $item->section_id = $section_id;
