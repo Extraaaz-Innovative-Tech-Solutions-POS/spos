@@ -401,6 +401,13 @@ class OrderController extends Controller
 
         $kot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
 
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+        $tax_status = $tax ? $tax->status  : 0;
+
+        $tax_cgst = $tax ? $tax->cgst : 0;
+        $tax_sgst = $tax ? $tax->sgst : 0;
+        $tax_vat = $tax ? $tax->vat : 0;
+
         if (!$kot) {
             return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
         }
@@ -416,6 +423,7 @@ class OrderController extends Controller
         $total = $kot->total;
 
         $orderItems = $request->items;//[0];
+
 
         foreach($orderItems as $orderItem)
         {
@@ -433,7 +441,23 @@ class OrderController extends Controller
                 $total += $orderItem['quantity'] * $orderItem['price'];
         
                 $kot->total = $total;
+                $kot->grand_total = $total;
                 $kot->save();
+
+                $cgstTax = ($tax_cgst / 100) * $kot->total;
+                $sgstTax = ($tax_sgst / 100) * $kot->total;
+                $vatTax = 0; //($tax_vat/100) * $grand_total;
+
+
+                if ($tax_status == 1) {
+                    $kot->cgst_tax = $cgstTax;
+                    $kot->sgst_tax = $sgstTax;
+                    $kot->vat_tax = $vatTax;
+                    $kot->grand_total = $kot->total + $cgstTax + $sgstTax + $vatTax;
+                    $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                    $kot->save();
+                }
 
                 // return response()->json(['success'=> true, 'message' => 'Item upadeted to table_id : '. $request->table_id .' successfully'], 200);
             }
@@ -454,7 +478,24 @@ class OrderController extends Controller
                 $total += $orderItem['quantity'] * $orderItem['price'];
         
                 $kot->total = $total;
+                $kot->grand_total = $total;
+                
                 $kot->save();
+
+                $cgstTax = ($tax_cgst / 100) * $kot->total;
+                $sgstTax = ($tax_sgst / 100) * $kot->total;
+                $vatTax = 0; //($tax_vat/100) * $grand_total;
+
+
+                if ($tax_status == 1) {
+                    $kot->cgst_tax = $cgstTax;
+                    $kot->sgst_tax = $sgstTax;
+                    $kot->vat_tax = $vatTax;
+                    $kot->grand_total = $kot->total + $cgstTax + $sgstTax + $vatTax;
+                    $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                    $kot->save();
+                }
             }
         }
         return response()->json(['success'=> true, 'message' => 'Items added to table_id : '. $request->table_id .' successfully'], 200);
