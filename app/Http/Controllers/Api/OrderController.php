@@ -185,6 +185,8 @@ class OrderController extends Controller
 
             $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
 
+            // return $tax;
+
             $tax_status = $tax ? $tax->status  : 0;
 
             $tax_cgst = $tax ? $tax->cgst : 0;
@@ -495,7 +497,7 @@ class OrderController extends Controller
 
         $item = Item::findOrFail($item_id);//->first();
 
-        $itemName = $item->item_name;
+        $itemName = $item ? $item->item_name : null;
         // $itemPrice = $item->price;
         
 
@@ -507,7 +509,7 @@ class OrderController extends Controller
             $kotItem->save();
 
             $kot->total = $kot->total - $kotItem->product_total;
-            $kot->grand_total = $kot->grand_total;
+            $kot->grand_total = $kot->grand_total - $kotItem->product_total;
             $kot->save();
 
             $cgstTax = ($tax_cgst / 100) * $kot->total;
@@ -728,7 +730,7 @@ class OrderController extends Controller
             $orderPayment->restaurant_id = $user->restaurant_id;
             $orderPayment->payment_type = $request->payment_type; // Cash/Online -- Compulsary
             $orderPayment->payment_method = $request->payment_method ?? null; // if ONline - UPI/Card/EMI, etc
-            $orderPayment->amount = $kot->total;
+            $orderPayment->amount = $kot->grand_total;
             $orderPayment->status = $status;
             $orderPayment->transaction_id = $request->transaction_id ?? null;
             $orderPayment->payment_details = $request->payment_details ?? null;
