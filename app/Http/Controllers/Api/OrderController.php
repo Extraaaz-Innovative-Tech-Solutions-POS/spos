@@ -322,7 +322,7 @@ class OrderController extends Controller
                 $tableActive->save();
             }
 
-            return response()->json(['success' => true, 'message' => 'Order confirmed successfully'], 200);
+            return response()->json(['success' => true, "order_number" => $order_number, 'message' => 'Order Confirmed successfully'], 200);
         });
     }
 
