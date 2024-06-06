@@ -28,6 +28,9 @@ class KotItem extends Model
         'cancel_reason',
         'created_at',
         'updated_at',
+        'is_custom',
+        // 'custom_name',
+        // 'custom_price',
     ];
 
     public function kot()

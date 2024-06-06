@@ -162,33 +162,36 @@ class OrderController extends Controller
             return $e->getMessage();
         }
     }
-    
+
     public function confirmOrder(Request $request)
     {
         $user = Auth::user();
+
         $request->validate([
             'table_id' => 'required',
             'items' => 'required',
+            'items.*.Id' => 'nullable|exists:items,id',
+            'items.*.name' => 'required|string|max:255',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.is_custom' => 'nullable|boolean',
+            'items.*.instruction' => 'nullable|string|max:255',
             "orderType" => "required",
-            "sub_table" => "",
-            "table" => "",
-            "section_id" => "",
-            "floor" => "",
-            "table_divided_by" => "", // If divided
-            "cover_count" => "", // Number of People
-            "customerId" => "",
-           // "advance_order_date_time"=>"",
-            
+            "sub_table" => "nullable|integer",
+            "table" => "nullable|integer",
+            "section_id" => "nullable|integer",
+            "floor" => "nullable|integer",
+            "table_divided_by" => "nullable|integer",
+            "cover_count" => "nullable|integer",
+            "customerId" => "nullable|integer",
+            "advance_order_date_time" => "nullable|date_format:Y-m-d h:i A",
         ]);
 
         return DB::transaction(function () use ($user, $request) {
 
             $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
 
-            // return $tax;
-
             $tax_status = $tax ? $tax->status  : 0;
-
             $tax_cgst = $tax ? $tax->cgst : 0;
             $tax_sgst = $tax ? $tax->sgst : 0;
             $tax_vat = $tax ? $tax->vat : 0;
@@ -200,15 +203,17 @@ class OrderController extends Controller
 
             if ($request->orderType == "Dine") {
                 # code...
-                $occupiedTable = KOT::where(["restaurant_id" => $user->restaurant_id,'floor_number'=> $request->floor,
-                                            'table_number'=> $request->table, "section_id" => $request->section_id, "status" => "PENDING",
-                                            "is_cancelled" => 0])
-                                    ->when($request->sub_table, function($query) use($request){
-                                         return $query->where('sub_table_number', $request->sub_table);
-                                    })->first();
-                                            
+                $occupiedTable = KOT::where([
+                    "restaurant_id" => $user->restaurant_id, 'floor_number' => $request->floor,
+                    'table_number' => $request->table, "section_id" => $request->section_id, "status" => "PENDING",
+                    "is_cancelled" => 0
+                ])
+                    ->when($request->sub_table, function ($query) use ($request) {
+                        return $query->where('sub_table_number', $request->sub_table);
+                    })->first();
+
                 if ($occupiedTable) {
-                    return response()->json(['success' => false, 'message' => 'Table has been already Occupied'],409); //! Actually should be 409 //418
+                    return response()->json(['success' => false, 'message' => 'Table has been already Occupied'], 409); //! Actually should be 409 //418
                 }
             }
 
@@ -256,21 +261,17 @@ class OrderController extends Controller
 
             foreach ($request->items as $orderItem) {
 
-                // return $orderItem;
                 $kotItem = new KotItem();
                 $kotItem->kot_id = $kot->id;
                 $kotItem->table_id = $request->table_id;
-                $kotItem->item_id = $orderItem['Id'];
+                $kotItem->item_id = $orderItem['Id'] ?? null;
                 $kotItem->quantity = $orderItem['quantity'];
                 $kotItem->price = $orderItem['price'];
                 $kotItem->product_total = $orderItem['quantity'] * $orderItem['price'];
-                $kotItem->name = $orderItem['name'];
                 $kotItem->instruction = $orderItem['instruction'] ?? null;
-                // $kotItem->is_cancelled = $orderItem->is_cancelled;
-                // $kotItem->status = $orderItem->status;
-                // $kotItem->cart_id = $orderItem->cart_id;
+                $kotItem->name = $orderItem['name'];
+                $kotItem->is_custom = true;
                 $kotItem->restaurant_id = $user->restaurant_id;
-                // $kotItem->cancel_reason = $orderItem->cancel_reason;
                 $kotItem->save();
 
                 $grand_total += $orderItem['quantity'] * $orderItem['price'];
@@ -279,15 +280,12 @@ class OrderController extends Controller
             $kot->total = $grand_total;
             $kot->grand_total = $grand_total;
 
-            $cgstTax = ($tax_cgst/100) * $grand_total;
-                
-            $sgstTax = ($tax_sgst/100) * $grand_total;
+            $cgstTax = ($tax_cgst / 100) * $grand_total;
+            $sgstTax = ($tax_sgst / 100) * $grand_total;
+            $vatTax = 0; //($tax_vat/100) * $grand_total;
 
-            $vatTax = 0;//($tax_vat/100) * $grand_total;
-
-            
-            if($tax_status == 1)
-            {   $kot->cgst_tax = $cgstTax;
+            if ($tax_status == 1) {
+                $kot->cgst_tax = $cgstTax;
                 $kot->sgst_tax = $sgstTax;
                 $kot->vat_tax = $vatTax;
                 $kot->grand_total = $grand_total + $cgstTax + $sgstTax + $vatTax;
@@ -298,14 +296,12 @@ class OrderController extends Controller
             // else{
             //     $kot->grand_total = $grand_total;
             // }
-            
 
             $kot->save();
 
-            
-            if($request->orderType == "Dine")
-            {
-                $section_name = Section::where('id', $request->section_id)->first()->name;
+            if ($request->orderType == "Dine") {
+                $section = Section::where('id', $request->section_id)->first();
+                $section_name = $section? $section->name : null;
 
                 $tableActive = new TableActive();
                 $tableActive->user_id = $user->id;
@@ -509,11 +505,14 @@ class OrderController extends Controller
 
         $request->validate([
             "table_id" => "required",
-            "item_id" => "required",
+            "item_id" => "nullable|integer",
+            "kot_item_id" => "nullable|integer",
+            "cancel_reason" => "nullable|string",
         ]);
 
         $table_id = $request->table_id;
         $item_id = $request->item_id;
+        $kot_item_id = $request->kot_item_id;
         $cancel_reason = $request->cancel_reason;
 
         $kot = KOT::where("table_id",$table_id)->first();
@@ -530,18 +529,21 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Table Id does not exists in the KOT table']);
         }
 
-        $kotItem = KotItem::where(['table_id' => $table_id, 'item_id' => $item_id, 'restaurant_id' => $user->restaurant_id])->first();
+        $kotItem = KotItem::where(['table_id' => $table_id, 'restaurant_id' => $user->restaurant_id])
+                           ->where(function($query) use($item_id, $kot_item_id) {
+                                $query->where('id', $kot_item_id);
+                                $query->orWhere('item_id', $item_id);
+                           })->first();
 
         if (!$kotItem) {
             return response()->json(['success' => false, 'message' => 'Item has not been found for this order']);
         }
 
-        $item = Item::findOrFail($item_id);//->first();
-
-        $itemName = $item ? $item->item_name : null;
+        // $item = Item::findOrFail($item_id);//->first();
+        // $itemName = $item ? $item->item_name : null;
         // $itemPrice = $item->price;
+        $itemName = $kotItem ? $kotItem->name : null;
         
-
         if($kotItem->is_cancelled == 0)
         {
             $kotItem->is_cancelled = 1;
