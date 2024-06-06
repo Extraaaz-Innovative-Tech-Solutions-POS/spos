@@ -227,6 +227,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('get-tax',[OrderController::class,'get_tax']);
 
+    Route::get('/me' ,[AuthController::class, 'me']);
+
 
 
 });

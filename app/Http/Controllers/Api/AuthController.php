@@ -111,6 +111,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
+        return Auth::user();
     }
 
     public function updateProfile(Request $request, $id)

@@ -28,9 +28,12 @@ class KotItemResource extends JsonResource
                 'status' => $this->status,
                 // 'cart_id' => $this->cart_id,
                 'restaurant_id' => $this->restaurant_id,
+                'cancel_reason' => $this->cancel_reason,
+                'is_custom' => $this->is_custom,
+                // 'custom_name' => $this->custom_name,
+                // 'custom_price' => $this->custom_price,
                 // 'created_at' => $this->created_at,
                 // 'updated_at' => $this->updated_at,
-                'cancel_reason' => $this->cancel_reason,
             ];
     }
 }
