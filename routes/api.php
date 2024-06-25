@@ -189,6 +189,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/view-payment-list/{id}', [InventoryPurchaseController::class, 'viewPaymentDetailsList']);
 
 
+    //Inventory History
+    Route::get('inventory-history',[InventoryPurchaseController::class, 'inventoryHistory']);
+
+    
+
     
 
 

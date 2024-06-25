@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InventoryHistory;
 use App\Models\Purchase;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderPayment;
@@ -99,6 +100,22 @@ class InventoryPurchaseController extends Controller
 
         $payment->save();
 
+        $existingHistory = InventoryHistory::where('product_name', $request->product_name)->exists();        
+
+        $history = new InventoryHistory;
+        $history->product_name = $request->product_name;;
+        $history->qty_change = $request->quantity;
+        $history->restaurant_id = $user->restaurant_id;
+
+        if ($existingHistory) {
+            $history->change_type = 'restock';
+        } else {
+            $history->change_type = 'stock added';
+        }
+        
+        $history->save();
+
+
 
 
         return response()->json(['success' => true, 'message' => "Purchase Order added Successfully", "data" => $data,"paymentDetails"=>$payment]);
@@ -152,6 +169,8 @@ class InventoryPurchaseController extends Controller
         }
 
         $data->save();
+
+       
 
         return response()->json(['success' => true, 'message' => "Purchase Order updated Successfully", "data" => $data]);
     }
@@ -221,7 +240,15 @@ class InventoryPurchaseController extends Controller
         return response()->json(['success' => true, "paymentDetails"=> $listPayments]);
 
 
+    }
 
+    public function inventoryHistory()
+    {
+        $user = Auth::user();
+
+        $history = InventoryHistory::where('restaurant_id', $user->restaurant_id)->get();
+
+        return response()->json(['sucess'=>true,'history'=>$history]);
 
     }
 }
