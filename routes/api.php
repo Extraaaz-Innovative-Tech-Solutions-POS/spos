@@ -16,13 +16,15 @@ use App\Http\Controllers\Api\ModifierController;
 use App\Http\Controllers\Api\ModifierGroupController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SectionController;
+use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
-use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InventorySupplierController;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -160,4 +162,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('selectModifierGroups/{modifier_id}', [ModifierController::class, 'selectModifierGroups']);
 
     Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
+
+    //inventory supplier
+
+      //inventory supplier     
+      Route::get('inventory-list',[InventorySupplierController::class, 'inventoryList']);
+      Route::post('create-supplier',[InventorySupplierController::class, 'createSupplier']);
+      Route::put('/suppliers/{id}', [InventorySupplierController::class, 'updateSupplier']);
+      Route::delete('/suppliers/{id}', [InventorySupplierController::class, 'deleteSupplier']);
+  
+      Route::get('/view-statement/{id}', [InventorySupplierController::class, 'viewStatement']);
+  
 });
