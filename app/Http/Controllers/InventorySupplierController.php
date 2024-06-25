@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,4 +78,22 @@ class InventorySupplierController extends Controller
 
         return response()->json(['success' => true, 'message' => "Supplier deleted successfully"]);
     }
+
+    public function viewStatement(Request $request,$id)
+    {   
+        $user = Auth::user();
+
+        $data = PurchaseOrder::leftJoin('suppliers','purchase_orders.supplier_id','=','suppliers.id')
+                        ->where('purchase_orders.restaurant_id', $user->restaurant_id)
+                        ->where('purchase_orders.supplier_id', $id)
+                        ->select('purchase_orders.created_at','purchase_orders.quantity','purchase_orders.amount','purchase_orders.rate','purchase_orders.product_name')
+                        ->get();
+     
+
+        return response()->json(['success'=>true,"data"=>$data]);
+
+
+    }
+
+    
 }

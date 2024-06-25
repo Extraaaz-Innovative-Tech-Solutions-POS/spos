@@ -171,12 +171,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/suppliers/{id}', [InventorySupplierController::class, 'updateSupplier']);
     Route::delete('/suppliers/{id}', [InventorySupplierController::class, 'deleteSupplier']);
 
+    Route::get('/view-statement/{id}', [InventorySupplierController::class, 'viewStatement']);
+
+    
+
+    
+
+
+
 
    //inventory Purchase 
     Route::get('purchase-list',[InventoryPurchaseController::class, 'purchaseList']);
     Route::post('create-purchase',[InventoryPurchaseController::class, 'createPurchase']);
     Route::put('/purchase-orders/{id}', [InventoryPurchaseController::class, 'updatePurchase']);
     Route::delete('/purchase-orders/{id}', [InventoryPurchaseController::class, 'deletePurchase']);
+    Route::post('/add-payment/{id}', [InventoryPurchaseController::class, 'addPayment']);
+    Route::get('/view-payment-list/{id}', [InventoryPurchaseController::class, 'viewPaymentDetailsList']);
+
+
+    
 
 
 });
