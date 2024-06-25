@@ -173,7 +173,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //inventory supplier
 
       //inventory supplier     
-      Route::get('inventory-list',[InventorySupplierController::class, 'inventoryList']);
+      Route::get('supplier-list',[InventorySupplierController::class, 'inventoryList']);
       Route::post('create-supplier',[InventorySupplierController::class, 'createSupplier']);
       Route::put('/suppliers/{id}', [InventorySupplierController::class, 'updateSupplier']);
       Route::delete('/suppliers/{id}', [InventorySupplierController::class, 'deleteSupplier']);
