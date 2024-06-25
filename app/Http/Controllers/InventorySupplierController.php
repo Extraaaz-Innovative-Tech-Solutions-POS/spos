@@ -94,9 +94,37 @@ class InventorySupplierController extends Controller
             return response()->json(['success' => false, 'message' => "Supplier not found"], 404);
         }
     }
-    
 
-   
 
+  
+
+
+    public function searchSupplier(Request $request)
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Validate the request input
+        $validator = $request->validate([
+            'query' => 'required|string|max:255',
+        ]);
+
+        // Get the search query
+        $query = $request->input('query');
+
+        // Search suppliers by name, mobile, or other fields
+        $suppliers = Supplier::where('restaurant_id', $user->restaurant_id)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('mobile', 'LIKE', "%{$query}%")
+                  ->orWhere('gstin', 'LIKE', "%{$query}%")
+                  ->orWhere('c_person', 'LIKE', "%{$query}%")
+                  ->orWhere('c_number', 'LIKE', "%{$query}%");
+            })
+            ->get();
+
+        // Return the search results
+        return response()->json(['success' => true, 'message' => 'Search results', 'data' => $suppliers]);
+    }
     
 }
