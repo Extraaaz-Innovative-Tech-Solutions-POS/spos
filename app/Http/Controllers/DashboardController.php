@@ -79,7 +79,6 @@ class DashboardController extends Controller
             $totalSaleAmount = Order::where('restaurant_id', $user->restaurant_id)            
             ->sum('total');
 
-
         return response()->json([
             "success" => true, "Today Sales" => $todaySales,
             'Unsettled Amount' => $unsettledAmount, 'Today Orders Count' => $todayOrderCount,
