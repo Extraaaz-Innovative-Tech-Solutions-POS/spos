@@ -32,6 +32,13 @@ class InventorySupplierController extends Controller
             'c_number' => 'nullable|numeric'
         ]);
 
+        // Check if the supplier already exists
+        $existingSupplier = Supplier::where('mobile', $request->mobile)->where('restaurant_id', $user->restaurant_id)->first();
+
+        if ($existingSupplier) {
+            return response()->json(['success' => false, 'message' => 'Supplier already exists'], 409);
+        }
+
         $data = new Supplier;
         $data->restaurant_id = $user->restaurant_id;        
         $data->mobile = $request->mobile;

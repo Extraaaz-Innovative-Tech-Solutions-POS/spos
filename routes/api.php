@@ -170,7 +170,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('saveModifierGroups/{modifier_id}', [ModifierGroupController::class, 'saveModifierGroups']);
 
-    //inventory supplier
+    //inventory
 
       //inventory supplier     
       Route::get('supplier-list',[InventorySupplierController::class, 'inventoryList']);
