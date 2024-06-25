@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class PurchaseUnit extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'units',
+        // Add other columns as needed
+    ];
+}

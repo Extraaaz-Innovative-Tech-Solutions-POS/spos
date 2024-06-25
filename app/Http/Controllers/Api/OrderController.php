@@ -757,15 +757,13 @@ class OrderController extends Controller
                     }
 
 
-
                 // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
                 // {     
                 $order->save();
                 // }
             }
 
-           
-            
+         
             $orderPayment = new OrderPayment();
             $orderPayment->user_id = $user->id;
             $orderPayment->order_id = $order? $order->id : null;

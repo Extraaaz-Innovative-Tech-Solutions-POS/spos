@@ -12,6 +12,10 @@ use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\GraphController;
+use App\Http\Controllers\Api\InventorHistoryController;
+use App\Http\Controllers\Api\InventorRetuenStockController;
+use App\Http\Controllers\Api\InventorWastageController;
+use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ItemSaleReportController;
 use App\Http\Controllers\Api\ModifierController;
@@ -22,6 +26,7 @@ use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RecipeManagementController;
 use App\Models\ModifierGroup;
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -226,6 +231,41 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('tax-setting',[OrderController::class,'tax_setting']);
 
     Route::get('get-tax',[OrderController::class,'get_tax']);
+
+
+
+    ///inventory//
+
+    Route::apiResource('inventory', InventoryController::class);
+
+    Route::apiResource('inventory-stock', InventorRetuenStockController::class);
+
+    
+
+    Route::apiResource('inventory-history', InventorHistoryController::class);
+
+    Route::apiResource('inventory-wastage', InventorWastageController::class);
+
+    Route::post('recipe-add',[RecipeManagementController::class,'storeRecipe']);
+
+    Route::delete('recipe-delete/{recipe_id}',[RecipeManagementController::class,'deleteRecipe']);
+
+    Route::get('recipe-list',[RecipeManagementController::class,'getAllRecipes']);
+
+
+
+
+
+
+
+    // Route::post('inventory-history-post', InventorHistoryController::class,'inventoryHistoryDateFilter');
+
+
+
+
+
+
+   
 
 
 
