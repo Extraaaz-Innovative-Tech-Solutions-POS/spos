@@ -178,7 +178,7 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::put('/suppliers/{id}', [InventorySupplierController::class, 'updateSupplier']);
       Route::delete('/suppliers/{id}', [InventorySupplierController::class, 'deleteSupplier']);
   
-      Route::get('/view-statement/{id}', [InventorySupplierController::class, 'viewStatement']);
+     
   
 
     //bulk upload
