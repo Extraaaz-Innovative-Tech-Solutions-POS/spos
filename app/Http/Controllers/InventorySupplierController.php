@@ -16,7 +16,7 @@ class InventorySupplierController extends Controller
 
         $data = Supplier::where('restaurant_id',$user->restaurant_id)->get();
 
-        return response()->json(["success"=>true,$data]);
+        return response()->json(["success"=>true,"data"=>$data]);
 
     }
 
