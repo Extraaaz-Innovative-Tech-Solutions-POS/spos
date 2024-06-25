@@ -8,6 +8,7 @@ use App\Http\Resources\TableActiveResource;
 use App\Models\Item;
 use App\Models\KOT;
 use App\Models\KotItem;
+use App\Models\Master_tax;
 use App\Models\Order;
 use App\Models\OrderPayment;
 use App\Models\Section;
@@ -141,7 +142,7 @@ class OrderController extends Controller
         try {
             do {
                 $sect_var = "";
-                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "TakeAway" ? "TAK/" : ($section == "Delivery" ?  "DEL/" : ($section == "Advance" ? "ADV/" : null)));
+                $sect_var = $section == "Dine-In" ? 'DI/' : ($section == "TakeAway" ? "TAK/" : ($section == "Delivery" ?  "DEL/" : ($section == "Advance" ? "ADV/" : ($section == "Catering" ?  "CAT/" : null))));
                 if (!$sect_var) {
                     return "Invalid Section Name";
                 }
@@ -176,13 +177,39 @@ class OrderController extends Controller
             "table_divided_by" => "", // If divided
             "cover_count" => "", // Number of People
             "customerId" => "",
+           // "advance_order_date_time"=>"",
+            
         ]);
 
         return DB::transaction(function () use ($user, $request) {
 
+            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+            // return $tax;
+
+            $tax_status = $tax ? $tax->status  : 0;
+
+            $tax_cgst = $tax ? $tax->cgst : 0;
+            $tax_sgst = $tax ? $tax->sgst : 0;
+            $tax_vat = $tax ? $tax->vat : 0;
+
             $oldKot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
             if ($oldKot) {
                 return response()->json(['success' => false, 'message' => 'Table already has an order with same table_id']);
+            }
+
+            if ($request->orderType == "Dine") {
+                # code...
+                $occupiedTable = KOT::where(["restaurant_id" => $user->restaurant_id,'floor_number'=> $request->floor,
+                                            'table_number'=> $request->table, "section_id" => $request->section_id, "status" => "PENDING",
+                                            "is_cancelled" => 0])
+                                    ->when($request->sub_table, function($query) use($request){
+                                         return $query->where('sub_table_number', $request->sub_table);
+                                    })->first();
+                                            
+                if ($occupiedTable) {
+                    return response()->json(['success' => false, 'message' => 'Table has been already Occupied'],409); //! Actually should be 409 //418
+                }
             }
 
             if (($request->table_divided_by) && ($request->sub_table)) {
@@ -203,6 +230,9 @@ class OrderController extends Controller
                 $order_number = $table_order_number + 1;
             }
 
+            $advanceDate = $request->advance_order_date_time;
+            $advanceDate = $advanceDate ? Carbon::createFromFormat('Y-m-d h:i A', $advanceDate) : null;
+
             $kot = new KOT();
             $kot->table_id = $request->table_id;
             $kot->order_number = $order_number;
@@ -218,6 +248,8 @@ class OrderController extends Controller
             // $kot->message = $request->message;
             // $kot->is_cancelled = $request->is_cancelled;
             // $kot->total = $request->total;
+            $kot->advance_order_date_time = $advanceDate; // $request->advance_order_date_time;
+            // $kot->delivery_address_id= $request->delivery_address_id;
             $kot->save();
 
             $grand_total = 0;
@@ -245,9 +277,34 @@ class OrderController extends Controller
             }
 
             $kot->total = $grand_total;
+            $kot->grand_total = $grand_total;
+
+            $cgstTax = ($tax_cgst/100) * $grand_total;
+                
+            $sgstTax = ($tax_sgst/100) * $grand_total;
+
+            $vatTax = 0;//($tax_vat/100) * $grand_total;
+
+            
+            if($tax_status == 1)
+            {   $kot->cgst_tax = $cgstTax;
+                $kot->sgst_tax = $sgstTax;
+                $kot->vat_tax = $vatTax;
+                $kot->grand_total = $grand_total + $cgstTax + $sgstTax + $vatTax;
+                $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                // $kot->save();
+            }
+            // else{
+            //     $kot->grand_total = $grand_total;
+            // }
+            
+
             $kot->save();
 
-            if ($request->orderType == "Dine") {
+            
+            if($request->orderType == "Dine")
+            {
                 $section_name = Section::where('id', $request->section_id)->first()->name;
 
                 $tableActive = new TableActive();
@@ -265,7 +322,7 @@ class OrderController extends Controller
                 $tableActive->save();
             }
 
-            return response()->json(['success' => true, 'message' => 'Order confirmed successfully'], 200);
+            return response()->json(['success' => true, "order_number" => $order_number, 'message' => 'Order Confirmed successfully'], 200);
         });
     }
 
@@ -344,6 +401,13 @@ class OrderController extends Controller
 
         $kot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
 
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+        $tax_status = $tax ? $tax->status  : 0;
+
+        $tax_cgst = $tax ? $tax->cgst : 0;
+        $tax_sgst = $tax ? $tax->sgst : 0;
+        $tax_vat = $tax ? $tax->vat : 0;
+
         if (!$kot) {
             return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
         }
@@ -358,12 +422,15 @@ class OrderController extends Controller
 
         $total = $kot->total;
 
-        $orderItems = $request->items; //[0];
+        $orderItems = $request->items;//[0];
 
-        foreach ($orderItems as $orderItem) {
+
+        foreach($orderItems as $orderItem)
+        {
             $kotItem = KotItem::where(['table_id' => $request->table_id, 'item_id' => $orderItem['Id'], 'restaurant_id' => $user->restaurant_id])->first();
-
-            if (($kotItem) && ($kotItem->is_cancelled == 0)) {
+        
+            if(($kotItem) && ($kotItem->is_cancelled == 0))
+            {
                 // $total = $total - $kotItem->product_total;
                 $kotItem->quantity += $orderItem['quantity'];
                 $kotItem->price = $orderItem['price'];
@@ -372,12 +439,30 @@ class OrderController extends Controller
                 $kotItem->save();
 
                 $total += $orderItem['quantity'] * $orderItem['price'];
-
+        
                 $kot->total = $total;
+                $kot->grand_total = $total;
                 $kot->save();
 
+                $cgstTax = ($tax_cgst / 100) * $kot->total;
+                $sgstTax = ($tax_sgst / 100) * $kot->total;
+                $vatTax = 0; //($tax_vat/100) * $grand_total;
+
+
+                if ($tax_status == 1) {
+                    $kot->cgst_tax = $cgstTax;
+                    $kot->sgst_tax = $sgstTax;
+                    $kot->vat_tax = $vatTax;
+                    $kot->grand_total = $kot->total + $cgstTax + $sgstTax + $vatTax;
+                    $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                    $kot->save();
+                }
+
                 // return response()->json(['success'=> true, 'message' => 'Item upadeted to table_id : '. $request->table_id .' successfully'], 200);
-            } else {
+            }
+            else
+            {
                 $kotItem = new KotItem();
                 $kotItem->kot_id = $kot->id;
                 $kotItem->table_id = $request->table_id;
@@ -389,14 +474,31 @@ class OrderController extends Controller
                 $kotItem->status = "PENDING";
                 $kotItem->restaurant_id = $user->restaurant_id;
                 $kotItem->save();
-
+                
                 $total += $orderItem['quantity'] * $orderItem['price'];
-
+        
                 $kot->total = $total;
+                $kot->grand_total = $total;
+                
                 $kot->save();
+
+                $cgstTax = ($tax_cgst / 100) * $kot->total;
+                $sgstTax = ($tax_sgst / 100) * $kot->total;
+                $vatTax = 0; //($tax_vat/100) * $grand_total;
+
+
+                if ($tax_status == 1) {
+                    $kot->cgst_tax = $cgstTax;
+                    $kot->sgst_tax = $sgstTax;
+                    $kot->vat_tax = $vatTax;
+                    $kot->grand_total = $kot->total + $cgstTax + $sgstTax + $vatTax;
+                    $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                    $kot->save();
+                }
             }
         }
-        return response()->json(['success' => true, 'message' => 'Items added to table_id : ' . $request->table_id . ' successfully'], 200);
+        return response()->json(['success'=> true, 'message' => 'Items added to table_id : '. $request->table_id .' successfully'], 200);
     }
 
     public function cancelItem(Request $request)
@@ -414,7 +516,15 @@ class OrderController extends Controller
         $item_id = $request->item_id;
         $cancel_reason = $request->cancel_reason;
 
-        $kot = KOT::where("table_id", $table_id)->first();
+        $kot = KOT::where("table_id",$table_id)->first();
+
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+        $tax_status = $tax ? $tax->status  : 0;
+
+        $tax_cgst = $tax ? $tax->cgst : 0;
+        $tax_sgst = $tax ? $tax->sgst : 0;
+        $tax_vat = $tax ? $tax->vat : 0;
+
 
         if (!$kot) {
             return response()->json(['success' => false, 'message' => 'Table Id does not exists in the KOT table']);
@@ -426,19 +536,38 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Item has not been found for this order']);
         }
 
-        $item = Item::findOrFail($item_id); //->first();
+        $item = Item::findOrFail($item_id);//->first();
 
-        $itemName = $item->item_name;
+        $itemName = $item ? $item->item_name : null;
         // $itemPrice = $item->price;
+        
 
-
-        if ($kotItem->is_cancelled == 0) {
+        if($kotItem->is_cancelled == 0)
+        {
             $kotItem->is_cancelled = 1;
             $kotItem->cancel_reason = $cancel_reason;
+            $kotItem->status = 'CANCELLED';
             $kotItem->save();
 
             $kot->total = $kot->total - $kotItem->product_total;
+            $kot->grand_total = $kot->grand_total - $kotItem->product_total;
             $kot->save();
+
+            $cgstTax = ($tax_cgst / 100) * $kot->total;
+            $sgstTax = ($tax_sgst / 100) * $kot->total;
+            $vatTax = 0; //($tax_vat/100) * $grand_total;
+
+
+            if ($tax_status == 1) {
+                $kot->cgst_tax = $cgstTax;
+                $kot->sgst_tax = $sgstTax;
+                $kot->vat_tax = $vatTax;
+                $kot->grand_total = $kot->total + $cgstTax + $sgstTax + $vatTax;
+                $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                $kot->save();
+            }
+
             return response()->json(['success' => true, 'message' => $itemName . ' item has been cancelled successfully'], 200);
         } else {
             return response()->json(['success' => false, 'message' => $itemName . ' item has been already cancelled for this order'], 404);
@@ -457,16 +586,19 @@ class OrderController extends Controller
 
         $kot = KOT::where(['restaurant_id' => $user->restaurant_id, 'table_id' => $table_id])->first();
 
+
         if ($kot) {
             if ($kot->is_cancelled == 0) {
                 $kot->cancelled_reason = $cancel_reason;
                 $kot->is_cancelled = 1;
+                $kot->status = 'CANCELLED';
                 $kot->save();
 
                 $kotItem = KotItem::where('table_id', $table_id)->get();
                 foreach ($kotItem as $kotItem) {
                     $kotItem->is_cancelled = 1;
                     $kotItem->cancel_reason = $cancel_reason;
+                    $kotItem->status = 'CANCELLED';
                     $kotItem->save();
                 }
 
@@ -495,6 +627,10 @@ class OrderController extends Controller
             "table" => "",
             "section_id" => "",
             "floor" => "",
+            'is_partial_paid'=>"",
+            'is_full_paid'=>"",
+            'delivery_address_id' => "",
+            "discounted_amount" => "",
         ]);
 
         $user = Auth::user();
@@ -503,6 +639,13 @@ class OrderController extends Controller
         return DB::transaction(function () use ($user, $table_id, $request) {
 
             $kot = KOT::where("table_id", $table_id)->first();
+
+            $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+            $tax_status = $tax ? $tax->status : 0;
+            $tax_cgst = $tax ? $tax->cgst :  0;
+            $tax_sgst = $tax ? $tax->sgst : 0;
+            $tax_vat = $tax ? $tax->vat : 0;
 
             if (!$kot) {
                 return response()->json(['success' => false, 'message' => 'Data does not exists for this table_id']);
@@ -513,61 +656,161 @@ class OrderController extends Controller
             }
 
             if ($kot->status == 'COMPLETED') {
-                return response()->json(['success' => false, 'message' => 'Cannot add item, Order has been already Completed']);
+                return response()->json(['success' => false, 'message' => 'Order has been already Completed'],404);
             }
 
-            $kot->status = "COMPLETED";
-            $kot->save();
+            // $kot->status = "COMPLETED";
+            if ($request->discounted_amount) {
+                $kot->total_discount += $request->discounted_amount;
+                $kot->save();
+                $kot->grand_total = $kot->total - $kot->total_discount;
+                $kot->save();
+            }
 
             $customer_id = $kot->customer_id;
 
             $kotItems = KotItem::where('table_id', $table_id)->get();
 
+            if(!$kotItems)
+            {
+                return response()->json(['success' => false, 'message' => 'There are no kotItems present for this table id']);
+            }
+
             $products = $this->mergedData($kotItems);
 
             $products = json_encode($products);
-
-            foreach ($kotItems as $kotItem) {
-                $kotItem->status = "COMPLETED";
-                $kotItem->save();
-            }
+            
+            $status = 'PENDING';
 
             $order = new Order();
-            $order->table_id = $request->table_id;
-            $order->ispaid = $request->ispaid;
-            $order->sub_table_number = $kot->sub_table_number ?? null;
-            $order->section_id = $kot->section_id ?? null;
-            $order->table_number = $kot->table_number;
-            $order->floor_number = $kot->floor_number;
-            $order->order_type = $kot->order_type;
-            $order->customer_id = $customer_id;
-            $order->invoice_id = $kot->order_number;
-            $order->restaurant_id = $user->restaurant_id;
-            $order->product = $products;    // This is important
-            $order->product_total = $kot->total;    // Total before Tax and Discount
-            $order->total_discount = 0;     // $request->total_discount; // Total Discount
-            $order->subtotal = $kot->total; // Total after discount
-            $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
-            $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
-            $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
-            $order->other_tax = 0;          // $request->other_tax; // Other tax data
-            $order->total = $kot->total;    // Total after adding tax and substracting discount
-            $order->save();
 
+            if($request->is_full_paid == 1)   
+            {
+                $status = "COMPLETED";
+
+                $kot->status = $status;
+                $kot->save();
+
+                foreach($kotItems as $kotItem)
+                {
+                    $kotItem->status = $status;
+                    $kotItem->save();
+                }
+
+                $total = $kot->total;
+                if($kot->total_discount)
+                {
+                    $total = $total - $kot->total_discount;
+                }
+
+                 $cgstTax = ($tax_cgst/100) * $total;
+                
+                 $sgstTax = ($tax_sgst/100) * $total;
+
+                 $vatTax = ($tax_vat/100) * $total;
+
+                if ($tax_status == 1) {
+                    $kot->cgst_tax = $cgstTax;
+                    $kot->sgst_tax = $sgstTax;
+                    $kot->vat_tax = $vatTax;
+                    $kot->grand_total = $total + $cgstTax + $sgstTax + $vatTax;
+                    $kot->total_tax = $cgstTax + $sgstTax + $vatTax;
+
+                    $kot->save();
+                }
+
+
+                $order->table_id = $request->table_id;
+                $order->ispaid = $request->ispaid;
+                $order->sub_table_number = $kot->sub_table_number ?? null;
+                $order->section_id = $kot->section_id ?? null;
+                $order->table_number = $kot->table_number;
+                $order->floor_number = $kot->floor_number;
+                $order->order_type = $kot->order_type;
+                $order->customer_id = $customer_id;
+                $order->invoice_id = $kot->order_number;
+                $order->restaurant_id = $user->restaurant_id;
+                $order->product = $products;    // This is important
+                $order->product_total = $kot->total;    // Total before Tax and Discount
+                $order->total_discount = $kot->total_discount;     // $request->total_discount; // Total Discount
+                $order->subtotal = $total; // Total after discount
+                $order->restrotaxtotal = 0;     // $request->restrotaxtotal; // Total Tax
+                $order->restro_tax = 0;         // $request->restro_tax;  // Tax Data
+                $order->othertaxtotal = 0;      // $request->othertaxtotal; // Total of other tax
+                $order->other_tax = 0;          // $request->other_tax; // Other tax data
+                $order->total = $total;    // Total after adding tax and substracting discount
+                $order->advance_order_date_time	 = $kot->advance_order_date_time; 
+
+                if($tax_status == 1)
+
+                    {   $order->cgst_tax = $cgstTax;
+                        $order->sgst_tax = $sgstTax;
+                        $order->vat_tax = $vatTax;
+
+                        $order->total = $total + $cgstTax + $sgstTax + $vatTax;
+                        $order->restrotaxtotal = $cgstTax + $sgstTax + $vatTax;
+
+                    }
+
+
+
+                // if($request->is_full_paid == 1 and $kot->order_type == 'Advance')
+                // {     
+                $order->save();
+                // }
+            }
+
+           
+            
             $orderPayment = new OrderPayment();
             $orderPayment->user_id = $user->id;
-            $orderPayment->order_id = $order->id;
-            $orderPayment->customer_id = $order->customer_id;
+            $orderPayment->order_id = $order? $order->id : null;
+            $orderPayment->customer_id = $kot->customer_id;
             $orderPayment->table_id = $request->table_id;
             $orderPayment->order_number = $kot->order_number;
             $orderPayment->restaurant_id = $user->restaurant_id;
             $orderPayment->payment_type = $request->payment_type; // Cash/Online -- Compulsary
             $orderPayment->payment_method = $request->payment_method ?? null; // if ONline - UPI/Card/EMI, etc
-            $orderPayment->amount = $order->total;
-            $orderPayment->status = "COMPLETED";
+            $orderPayment->amount = $kot->grand_total;
+            $orderPayment->status = $status;
             $orderPayment->transaction_id = $request->transaction_id ?? null;
             $orderPayment->payment_details = $request->payment_details ?? null;
+
+            $orderPayment->money_given = $request->money_given ?? null;
+            $orderPayment->is_partial_paid = $request->is_partial_paid ?? null;
+            $orderPayment->is_full_paid = $request->is_full_paid ?? null;
+
+           
+
+
             $orderPayment->save();
+
+            if ($request->is_full_paid == 1)  
+            {
+                $orderPayments = OrderPayment::where('table_id',$request->table_id)->get();
+                
+                // $cgstTax = ($tax_cgst/100) * $orderPayment->money_given;
+                
+                // $sgstTax = ($tax_sgst/100) * $orderPayment->money_given;
+
+                // $vatTax = ($tax_vat/100) * $orderPayment->money_given;
+
+                foreach ($orderPayments as $orderPayment)
+                {
+                    $orderPayment->status = "COMPLETED";
+
+                    // if($tax_status == 1)
+
+                    //     {   $orderPayment->cgst_tax = $cgstTax;
+                    //         $orderPayment->sgst_tax = $sgstTax;
+                    //         $orderPayment->vat_tax = $vatTax;
+
+                    //     }
+
+                    $orderPayment->save();
+                }
+            } 
+
 
             if (($kot->order_type == "Dine") || ($request->orderType == "Dine")) {
                 $tableActives = TableActive::where("table_id", $kot->table_id)->get();
@@ -588,7 +831,15 @@ class OrderController extends Controller
                 }
             }
 
-            return response()->json(["success" => true, "message" => "Order Completed Successfully"]);
+            if ($kot->order_type == "Delivery" || $kot->order_type == "delivery") {
+                $kot->delivery_address_id = $request->delivery_address_id;
+                $kot->delivery_status = "PENDING";
+                $kot->save();
+            }
+
+            $kot = new KotResource($kot);
+
+            return response()->json(["success" => true, "data"=>$kot, "message" => "Order Completed Successfully" ]);
         });
 
         // return response()->json(["success"=>false , "message"=>"Order Not Completed"]);
@@ -655,5 +906,114 @@ class OrderController extends Controller
 
         return response()->json(["success" => true, "data" => $orders, "message" => "Data of " . $orderType]);
     }
+    public function getOngoingOrders(Request $request)
+    {
+        $user = Auth::user();
+        $orders = KOT::where(['restaurant_id' => $user->restaurant_id,
+                              'is_cancelled' => 0,
+                              'status' => 'PENDING'])->get();
 
+        $orders = KotResource::collection($orders);
+        
+        return response()->json(["success" => true, "data" => $orders]);
+    }
+
+    public function delivery_status_kot(Request $request)
+    {
+        //dd('yesy');
+        $user = Auth::user();
+
+        $request->validate([
+            "table_id" => "required",
+            
+        ]);
+        $table_id = $request->table_id;        
+
+        $kot = KOT::where(['restaurant_id'=>$user->restaurant_id,'table_id'=>$table_id])->first();
+       
+        if($kot)
+        {
+            // $kot->status = "DELIVERED";
+            $kot->delivery_status = "DELIVERED";
+            $kot->save();
+        }
+        
+        return response()->json(["success"=>true , "message"=>"Item has been delivered"]);
+    }
+
+    public function getDeliveryPendingOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where([
+            'restaurant_id' => $user->restaurant_id,
+            'is_cancelled' => 0,
+            'order_type' => 'Delivery',
+            'delivery_status' => 'PENDING'
+        ])->get();
+
+        $orders = KotResource::collection($orders);
+        return response()->json(["success" => true, "data" => $orders]);
+    }
+
+    public function getDeliveryCompletedOrders()
+    {
+        $user = Auth::user();
+        $orders = KOT::where([
+            'restaurant_id' => $user->restaurant_id,
+            'is_cancelled' => 0,
+            'order_type' => 'Delivery',
+            'delivery_status' => 'DELIVERED',
+        ])->get();
+
+        $orders = KotResource::collection($orders);
+        return response()->json(["success" => true, "data" => $orders]);
+    }
+
+    public function tax_setting(Request $request)
+    {
+        $user = Auth::user();
+        
+       
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+    
+        if($tax) {
+            
+            if ($request->has('cgst')) {
+                $tax->cgst = $request->cgst;
+            }
+            if ($request->has('sgst')) {
+                $tax->sgst = $request->sgst;
+            }
+            if ($request->has('status')) {
+                $tax->status = $request->status;
+            }
+            $tax->save();
+            return response()->json(['success' => "Tax settings updated"]);
+        } else {
+           
+            $tax = new Master_tax();
+            $tax->cgst = $request->cgst;
+            $tax->sgst = $request->sgst;
+            $tax->status = $request->status;
+            $tax->restaurant_id = $user->restaurant_id;
+            $tax->save();
+            return response()->json(['success' => "Tax settings confirmed"]);
+        }
+    }
+
+
+    public function get_tax()
+    {
+        $user = Auth::user();
+
+        $tax = Master_tax::where('restaurant_id', $user->restaurant_id)->first();
+
+        return response()->json(["success" => true, "data" => $tax]);
+
+
+
+
+    }
+
+    
 }

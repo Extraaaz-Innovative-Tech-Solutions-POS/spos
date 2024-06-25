@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ModifierExport;
+use App\Exports\ModifierGroupExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemResource;
 use App\Http\Resources\ModifierGroupResource;
+use App\Imports\ModifierGroupImport;
 use App\Models\Item;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ModifierGroupController extends Controller
 {
@@ -51,6 +55,7 @@ class ModifierGroupController extends Controller
         $modifierGroup->name = $request->name;
         $modifierGroup->description = $request->description;
         $modifierGroup->type = $request->type;
+        $modifierGroup->section_id = $request->section_id;
         $modifierGroup->restaurant_id = $user->restaurant_id;
         $modifierGroup->save();
 
@@ -85,6 +90,7 @@ class ModifierGroupController extends Controller
         $modifierGroup->name = $request->name;
         $modifierGroup->description = $request->description;
         $modifierGroup->type = $request->type;
+        $modifierGroup->section_id = $request->section_id;
         $modifierGroup->save();
 
         return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifierGroup]);       
@@ -193,5 +199,23 @@ class ModifierGroupController extends Controller
         $modifierGroup->items()->sync($selectedIds);
 
         return response()->json(["success" => true, 'message' => 'ModifierGroups and Items synced Successfully']);
+    }
+
+    public function importModifierGroups(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate(['file' => 'required']);
+
+        if ($request->hasFile('file')) {
+            Excel::import(new ModifierGroupImport, $request->file('file'));
+        }
+
+        return response()->json(['success' => 'File uploaded successfully']);
+    }
+
+    public function exportModifierGroups(Request $request)
+    {
+        return Excel::download(new ModifierGroupExport, 'modifierGroupExport.xlsx');
     }
 }

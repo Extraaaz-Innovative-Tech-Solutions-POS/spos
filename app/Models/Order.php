@@ -31,7 +31,22 @@ class Order extends Model
         'othertaxtotal',
         'other_tax',
         'total',
+        'no_of_thali',
+        'thali_price',
+        'status'
 
 
     ];
+
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function kotItems() {
+        return $this->hasMany(KotItem::class, 'table_id','table_id');
+    }
+    public function orderPayments() {
+        return $this->hasMany(OrderPayment::class, 'table_id','table_id');
+    }
+
 }

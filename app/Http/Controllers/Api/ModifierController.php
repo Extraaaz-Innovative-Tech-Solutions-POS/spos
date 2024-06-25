@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ModifierExport;
 use App\Http\Controllers\Controller;
+use App\Imports\ModifierImport;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ModifierController extends Controller
 {
@@ -79,6 +82,7 @@ class ModifierController extends Controller
         $modifier->short_name = $request->short_name ?? null;
         $modifier->description = $request->description ?? null;
         $modifier->price = $request->price;
+        $modifier->save();
 
         return response()->json(["success" => true, "message" => "Data Updated successfully", "data" => $modifier]);
     }
@@ -141,5 +145,23 @@ class ModifierController extends Controller
         $modifier->modifierGroups()->sync($selectedIds);
 
         return response()->json(["success" => true, 'message' => 'ModifierGroups and Modifier synced Successfully']);
+    }
+
+    public function importModifiers(Request $request)
+    {
+        $user = Auth::user();
+        
+        $validated = $request->validate(['file' => 'required']);
+
+        if ($request->hasFile('file')) {
+            Excel::import(new ModifierImport, $request->file('file'));
+        }
+
+        return response()->json(['success' => 'File uploaded successfully']);
+    }
+
+    public function exportModifiers(Request $request)
+    {
+        return Excel::download(new ModifierExport, 'modifierExport.xlsx');
     }
 }

@@ -20,11 +20,22 @@ class OrderPayment extends Model
         'payment_type',
         'payment_method',
         'amount',
+        'money_given',
+        'is_partially_paid',
+        'is_full_paid',
         'status',
         'transaction_id',
         'payment_details',
         'created_at',
         'updated_at',
         'deleted_at',
+        'cgst_tax',
+        'sgst_tax',
+        'vat_tax'
     ];
+
+    public function kot()
+    {
+        return $this->belongsTo(KOT::class,'table_id');
+    }
 }

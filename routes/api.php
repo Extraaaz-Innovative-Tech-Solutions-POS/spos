@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CashierHallWiseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CateringConfirmController;
+use App\Http\Controllers\Api\CustomerAddressController;
 use App\Http\Controllers\Api\CustomerAdvancedtController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DaySummaryReport;
@@ -21,6 +23,7 @@ use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TaxController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventorySupplierController;
+use App\Models\ModifierGroup;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +45,8 @@ Route::post('userlogin', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('category', CategoryController::class);
+
+    Route::get('category2', [CategoryController::class, 'index2']);
 
     Route::get('getItems/{category_id}', [CategoryController::class, 'getItems']);
 
@@ -118,7 +123,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cash-payment', [DashboardController::class, 'cashPaymentAmount']);
 
     Route::get('online-payment', [DashboardController::class, 'onlinePaymentAmount']);
-    // Route::post("online-payment",[DashboardController::class, 'onlinePaymentAmount']);
+    
     Route::get('day-summary-report', [DaySummaryReport::class, 'index']);
 
     route::apiResource('section', SectionController::class);
@@ -137,7 +142,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('getActiveTables', [OrderController::class, 'getActiveTables']);
 
-    Route::apiResource('customerAddress',CustomerAdvancedtController::class);
+    Route::apiResource('customerAddress',CustomerAddressController::class);
+
+    Route::get('getCustomerAddresses/{customerId}', [CustomerAddressController::class, 'getCustomerAddresses']);
 
     // Modifiers Groups Apis - Modifiers & Items
     Route::apiResource('modifierGroups', ModifierGroupController::class);
@@ -173,4 +180,66 @@ Route::middleware('auth:sanctum')->group(function () {
   
       Route::get('/view-statement/{id}', [InventorySupplierController::class, 'viewStatement']);
   
+
+    //bulk upload
+    Route::post('bulk-item', [ItemController::class, 'bulkUploadItems']);
+    
+    Route::post('bulk-category', [CategoryController::class, 'bulkUploadCategories']);
+
+    Route::get('getTotalOrders/{tab}',[OrderController::class, 'getTotalOrders']);
+
+    Route::get('/export-categories',[ItemController::class, 'exportCategories']);
+
+    Route::post('update-status-delivery', [OrderController::class, 'delivery_status_kot']);
+
+    Route::get('get-ongoing-orders', [OrderController::class, 'getOngoingOrders']);
+
+    Route::get('getDeliveryPendingOrders', [OrderController::class, 'getDeliveryPendingOrders']);
+    
+    Route::get('getDeliveryCompletedOrders', [OrderController::class, 'getDeliveryCompletedOrders']);
+
+    Route::post('importModifierGroups', [ModifierGroupController::class, 'importModifierGroups']);
+    
+    Route::post('importModifiers', [ModifierController ::class, 'importModifiers']);
+
+    Route::get('exportModifierGroups', [ModifierGroupController::class, 'exportModifierGroups']);
+
+    Route::get('exportModifiers', [ModifierController::class, 'exportModifiers']);
+
+    Route::put("updateProfile/{id}", [AuthController::class, 'updateProfile']);
+
+    Route::put("updateRestaurant/{rest_id}", [AuthController::class, 'updateRestaurant']);
+
+    //catering conform /
+
+    Route::post('catering-order-confirm', [CateringConfirmController::class, 'cateringConfirmOrder']);
+
+    Route::get('catering-order-bill', [CateringConfirmController::class, 'cateringOrderBill']);
+
+    Route::post('catering-item-update',[CateringConfirmController::class, 'updateItemCat']);
+
+    Route::post('catering-add-item',[CateringConfirmController::class,'additemCat']);
+
+    Route::post('catering-cancel-item',[CateringConfirmController::class,'cancelItemCatering']);
+
+    Route::post('complete-order-catering',[CateringConfirmController::class,'completeOrderCatering']);
+
+    Route::post('cancel-order-catering', [CateringConfirmController::class, 'cancelOrderCatering']);
+
+    Route::get('pending-order-catering', [CateringConfirmController::class, 'cateringPendingOrders']);
+
+    Route::post('partial-catering-payment',[CateringConfirmController::class,'partialOrderPayment']);
+
+    Route::post('setSectionWisePrice',[ItemController::class, 'setSectionWisePrice']);
+    
+    Route::get('getItemsBySectionId/{section_id}',[ItemController::class, 'getItemsBySectionId']);
+    
+    Route::get('getCategoryItemsBySectionId/{category_id}/{section_id}',[ItemController::class, 'getCategoryItemsBySectionId']);
+
+    Route::post('tax-setting',[OrderController::class,'tax_setting']);
+
+    Route::get('get-tax',[OrderController::class,'get_tax']);
+
+
+
 });

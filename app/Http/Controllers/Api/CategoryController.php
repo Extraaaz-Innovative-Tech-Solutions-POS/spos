@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ItemResource;
+use App\Imports\CategoryImport;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+
 // use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
@@ -20,11 +23,27 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index2(Request $request)
     {
         $user = Auth::user();
         
-        $categories = Category::with('items')->where('restaurant_id',$user->restaurant_id)->get();
+        $categories = Category::with(['items.modifierGroups','items.sectionWisePricings'])->where('restaurant_id',$user->restaurant_id)->get();
+        $categories = CategoryResource::collection($categories);
+
+        return response()->json(["success" => true, "data" => $categories]);
+    }
+
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+
+        $section_id = $request->section_id;
+
+        $categories = Category::with(['items.modifierGroups', 'items.sectionWisePricings'])->where('restaurant_id', $user->restaurant_id)->get();
+
+        $categories->each(function ($categories) use ($section_id) {
+            $categories->section_id = $section_id;
+        });
         $categories = CategoryResource::collection($categories);
 
         return response()->json(["success" => true, "data" => $categories]);
@@ -112,5 +131,16 @@ class CategoryController extends Controller
         $items = ItemResource::collection($items);
 
         return response()->json(["success" => true,"message"=>"Items according to Category Id" ,"data" => $items]);
+    }
+
+    public function bulkUploadCategories(Request $request)
+    {  
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls' 
+        ]);
+        // Process the uploaded Excel file
+        Excel::import(new CategoryImport, $request->file('file'));
+
+        return response()->json(['message' => 'Bulk upload successful'], 201);
     }
 }

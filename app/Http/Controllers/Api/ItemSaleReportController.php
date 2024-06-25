@@ -51,7 +51,7 @@ class ItemSaleReportController extends Controller
         ->select('total_discount')
         ->get();
 
-    $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
+    $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('name');
     return response()->json([
     "success" => true,
     "restaurantName" => $restaurantName,
@@ -117,8 +117,6 @@ class ItemSaleReportController extends Controller
         $selectedToDate = $request->toDate;
 
         // return $user;
-
-
         $productsGrouped = KotItem::where('restaurant_id', $user->restaurant_id)//$user->restaurant_id)
         ->where(function ($query) use ($selectedFromDate, $selectedToDate) {
             $query->whereBetween('.created_at', [$selectedFromDate, $selectedToDate])
@@ -143,7 +141,7 @@ class ItemSaleReportController extends Controller
 
             $resultArray = $productsGrouped->values()->toArray();
 
-            $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('restaurant_name');
+            $restaurantName = Restaurant::where('id', $user->restaurant_id)->value('name');
 
 
 
@@ -158,3 +156,6 @@ class ItemSaleReportController extends Controller
 
     }
 }
+
+
+//Testing
