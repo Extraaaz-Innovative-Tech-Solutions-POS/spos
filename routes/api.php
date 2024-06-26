@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DaySummaryReport;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\FloorSectionController;
 use App\Http\Controllers\Api\GraphController;
+use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ItemSaleReportController;
 use App\Http\Controllers\Api\ModifierController;
@@ -243,6 +244,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('tax-setting',[OrderController::class,'tax_setting']);
 
     Route::get('get-tax',[OrderController::class,'get_tax']);
+
+
+///inventoy///
+
+
+Route::apiResource('inventory', InventoryController::class);
+  
 
 
 
