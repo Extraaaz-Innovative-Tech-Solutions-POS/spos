@@ -661,7 +661,10 @@ class OrderController extends Controller
 
             // $kot->status = "COMPLETED";
             if ($request->discounted_amount) {
-                $kot->total_discount += $request->discounted_amount;
+                
+                $total_discount = $kot->total * ($request->discounted_amount/100);
+                
+                $kot->total_discount += $total_discount;// $request->discounted_amount;
                 $kot->save();
                 $kot->grand_total = $kot->total - $kot->total_discount;
                 $kot->save();
