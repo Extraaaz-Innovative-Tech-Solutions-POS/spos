@@ -48,6 +48,8 @@ class InventoryPurchaseController extends Controller
         $lastOrder = PurchaseOrder::orderBy('invoice_number', 'desc')->first();
         $newInvoiceNumber = $lastOrder ? $lastOrder->invoice_number + 1 : 1;
 
+        $discount = $request->discount ?? 0;
+
         $data = new PurchaseOrder;
         $data->supplier_id = $request->supplier_id;
         $data->product_name = $request->product_name;
@@ -57,18 +59,25 @@ class InventoryPurchaseController extends Controller
         $data->cgst = $request->cgst ?? null;
         $data->sgst = $request->sgst ?? null;
         $data->tax = $request->tax ?? null;
-        $data->discount = $request->discount ?? null;
+        $data->discount = $discount;
         $data->restaurant_id = $user->restaurant_id;
         $data->rate = $request->rate;
         $data->amount = $request->rate *  $request->quantity;
         $data->reason = $request->reason ?? null;
         $data->original_quantity = $request->quantity;
 
+        $discountedAmount = $data->amount - $discount;
+
+        
+
         if ($request->tax) {
             $totalTaxPercentage = ($request->cgst ?? 0) + ($request->sgst ?? 0);
-            $data->net_payable = $data->amount + ($data->amount * ($totalTaxPercentage / 100));
+            $data->net_payable = $discountedAmount + ($discountedAmount * ($totalTaxPercentage / 100));
+
+            
+
         } else {
-            $data->net_payable = $data->amount;
+            $data->net_payable = $discountedAmount;
         }
 
         $data->save();
@@ -81,9 +90,9 @@ class InventoryPurchaseController extends Controller
 
         if ($request->tax) {
             $totalTaxPercentage = ($request->cgst ?? 0) + ($request->sgst ?? 0);
-            $payment->amount = $data->amount + ($data->amount * ($totalTaxPercentage / 100));
+            $payment->amount = $discountedAmount + ($discountedAmount * ($totalTaxPercentage / 100));
         } else {
-            $payment->amount = $data->amount;
+            $payment->amount = $discountedAmount;
         }
 
         $payment->discount = $request->discount ?? null;
@@ -96,7 +105,11 @@ class InventoryPurchaseController extends Controller
 
         if($request->is_partial == 1)
         {
-            $payment->outstanding_amount = (($request->rate *  $request->quantity) -  $request->amount_paid );
+            $payment->outstanding_amount = ($payment->amount -  $request->amount_paid );
+        }
+        else
+        {
+            $payment->outstanding_amount = 0;
         }
 
         $payment->save();
@@ -189,16 +202,14 @@ class InventoryPurchaseController extends Controller
         return response()->json(['success' => true, 'message' => "Purchase Order deleted successfully"]);
     }
 
-    public function viewInvoice($id)
-    {
-        $user = Auth::user();
-    }
 
     public function addPayment(Request $request,$id)
     {
         $user = Auth::user();
 
         $order = PurchaseOrder::where('id', $id)->where('restaurant_id', $user->restaurant_id)->first();
+
+        
 
         $amountPaid = PurchaseOrderPayment::where('purchase_order_id', $id)
         ->where('restaurant_id', $user->restaurant_id)
@@ -208,9 +219,9 @@ class InventoryPurchaseController extends Controller
         $pay->purchase_order_id = $id;
         $pay->supplier_id = $order->supplier_id;
         $pay->restaurant_id = $user->restaurant_id;
-        $pay->amount = $order->amount;
+        $pay->amount = $order->net_payable;
         $pay->discount = $order->discount;
-        $pay->outstanding_amount = ($order->amount -  $request->amount_paid - $amountPaid );
+        $pay->outstanding_amount = ($order->net_payable -  $request->amount_paid - $amountPaid );
         $pay->payment_type = $request->payment_type;
         $pay->status = $request->status;
         $pay->amount_paid = $request->amount_paid;
