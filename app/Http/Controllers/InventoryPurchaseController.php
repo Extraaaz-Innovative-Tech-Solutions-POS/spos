@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Purchase;
-use Illuminate\Http\Request;
-use App\Models\PurchaseOrder;
-use App\Models\InventoryHistory;
 use App\Http\Controllers\Controller;
+use App\Models\InventoryHistory;
+use App\Models\Purchase;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderPayment;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InventoryPurchaseController extends Controller
@@ -135,73 +136,82 @@ class InventoryPurchaseController extends Controller
         return response()->json(['success' => true, 'message' => "Purchase Order added Successfully", "data" => $data,"paymentDetails"=>$payment]);
     }
 
-    public function updatePurchase(Request $request, $id)
-    {
-        $user = Auth::user();
+    // public function updatePurchase(Request $request, $id)
+    // {
+    //     $user = Auth::user();
 
-        $validator = $request->validate([
-            'supplier_id' => 'required|numeric',
-            'product_name' => 'required|string',
-            'invoice_number' => 'string|nullable',
-            'unit' => 'required',
-            'quantity' => 'required|numeric',
-            'rate' => 'required|numeric',
-            'cgst' => 'numeric|nullable',
-            'sgst' => 'numeric|nullable',
-            'vat' => 'numeric|nullable',
-            'tax' => 'boolean|nullable',
-            'amount' => 'numeric|nullable',
-            'discount' => 'numeric|nullable',
-            'restaurant_id' => 'numeric|nullable',
-            'net_payable' => 'numeric|nullable',
-            'reason' => 'string|nullable',
-            'original_quantity' => 'numeric|nullable',
-        ]);
+    //     $validator = $request->validate([
+    //         'supplier_id' => 'required|numeric',
+    //         'product_name' => 'required|string',
+    //         'invoice_number' => 'string|nullable',
+    //         'unit' => 'required',
+    //         'quantity' => 'required|numeric',
+    //         'rate' => 'required|numeric',
+    //         'cgst' => 'numeric|nullable',
+    //         'sgst' => 'numeric|nullable',
+    //         'vat' => 'numeric|nullable',
+    //         'tax' => 'boolean|nullable',
+    //         'amount' => 'numeric|nullable',
+    //         'discount' => 'numeric|nullable',
+    //         'restaurant_id' => 'numeric|nullable',
+    //         'net_payable' => 'numeric|nullable',
+    //         'reason' => 'string|nullable',
+    //         'original_quantity' => 'numeric|nullable',
+    //     ]);
 
-        $data = PurchaseOrder::where('restaurant_id', $user->restaurant_id)->findOrFail($id);
+    //     try {
+    //         $discount = $request->discount ?? 0;
+    //         $data = PurchaseOrder::where('restaurant_id', $user->restaurant_id)->findOrFail($id);
 
-        $invoice =  $data->invoice_number;
+    //         $invoice = $data->invoice_number;
 
-        $data->supplier_id = $request->supplier_id;
-        $data->product_name = $request->product_name;
-        $data->invoice_number = $invoice;
-        $data->quantity = $request->quantity;
-        $data->unit = $request->unit;
-        $data->cgst = $request->cgst ?? null;
-        $data->sgst = $request->sgst ?? null;
-        $data->tax = $request->tax ?? null;
-        $data->discount = $request->discount ?? null;
-        $data->restaurant_id = $user->restaurant_id;
-        $data->rate = $request->rate;
-        $data->amount = $request->rate * $request->quantity;
-        $data->reason = $request->reason ?? null;
-        $data->original_quantity = $request->quantity;
+    //         $data->supplier_id = $request->supplier_id;
+    //         $data->product_name = $request->product_name;
+    //         $data->invoice_number = $invoice;
+    //         $data->quantity = $request->quantity;
+    //         $data->unit = $request->unit;
+    //         $data->cgst = $request->cgst ?? null;
+    //         $data->sgst = $request->sgst ?? null;
+    //         $data->tax = $request->tax ?? null;
+    //         $data->discount = $discount;
+    //         $data->restaurant_id = $user->restaurant_id;
+    //         $data->rate = $request->rate;
+    //         $data->amount = $request->rate * $request->quantity;
+    //         $data->reason = $request->reason ?? null;
+    //         $data->original_quantity = $request->quantity;
 
-        if ($request->tax) {
-            $totalTaxPercentage = ($request->cgst ?? 0) + ($request->sgst ?? 0);
-            $data->net_payable = $data->amount + ($data->amount * ($totalTaxPercentage / 100));
-        } else {
-            $data->net_payable = $data->amount;
-        }
+    //         $discountedAmount = $data->amount - $discount;
 
-        $data->save();
 
-       
+    //         if ($request->tax) {
+    //             $totalTaxPercentage = ($request->cgst ?? 0) + ($request->sgst ?? 0);
+    //             $data->net_payable = $discountedAmount + ($discountedAmount * ($totalTaxPercentage / 100));   
+                
+    
+    //         } else {
+    //             $data->net_payable = $discountedAmount;
+    //         }
 
-        return response()->json(['success' => true, 'message' => "Purchase Order updated Successfully", "data" => $data]);
-    }
+    //         $data->save();
 
+    //         return response()->json(['success' => true, 'message' => "Purchase Order updated Successfully", "data" => $data]);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['success' => false, 'message' => "Purchase Order not found"], 404);
+    //     }
+    // }
     public function deletePurchase($id)
     {
         $user = Auth::user();
 
-        $purchaseOrder = PurchaseOrder::where('restaurant_id', $user->restaurant_id)->findOrFail($id);
+        try {
+            $purchaseOrder = PurchaseOrder::where('restaurant_id', $user->restaurant_id)->findOrFail($id);
+            $purchaseOrder->delete();
 
-        $purchaseOrder->delete();
-
-        return response()->json(['success' => true, 'message' => "Purchase Order deleted successfully"]);
+            return response()->json(['success' => true, 'message' => "Purchase Order deleted successfully"]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => "Purchase Order not found"], 404);
+        }
     }
-
 
     public function addPayment(Request $request,$id)
     {
