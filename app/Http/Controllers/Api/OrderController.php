@@ -1018,5 +1018,61 @@ class OrderController extends Controller
 
     }
 
+
+
+
+    public function updateItemQuantity(Request $request)
+{
+    $user = Auth::user();
+    $request->validate([
+        'table_id' => 'required',
+        'item_id' => 'required',
+        'quantity' => 'required|integer|min:1', 
+    ]);
+
+    $kot = KOT::where('restaurant_id', $user->restaurant_id)->where('table_id', $request->table_id)->first();
+
+    if (!$kot) {
+        return response()->json(['success' => false, 'message' => 'Data does not exist for this table_id']);
+    }
+
+    if ($kot->is_cancelled == 1) {
+        return response()->json(['success' => false, 'message' => 'Data does not exist for this table_id, since it has been cancelled']);
+    }
+
+    if ($kot->status == 'COMPLETED') {
+        return response()->json(['success' => false, 'message' => 'Cannot update item, Order has already been Completed']);
+    }
+
+    $total = $kot->total;
+
+    $kotItem = KotItem::where("table_id", $request->table_id)->where("item_id", $request->item_id)->first();
+
+    if (!$kotItem) {
+        return response()->json(['success' => false, 'message' => 'Data does not exist for this item_id in the table']);
+    }
+
+    if ($kotItem->is_cancelled == 1) {
+        return response()->json(['success' => false, 'message' => 'Cannot Update, since it has been cancelled']);
+    }
+
+    // Subtract the old product total from the KOT total
+    $total -= $kotItem->product_total;
+
+    // Update the quantity and product total
+    $kotItem->quantity = $request->quantity;
+    $kotItem->product_total = $kotItem->quantity * $kotItem->price;
+    $kotItem->save();
+
+    // Add the new product total to the KOT total
+    $total += $kotItem->product_total;
+
+    // Update KOT total
+    $kot->total = $total;
+    $kot->save();
+
+    return response()->json(["success" => true, "message" => "Item quantity updated successfully"]);
+}
+
     
 }

@@ -104,6 +104,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('update-item', [OrderController::class, 'updateItem']);
 
+    Route::post('update-quantity',[OrderController::class, 'updateItemQuantity']);
+
     Route::post('add-item', [OrderController::class, 'addItem']);
 
     Route::post('cancel-item', [OrderController::class, 'cancelItem']);
